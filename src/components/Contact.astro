@@ -1,5 +1,8 @@
 ---
 import Icon from './Icon.astro';
+const base = import.meta.env.BASE_URL;
+
+const WEB3FORMS_KEY = "1cf130da-891f-440f-a9f5-b6798f537674";
 ---
 <section id="contact" class="contact">
   <div class="container">
@@ -12,31 +15,96 @@ import Icon from './Icon.astro';
     </div>
 
     <div class="contact__grid mt-80">
-      <div class="info-card reveal">
-        <div class="info-card__icon">
-          <Icon name="map-pin" size="32" />
+      <!-- Info Cards -->
+      <div class="contact__info">
+        <div class="info-card reveal">
+          <div class="info-card__icon">
+            <Icon name="map-pin" size="28" />
+          </div>
+          <div class="info-card__content">
+            <h3>Adresse</h3>
+            <p>Quai du Seujet 14<br/>1201 Genève</p>
+            <a href="https://www.google.com/maps/search/?api=1&query=Quai+du+Seujet+14,+1201+Genève" target="_blank" rel="noopener noreferrer" class="link-arrow">Voir sur la carte →</a>
+          </div>
         </div>
-        <h3>Adresse</h3>
-        <p>Quai du Seujet 14<br/>1201 Genève</p>
-        <a href="https://www.google.com/maps/search/?api=1&query=Quai+du+Seujet+14,+1201+Genève" target="_blank" rel="noopener noreferrer" class="link-arrow">Voir sur la carte →</a>
+
+        <div class="info-card reveal" style="transition-delay: 0.1s;">
+          <div class="info-card__icon">
+            <Icon name="phone" size="28" />
+          </div>
+          <div class="info-card__content">
+            <h3>Téléphone</h3>
+            <p>Du Lundi au Vendredi</p>
+            <a href="tel:+41227311947" class="link-large">+41 (0)22 731 19 47</a>
+          </div>
+        </div>
+
+        <div class="info-card reveal" style="transition-delay: 0.2s;">
+          <div class="info-card__icon">
+            <Icon name="mail" size="28" />
+          </div>
+          <div class="info-card__content">
+            <h3>Email</h3>
+            <p>Pour toute question</p>
+            <a href="mailto:info@jeunesseandco.ch" class="link-large">info@jeunesseandco.ch</a>
+          </div>
+        </div>
       </div>
 
-      <div class="info-card reveal" style="transition-delay: 0.1s;">
-        <div class="info-card__icon">
-          <Icon name="mail" size="32" />
-        </div>
-        <h3>Email</h3>
-        <p>Pour toute question générale</p>
-        <a href="mailto:info@jeunesseandco.ch" class="link-large">info@jeunesseandco.ch</a>
-      </div>
+      <!-- Contact Form -->
+      <div class="contact__form-wrapper reveal" style="transition-delay: 0.15s;">
+        <form action="https://api.web3forms.com/submit" method="POST" class="contact-form" id="contact-form">
+          <input type="hidden" name="access_key" value={WEB3FORMS_KEY} />
+          <input type="hidden" name="subject" value="Nouveau message - Jeunesse & Co" />
+          <input type="hidden" name="from_name" value="Jeunesse & Co - Site Web" />
+          <input type="checkbox" name="botcheck" class="hidden" style="display: none;" />
 
-      <div class="info-card reveal" style="transition-delay: 0.2s;">
-        <div class="info-card__icon">
-          <Icon name="phone" size="32" />
+          <div class="form-row">
+            <div class="form-group">
+              <label for="contact-prenom">Prénom <span class="required">*</span></label>
+              <input type="text" id="contact-prenom" name="prenom" required placeholder="Jean" />
+            </div>
+            <div class="form-group">
+              <label for="contact-nom">Nom <span class="required">*</span></label>
+              <input type="text" id="contact-nom" name="nom" required placeholder="Dupont" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="contact-email">Email <span class="required">*</span></label>
+              <input type="email" id="contact-email" name="email" required placeholder="jean.dupont@email.ch" />
+            </div>
+            <div class="form-group">
+              <label for="contact-telephone">Téléphone</label>
+              <input type="tel" id="contact-telephone" name="telephone" placeholder="+41 79 123 45 67" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="contact-message">Message <span class="required">*</span></label>
+            <textarea id="contact-message" name="message" rows="4" required placeholder="Comment pouvons-nous vous aider ?"></textarea>
+          </div>
+
+          <button type="submit" class="btn-submit">
+            <span>Envoyer le message</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </form>
+
+        <!-- Success State -->
+        <div class="form-success" id="contact-form-success">
+          <div class="success-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          <h3>Message envoyé !</h3>
+          <p>Merci, nous vous répondrons dans les plus brefs délais.</p>
         </div>
-        <h3>Téléphone</h3>
-        <p>Du Lundi au Vendredi</p>
-        <a href="tel:+41227311947" class="link-large">+41 (0)22 731 19 47</a>
       </div>
     </div>
   </div>
@@ -46,6 +114,10 @@ import Icon from './Icon.astro';
   .contact {
     background-color: var(--color-bg);
     padding: 140px 0;
+
+    @media (max-width: 768px) {
+      padding: 80px 0;
+    }
 
     &__header {
       text-align: center;
@@ -77,70 +149,92 @@ import Icon from './Icon.astro';
 
     &__grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 32px;
+      grid-template-columns: 380px 1fr;
+      gap: 60px;
+      align-items: start;
 
       @media (max-width: 1024px) {
         grid-template-columns: 1fr;
-        max-width: 500px;
-        margin-left: auto;
-        margin-right: auto;
+        gap: 48px;
+      }
+    }
+
+    &__info {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+
+      @media (max-width: 1024px) {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
       }
     }
 
     .info-card {
       background: var(--color-white);
-      padding: 48px 32px;
-      border-radius: 24px;
-      text-align: center;
+      padding: 28px;
+      border-radius: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       border: 1px solid transparent;
       box-shadow: var(--shadow-sm);
 
+      @media (max-width: 1024px) {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+        padding: 32px 24px;
+      }
+
       &:hover {
-        transform: translateY(-8px);
-        box-shadow: var(--shadow-lg);
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
         border-color: var(--color-border);
       }
 
       &__icon {
-        margin-bottom: 24px;
         background: var(--color-surface);
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-left: auto;
-        margin-right: auto;
         color: var(--color-primary);
+        flex-shrink: 0;
         transition: all 0.3s ease;
       }
       
       &:hover &__icon {
         background: var(--color-accent);
-        color: var(--color-text);
+        color: var(--color-primary);
       }
 
-      h3 {
-        font-size: 20px;
-        font-weight: 700;
-        margin-bottom: 12px;
-        font-family: var(--font-headline);
-      }
+      &__content {
+        h3 {
+          font-size: 16px;
+          font-weight: 700;
+          margin-bottom: 6px;
+          font-family: var(--font-headline);
+        }
 
-      p {
-        font-size: 15px;
-        color: var(--color-text-muted);
-        line-height: 1.6;
-        margin-bottom: 24px;
-        text-align: center;
+        p {
+          font-size: 14px;
+          color: var(--color-text-muted);
+          line-height: 1.5;
+          margin-bottom: 12px;
+        }
       }
       
       .link-large {
-        display: block;
-        font-size: 18px;
+        font-size: 15px;
         font-weight: 700;
         color: var(--color-primary);
         text-decoration: none;
@@ -152,22 +246,201 @@ import Icon from './Icon.astro';
       }
 
       .link-arrow {
-        display: block;
-        text-align: center;
-        font-size: 14px;
-        font-weight: 700;
+        font-size: 13px;
+        font-weight: 600;
         color: var(--color-primary);
         text-decoration: none;
-        border-bottom: 1px solid var(--color-border);
-        padding-bottom: 2px;
         transition: all 0.3s ease;
-        width: fit-content;
-        margin: 0 auto;
 
         &:hover {
-          border-color: var(--color-primary);
+          color: var(--color-accent);
         }
       }
     }
+
+    // FORM
+    &__form-wrapper {
+      background: var(--color-white);
+      border-radius: 28px;
+      padding: 48px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--color-border);
+
+      @media (max-width: 768px) {
+        padding: 32px 24px;
+        border-radius: 24px;
+      }
+    }
+  }
+
+  .contact-form {
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      
+      @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-primary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+
+      .required {
+        color: #e53935;
+      }
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 16px 18px;
+      background: #f8f9fa;
+      border: 2px solid transparent;
+      border-radius: 14px;
+      font-size: 15px;
+      color: var(--color-primary);
+      transition: all 0.3s ease;
+      font-family: inherit;
+
+      &::placeholder {
+        color: #adb5bd;
+      }
+
+      &:hover {
+        background: #f1f3f4;
+      }
+
+      &:focus {
+        outline: none;
+        background: var(--color-white);
+        border-color: var(--color-accent);
+        box-shadow: 0 0 0 4px rgba(255, 223, 92, 0.15);
+      }
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 18px 32px;
+      margin-top: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      border-radius: 14px;
+      background: var(--color-primary);
+      color: var(--color-white);
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: #2a2a2a;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      svg {
+        transition: transform 0.3s ease;
+      }
+
+      &:hover svg {
+        transform: translateX(4px);
+      }
+    }
+  }
+
+  // SUCCESS STATE
+  .form-success {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+
+    &.visible {
+      display: block;
+    }
+  }
+
+  .success-icon {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: white;
+  }
+
+  .form-success h3 {
+    font-family: var(--font-headline);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 8px;
+  }
+
+  .form-success p {
+    font-size: 15px;
+    color: var(--color-text-muted);
+    line-height: 1.6;
   }
 </style>
+
+<script>
+  const form = document.getElementById('contact-form') as HTMLFormElement;
+  const formSuccess = document.getElementById('contact-form-success');
+
+  if (form && formSuccess) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+      const originalHTML = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<span>Envoi en cours...</span>';
+      submitBtn.disabled = true;
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+        });
+
+        if (response.ok) {
+          form.style.display = 'none';
+          formSuccess.classList.add('visible');
+        } else {
+          throw new Error('Erreur serveur');
+        }
+      } catch (error) {
+        alert('Une erreur est survenue. Veuillez réessayer ou nous contacter à info@jeunesseandco.ch');
+        submitBtn.innerHTML = originalHTML;
+        submitBtn.disabled = false;
+      }
+    });
+  }
+</script>
