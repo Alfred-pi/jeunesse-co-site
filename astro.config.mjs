@@ -1,7 +1,7 @@
 import { defineConfig } from 'astro/config';
 export default defineConfig({
-  site: 'https://alfred-pi.github.io',
-  base: '/jeunesse-co-site/',
+  site: 'https://jeunesseandco.ch',
+  base: '/',
   compressHTML: true,
   image: { service: { config: { quality: 90 } } },
   build: { inlineStylesheets: 'auto' },
