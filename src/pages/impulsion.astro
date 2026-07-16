@@ -177,7 +177,7 @@ const data = {
           <div class="pillar">
             <div class="pillar-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                <circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/>
               </svg>
             </div>
             <h4>Auto-Portrait</h4>
@@ -442,8 +442,9 @@ const data = {
             <div class="thematique-item">
               <div class="thematique-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                  <polyline points="9 22 9 12 15 12 15 22"/>
+                  <path d="M11 12h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 14"/>
+                  <path d="m7 18 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/>
+                  <path d="m2 13 6 6"/>
                 </svg>
               </div>
               <span>Soutien aux sans-abri</span>
@@ -452,6 +453,9 @@ const data = {
               <div class="thematique-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                   <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                  <path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66"/>
+                  <path d="m18 15-2-2"/>
+                  <path d="m15 18-2-2"/>
                 </svg>
               </div>
               <span>Personnes âgées</span>
@@ -459,8 +463,7 @@ const data = {
             <div class="thematique-item">
               <div class="thematique-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M12 6v6l4 2"/>
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                 </svg>
               </div>
               <span>Victimes de violences</span>
@@ -468,12 +471,8 @@ const data = {
             <div class="thematique-item">
               <div class="thematique-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/>
-                  <path d="M8.5 8.5v.01"/>
-                  <path d="M16 15.5v.01"/>
-                  <path d="M12 12v.01"/>
-                  <path d="M11 17v.01"/>
-                  <path d="M7 14v.01"/>
+                  <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+                  <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
                 </svg>
               </div>
               <span>Écologie</span>
@@ -531,9 +530,8 @@ const data = {
             <div class="competence-card">
               <div class="competence-icon">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="2" y1="12" x2="22" y2="12"/>
-                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                  <circle cx="12" cy="12" r="3"/>
                 </svg>
               </div>
               <h4>Conscience critique</h4>
@@ -1308,7 +1306,7 @@ const data = {
         border-radius: 50%;
         &.physics { background: #FFDF5C; }
         &.social { background: #111111; }
-        &.edu { background: #333333; }
+        &.edu { background: var(--color-primary); }
         &.sante { background: #FFE88C; }
         &.creatif { background: #D4B83D; }
       }
@@ -2171,12 +2169,12 @@ const data = {
   .activity-card .accent-bar {
     width: 6px;
     min-height: 100%;
-    background: #e5e5ea;
+    background: var(--color-border);
   }
   .activity-card .accent-bar.Physique { background: linear-gradient(180deg, #FFDF5C 0%, #E5C845 100%); }
   .activity-card .accent-bar.Social { background: linear-gradient(180deg, #111111 0%, #000000 100%); }
   .activity-card .accent-bar.Santé { background: linear-gradient(180deg, #FFE88C 0%, #FFDF5C 100%); }
-  .activity-card .accent-bar.Éducatif { background: linear-gradient(180deg, #333333 0%, #1A1A1A 100%); }
+  .activity-card .accent-bar.Éducatif { background: linear-gradient(180deg, var(--color-primary) 0%, #1A1A1A 100%); }
   .activity-card .accent-bar.Créatif { background: linear-gradient(180deg, #D4B83D 0%, #B8A030 100%); }
 
   .activity-card .card-body {
@@ -2194,14 +2192,14 @@ const data = {
     justify-content: center;
     min-width: 60px;
     padding: 12px 14px;
-    background: #f5f5f7;
+    background: var(--color-surface);
     border-radius: 12px;
   }
 
   .activity-card .time-block .time-start {
     font-size: 16px;
     font-weight: 600;
-    color: #1a1a1a;
+    color: var(--color-text);
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
     line-height: 1.2;
@@ -2210,7 +2208,7 @@ const data = {
   .activity-card .time-block .time-divider {
     width: 14px;
     height: 1.5px;
-    background: #c7c7cc;
+    background: var(--color-border);
     margin: 5px 0;
     border-radius: 1px;
   }
@@ -2218,7 +2216,7 @@ const data = {
   .activity-card .time-block .time-end {
     font-size: 13px;
     font-weight: 500;
-    color: #8e8e93;
+    color: var(--color-text-muted);
     font-variant-numeric: tabular-nums;
     line-height: 1.2;
   }
@@ -2235,7 +2233,7 @@ const data = {
     font-size: 18px;
     font-weight: 600;
     margin: 0;
-    color: #1a1a1a;
+    color: var(--color-text);
     letter-spacing: -0.02em;
     line-height: 1.3;
   }
@@ -2248,7 +2246,7 @@ const data = {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #8e8e93;
+    color: var(--color-text-muted);
   }
 
   .activity-card .content-area .category-badge::before {
@@ -2262,7 +2260,7 @@ const data = {
   .activity-card .content-area .category-badge.Physique { color: #D4A500; }
   .activity-card .content-area .category-badge.Social { color: #111111; }
   .activity-card .content-area .category-badge.Santé { color: #C9A000; }
-  .activity-card .content-area .category-badge.Éducatif { color: #333333; }
+  .activity-card .content-area .category-badge.Éducatif { color: var(--color-primary); }
   .activity-card .content-area .category-badge.Créatif { color: #9C7B00; }
 
   .activity-card .icon-wrapper {
@@ -2273,8 +2271,8 @@ const data = {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    background: #f5f5f7;
-    color: #8e8e93;
+    background: var(--color-surface);
+    color: var(--color-text-muted);
     transition: transform 0.25s ease;
   }
 
