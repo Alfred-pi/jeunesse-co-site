@@ -1,0 +1,102 @@
+---
+import { Image } from 'astro:assets';
+import VideoPlayer from './VideoPlayer.astro';
+import locaux15 from '../assets/gallery/locaux/deco-j-co-15.webp';
+import locaux1 from '../assets/gallery/locaux/deco-j-co-1.webp';
+import locaux11 from '../assets/gallery/locaux/deco-j-co-11.webp';
+import locaux7 from '../assets/gallery/locaux/deco-j-co-7.webp';
+import locaux4 from '../assets/gallery/locaux/deco-j-co-4.webp';
+import locaux13 from '../assets/gallery/locaux/deco-j-co-13.webp';
+import locaux22 from '../assets/gallery/locaux/deco-j-co-22.webp';
+import locaux17 from '../assets/gallery/locaux/deco-j-co-17.webp';
+
+const photos = [
+	{ src: locaux15, alt: "Salle d'accueil de Jeunesse & Co, Quai du Seujet" },
+	{ src: locaux11, alt: 'Décoration des locaux — affiches et lampe' },
+	{ src: locaux1, alt: "Espace détente avec canapé et bibliothèque" },
+	{ src: locaux4, alt: "Coin d'entretien avec fauteuils" },
+	{ src: locaux7, alt: "Espace de travail lumineux" },
+	{ src: locaux13, alt: "Console et miroir de l'entrée" },
+	{ src: locaux22, alt: 'Tableaux dans la salle de réunion' },
+	{ src: locaux17, alt: 'Mobilier des espaces communs' },
+];
+---
+<section id="locaux" class="locaux">
+  <div class="container">
+    <div class="grid">
+      <div class="col-6 reveal">
+        <div class="label">Nos espaces</div>
+        <h2>Un lieu pensé pour se poser<span>.</span></h2>
+      </div>
+      <div class="col-6 reveal">
+        <p class="text-large">
+          Au Quai du Seujet, nos locaux offrent un cadre chaleureux et apaisant, à l'image de notre accompagnement.
+        </p>
+        <p class="text-muted">
+          Espaces d'entretien, salle commune, coin détente : chaque pièce a été aménagée pour que les jeunes s'y sentent accueillis, en confiance, et puissent avancer à leur rythme.
+        </p>
+      </div>
+    </div>
+
+    <div class="locaux__video mt-80 reveal">
+      <VideoPlayer src="assets/locaux-jco.mp4" poster="assets/locaux-jco-poster.webp" label="Visite des locaux de Jeunesse & Co" />
+    </div>
+
+    <div class="locaux__gallery mt-24">
+      {photos.map((photo) => (
+        <div class="locaux__item reveal">
+          <Image src={photo.src} alt={photo.alt} widths={[400, 700, 1000]} sizes="(max-width: 768px) 50vw, 33vw" loading="lazy" />
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  .locaux {
+    background-color: var(--color-white);
+
+    &__video {
+      max-width: 1100px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    &__gallery {
+      columns: 3;
+      column-gap: 24px;
+
+      @media (max-width: 1024px) {
+        columns: 2;
+      }
+
+      @media (max-width: 480px) {
+        column-gap: 16px;
+      }
+    }
+
+    &__item {
+      break-inside: avoid;
+      margin-bottom: 24px;
+      border-radius: 20px;
+      overflow: hidden;
+      background: var(--color-surface);
+
+      @media (max-width: 480px) {
+        margin-bottom: 16px;
+        border-radius: 14px;
+      }
+
+      img {
+        width: 100%;
+        height: auto;
+        display: block;
+        transition: transform 0.6s var(--ease-out);
+      }
+
+      &:hover img {
+        transform: scale(1.04);
+      }
+    }
+  }
+</style>

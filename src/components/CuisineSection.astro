@@ -1,0 +1,132 @@
+---
+import { Image } from 'astro:assets';
+import VideoPlayer from './VideoPlayer.astro';
+import cuisine14 from '../assets/gallery/cuisine/cuisine-avec-ziaad-14.webp';
+import cuisine21 from '../assets/gallery/cuisine/cuisine-avec-ziaad-21.webp';
+import cuisine32 from '../assets/gallery/cuisine/cuisine-avec-ziaad-32.webp';
+import cuisine38 from '../assets/gallery/cuisine/cuisine-avec-ziaad-38.webp';
+
+const photos = [
+	{ src: cuisine14, alt: 'Deux jeunes cuisinent ensemble aux fourneaux' },
+	{ src: cuisine21, alt: "Découpe des légumes pendant l'atelier cuisine" },
+	{ src: cuisine32, alt: 'Préparation du repas — plat mijoté' },
+	{ src: cuisine38, alt: "Dressage des assiettes à la fin de l'atelier" },
+];
+---
+<section class="cuisine-section">
+  <div class="container">
+    <div class="cuisine-header reveal">
+      <span class="section-tag">Repas & Nutrition</span>
+      <h2>L'atelier cuisine</h2>
+      <p class="cuisine-intro">
+        Chaque semaine, les jeunes préparent ensemble un vrai repas, guidés par Ziaad.
+        Faire les courses, cuisiner, dresser, partager : un moment du quotidien qui travaille
+        l'autonomie, la coopération et le plaisir de faire pour les autres.
+      </p>
+    </div>
+
+    <div class="cuisine-content">
+      <div class="cuisine-video reveal">
+        <VideoPlayer src="assets/making-cookie.mp4" poster="assets/making-cookie-poster.webp" label="Atelier cuisine — préparation de cookies" />
+      </div>
+
+      <div class="cuisine-gallery">
+        {photos.map((photo) => (
+          <div class="cuisine-photo reveal">
+            <Image src={photo.src} alt={photo.alt} widths={[400, 700]} sizes="(max-width: 768px) 50vw, 25vw" loading="lazy" />
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  .cuisine-section {
+    padding: 120px 0;
+    background: var(--color-surface);
+
+    @media (max-width: 768px) {
+      padding: 80px 0;
+    }
+  }
+
+  .cuisine-header {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto 64px;
+
+    .section-tag {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-primary);
+      background: var(--color-accent);
+      padding: 6px 14px;
+      border-radius: 100px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-family: var(--font-headline);
+      font-size: clamp(32px, 4vw, 48px);
+      margin-bottom: 20px;
+    }
+
+    .cuisine-intro {
+      color: var(--color-text-muted);
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 768px) {
+      margin-bottom: 40px;
+    }
+  }
+
+  .cuisine-video {
+    max-width: 900px;
+    margin: 0 auto 24px;
+  }
+
+  .cuisine-gallery {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+
+    @media (max-width: 1024px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 480px) {
+      gap: 16px;
+    }
+  }
+
+  .cuisine-photo {
+    border-radius: 20px;
+    overflow: hidden;
+    aspect-ratio: 3 / 4;
+    background: var(--color-bg);
+
+    @media (max-width: 480px) {
+      border-radius: 14px;
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s var(--ease-out);
+    }
+
+    &:hover img {
+      transform: scale(1.05);
+    }
+  }
+</style>

@@ -1,0 +1,174 @@
+---
+// Lecteur vidéo réutilisable : autoplay muet au scroll, play/pause au clic,
+// toggle son. Le script câble toutes les instances .jc-player de la page.
+interface Props {
+	src: string; // chemin relatif à la base, ex: 'assets/teaser.mp4'
+	poster?: string;
+	label?: string;
+}
+const base = import.meta.env.BASE_URL;
+const { src, poster, label = 'Vidéo Jeunesse & Co' } = Astro.props;
+---
+<div class="jc-player">
+  <video
+    class="jc-player__video"
+    muted
+    playsinline
+    preload="metadata"
+    loop
+    poster={poster ? `${base}${poster}` : undefined}
+    aria-label={label}
+  >
+    <source src={`${base}${src}`} type="video/mp4" />
+  </video>
+
+  <button class="jc-player__overlay" aria-label="Lecture / pause">
+    <span class="jc-player__play-icon">
+      <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+        <circle cx="40" cy="40" r="40" fill="rgba(0,0,0,0.5)"/>
+        <path d="M32 25L55 40L32 55V25Z" fill="white"/>
+      </svg>
+    </span>
+  </button>
+
+  <button class="jc-player__sound" aria-label="Activer ou couper le son">
+    <svg class="jc-player__sound-off" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+      <line x1="23" y1="9" x2="17" y2="15"/>
+      <line x1="17" y1="9" x2="23" y2="15"/>
+    </svg>
+    <svg class="jc-player__sound-on" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+      <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+    </svg>
+  </button>
+</div>
+
+<style lang="scss">
+  .jc-player {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.3);
+
+    @media (max-width: 768px) {
+      border-radius: 16px;
+    }
+
+    &__video {
+      width: 100%;
+      display: block;
+      aspect-ratio: 16 / 9;
+      object-fit: contain;
+      background: #000;
+      cursor: pointer;
+    }
+
+    &__overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.3s ease;
+
+      &.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+    }
+
+    &__play-icon {
+      transition: transform 0.3s ease;
+    }
+
+    &__overlay:hover .jc-player__play-icon {
+      transform: scale(1.1);
+    }
+
+    &__sound {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.6);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.8);
+        transform: scale(1.05);
+      }
+
+      @media (max-width: 480px) {
+        width: 40px;
+        height: 40px;
+        bottom: 12px;
+        right: 12px;
+      }
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.jc-player').forEach((player) => {
+    const video = player.querySelector('video') as HTMLVideoElement | null;
+    const overlay = player.querySelector('.jc-player__overlay') as HTMLElement | null;
+    const soundToggle = player.querySelector('.jc-player__sound') as HTMLElement | null;
+    const soundOff = player.querySelector('.jc-player__sound-off') as SVGElement | null;
+    const soundOn = player.querySelector('.jc-player__sound-on') as SVGElement | null;
+
+    if (!video || !overlay || !soundToggle) return;
+
+    // Autoplay muet quand la vidéo entre dans le viewport
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+          video.play();
+          overlay.classList.add('hidden');
+        } else {
+          video.pause();
+          overlay.classList.remove('hidden');
+        }
+      });
+    }, { threshold: 0.5 });
+
+    observer.observe(video);
+
+    const togglePlay = () => {
+      if (video.paused) {
+        video.play();
+        overlay.classList.add('hidden');
+      } else {
+        video.pause();
+        overlay.classList.remove('hidden');
+      }
+    };
+
+    overlay.addEventListener('click', () => {
+      if (video.paused) togglePlay();
+    });
+    video.addEventListener('click', togglePlay);
+
+    soundToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      video.muted = !video.muted;
+      if (soundOff && soundOn) {
+        soundOff.style.display = video.muted ? 'block' : 'none';
+        soundOn.style.display = video.muted ? 'none' : 'block';
+      }
+    });
+  });
+</script>

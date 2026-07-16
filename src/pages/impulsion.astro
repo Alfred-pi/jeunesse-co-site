@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Icon from '../components/Icon.astro';
+import CuisineSection from '../components/CuisineSection.astro';
 const base = import.meta.env.BASE_URL;
 
 const intervenants = [
@@ -37,7 +38,7 @@ Son approche associe cadre structurant, exigence pédagogique et médiations art
   //   name: "Elke Arod",
   //   role: "À définir",
   //   job: "À définir",
-  //   photo: "elke-arod.png",
+  //   photo: "elke-arod.webp",
   //   bio: `Description à venir...`
   // },
   {
@@ -571,6 +572,8 @@ const data = {
     </div>
   </section>
 
+  <CuisineSection />
+
   <section class="intervenants-section">
     <div class="container">
       <div class="intervenants-header reveal">
@@ -589,7 +592,7 @@ const data = {
             aria-label={`Voir le profil de ${intervenant.name}`}
           >
             <div class="intervenant-photo">
-              <img src={`${base}assets/intervenants/${intervenant.photo}`} alt={intervenant.name} />
+              <img src={`${base}assets/intervenants/${intervenant.photo}`} alt={intervenant.name} loading="lazy" />
               <div class="photo-overlay">
                 <span>Voir le profil</span>
               </div>

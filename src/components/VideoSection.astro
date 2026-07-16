@@ -1,42 +1,11 @@
 ---
+import VideoPlayer from './VideoPlayer.astro';
 const base = import.meta.env.BASE_URL;
 ---
 <section class="video-section" id="video">
   <div class="container">
     <div class="video-wrapper">
-      <video 
-        id="teaser-video"
-        class="video-player"
-        muted
-        playsinline
-        preload="metadata"
-        loop
-      >
-        <source src={`${base}assets/teaser.mp4`} type="video/mp4" />
-      </video>
-      
-      <!-- Play/Pause overlay -->
-      <button class="video-overlay" id="video-overlay" aria-label="Play/Pause">
-        <div class="play-icon" id="play-icon">
-          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-            <circle cx="40" cy="40" r="40" fill="rgba(0,0,0,0.5)"/>
-            <path d="M32 25L55 40L32 55V25Z" fill="white"/>
-          </svg>
-        </div>
-      </button>
-
-      <!-- Sound toggle -->
-      <button class="sound-toggle" id="sound-toggle" aria-label="Toggle sound">
-        <svg class="sound-off" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M11 5L6 9H2v6h4l5 4V5z"/>
-          <line x1="23" y1="9" x2="17" y2="15"/>
-          <line x1="17" y1="9" x2="23" y2="15"/>
-        </svg>
-        <svg class="sound-on" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
-          <path d="M11 5L6 9H2v6h4l5 4V5z"/>
-          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
-        </svg>
-      </button>
+      <VideoPlayer src="assets/teaser.mp4" poster="assets/teaser-poster.webp" label="Teaser Jeunesse & Co" />
     </div>
 
     <!-- CTA Button below video -->
@@ -63,81 +32,8 @@ const base = import.meta.env.BASE_URL;
   }
 
   .video-wrapper {
-    position: relative;
     max-width: 1100px;
     margin: 0 auto;
-    border-radius: 24px;
-    overflow: hidden;
-    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.3);
-    background: #000;
-
-    @media (max-width: 768px) {
-      border-radius: 16px;
-    }
-  }
-
-  .video-player {
-    width: 100%;
-    display: block;
-    aspect-ratio: 16 / 9;
-    object-fit: contain;
-    background: #000;
-    cursor: pointer;
-  }
-
-  .video-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: opacity 0.3s ease;
-
-    &.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .play-icon {
-      transition: transform 0.3s ease;
-    }
-
-    &:hover .play-icon {
-      transform: scale(1.1);
-    }
-  }
-
-  .sound-toggle {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.6);
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-
-    &:hover {
-      background: rgba(0, 0, 0, 0.8);
-      transform: scale(1.05);
-    }
-
-    @media (max-width: 480px) {
-      width: 40px;
-      height: 40px;
-      bottom: 12px;
-      right: 12px;
-    }
   }
 
   .video-cta {
@@ -182,60 +78,3 @@ const base = import.meta.env.BASE_URL;
     }
   }
 </style>
-
-<script>
-  const video = document.getElementById('teaser-video') as HTMLVideoElement;
-  const overlay = document.getElementById('video-overlay');
-  const playIcon = document.getElementById('play-icon');
-  const soundToggle = document.getElementById('sound-toggle');
-  const soundOff = soundToggle?.querySelector('.sound-off') as SVGElement;
-  const soundOn = soundToggle?.querySelector('.sound-on') as SVGElement;
-
-  if (video && overlay && soundToggle) {
-    // Autoplay when video enters viewport
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
-          video.play();
-          overlay.classList.add('hidden');
-        } else {
-          video.pause();
-          overlay.classList.remove('hidden');
-        }
-      });
-    }, { threshold: 0.5 });
-
-    observer.observe(video);
-
-    // Click to play/pause
-    overlay.addEventListener('click', () => {
-      if (video.paused) {
-        video.play();
-        overlay.classList.add('hidden');
-      }
-    });
-
-    video.addEventListener('click', () => {
-      if (video.paused) {
-        video.play();
-        overlay.classList.add('hidden');
-      } else {
-        video.pause();
-        overlay.classList.remove('hidden');
-      }
-    });
-
-    // Sound toggle
-    soundToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      video.muted = !video.muted;
-      if (video.muted) {
-        soundOff.style.display = 'block';
-        soundOn.style.display = 'none';
-      } else {
-        soundOff.style.display = 'none';
-        soundOn.style.display = 'block';
-      }
-    });
-  }
-</script>
