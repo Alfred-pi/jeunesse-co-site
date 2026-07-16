@@ -11,6 +11,7 @@ import Footer from '../components/Footer.astro';
 import MobileNav from '../components/MobileNav.astro';
 import { getImage } from 'astro:assets';
 import image6 from '../assets/image6.webp';
+import heroMain from '../assets/sections/hero-main.webp';
 
 interface Props {
 	title: string;
@@ -20,8 +21,14 @@ interface Props {
 
 const { title, description = "Jeunesse & Co - L'accompagnement éducatif sur mesure", preloadHeroImage = false } = Astro.props;
 
-const heroImage = preloadHeroImage ? await getImage({ src: image6, width: 600, height: 450, format: 'webp' }) : null;
+// Précharge la même image que Hero.astro affiche en LCP (mêmes dimensions)
+const heroImage = preloadHeroImage ? await getImage({ src: heroMain, width: 600, height: 450, format: 'webp' }) : null;
 const base = import.meta.env.BASE_URL;
+
+// OpenGraph absolu par environnement (prod / preview) via Astro.site
+const ogImage = await getImage({ src: image6, width: 1200, format: 'webp' });
+const ogImageUrl = new URL(ogImage.src, Astro.site);
+const ogUrl = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!doctype html>
@@ -29,7 +36,7 @@ const base = import.meta.env.BASE_URL;
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="description" content={description} />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="icon" type="image/png" href={`${base}assets/Favicon-32.png`} />
 		<meta name="generator" content={Astro.generator} />
 		{heroImage && <link rel="preload" as="image" href={heroImage.src} type="image/webp" fetchpriority="high" />}
@@ -38,8 +45,8 @@ const base = import.meta.env.BASE_URL;
 		<!-- OpenGraph / Telegram Preview -->
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
-		<meta property="og:image" content="https://alfred-pi.github.io/jeunesse-co-site/assets/image6.webp" />
-		<meta property="og:url" content="https://alfred-pi.github.io/jeunesse-co-site/" />
+		<meta property="og:image" content={ogImageUrl} />
+		<meta property="og:url" content={ogUrl} />
 		<meta property="og:type" content="website" />
 		<meta name="twitter:card" content="summary_large_image" />
 	</head>

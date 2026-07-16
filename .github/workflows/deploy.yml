@@ -22,7 +22,9 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          DEPLOY_ENV: production
+          # PROD uniquement sur le repo du domaine custom ; ailleurs (repo TEST
+          # Alfred-pi/jeunesse-co-site), build preview avec base /jeunesse-co-site/
+          DEPLOY_ENV: ${{ github.repository == 'JonnyBuild/jeunesse-co' && 'production' || 'preview' }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist

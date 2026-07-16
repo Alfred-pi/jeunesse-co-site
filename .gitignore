@@ -24,3 +24,7 @@ npm-debug.log*
 
 # Vite
 .vite/
+
+# Médias sources client (lourds, hors git)
+media/
+docs-text-jeunesse-co/new/
