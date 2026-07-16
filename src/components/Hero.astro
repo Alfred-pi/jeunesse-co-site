@@ -1,9 +1,9 @@
 ---
 import { Image } from 'astro:assets';
-import heroMain from '../assets/sections/hero-main.webp';
-import hero2 from '../assets/sections/hero-2.webp';
-import hero3 from '../assets/sections/hero-3.webp';
-import hero4 from '../assets/sections/hero-4.webp';
+import heroMain from '../assets/gallery/cuisine/cuisine-avec-ziaad-29.webp';
+import hero2 from '../assets/gallery/locaux/deco-j-co-14.webp';
+import hero3 from '../assets/gallery/locaux/deco-j-co-20.webp';
+import hero4 from '../assets/gallery/locaux/deco-j-co-16.webp';
 const base = import.meta.env.BASE_URL;
 ---
 <section class="hero">
@@ -45,25 +45,25 @@ const base = import.meta.env.BASE_URL;
         <div class="mosaic__grid">
           <div class="mosaic__item mosaic__item--main" data-speed="1.1">
             <div class="mosaic__image-wrap">
-              <Image src={heroMain} alt="Accompagnement Jeunesse & Co" class="mosaic__img" width={600} height={450} loading="eager" fetchpriority="high" />
+              <Image src={heroMain} alt="Atelier cuisine dans les locaux de Jeunesse & Co" class="mosaic__img" width={600} height={450} loading="eager" fetchpriority="high" />
             </div>
           </div>
           
           <div class="mosaic__item mosaic__item--top" data-speed="0.9">
             <div class="mosaic__image-wrap">
-              <Image src={hero2} alt="Interaction éducative" class="mosaic__img" width={400} height={300} loading="lazy" />
+              <Image src={hero2} alt="Salle d'accueil de nos locaux" class="mosaic__img" width={400} height={300} loading="lazy" />
             </div>
           </div>
           
           <div class="mosaic__item mosaic__item--bottom" data-speed="1.2">
             <div class="mosaic__image-wrap">
-              <Image src={hero3} alt="Accompagnement jeunesse" class="mosaic__img" width={350} height={400} loading="lazy" />
+              <Image src={hero3} alt="Coin détente de nos espaces" class="mosaic__img" width={350} height={400} loading="lazy" />
             </div>
           </div>
           
           <div class="mosaic__item mosaic__item--accent" data-speed="0.8">
             <div class="mosaic__image-wrap">
-              <Image src={hero4} alt="Travail social" class="mosaic__img" width={250} height={250} loading="lazy" />
+              <Image src={hero4} alt="Entrée de nos locaux" class="mosaic__img" width={250} height={250} loading="lazy" />
             </div>
           </div>
         </div>
@@ -143,7 +143,6 @@ const base = import.meta.env.BASE_URL;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        min-height: calc(100svh - 180px);
         padding: 0 24px;
       }
 
@@ -188,6 +187,20 @@ const base = import.meta.env.BASE_URL;
       color: var(--color-white);
       opacity: 0;
       transform: translateY(30px);
+
+      // Masques de mots injectés par le script d'animation
+      :global(.w-mask) {
+        display: inline-block;
+        overflow: hidden;
+        vertical-align: bottom;
+        padding-bottom: 0.08em;
+        margin-bottom: -0.08em;
+      }
+
+      :global(.w) {
+        display: inline-block;
+        will-change: transform;
+      }
     }
 
     &__description {
@@ -256,12 +269,17 @@ const base = import.meta.env.BASE_URL;
 
     @media (max-width: 1024px) {
       height: 420px;
+      width: 100%;
       max-width: 550px;
       margin: 0 auto;
     }
 
+    // Mobile : on garde la photo principale (vraie photo client)
     @media (max-width: 768px) {
-      display: none;
+      height: 260px;
+      max-width: 100%;
+      margin-top: 8px;
+      padding: 0 24px;
     }
   }
 
@@ -333,10 +351,10 @@ const base = import.meta.env.BASE_URL;
     box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
 
     @media (max-width: 768px) {
-      width: 90%;
+      width: 100%;
       height: 100%;
       top: 0;
-      right: 5%;
+      right: 0;
       border-radius: 16px;
     }
   }
@@ -460,86 +478,91 @@ const base = import.meta.env.BASE_URL;
       return;
     }
 
+    // Découpe le titre en mots masqués (texte inchangé, wrappers seulement)
+    const splitTitleWords = () => {
+      document.querySelectorAll('.hero__title > span').forEach((line) => {
+        const words = (line.textContent || '').trim().split(/\s+/);
+        line.innerHTML = words
+          .map((w) => `<span class="w-mask"><span class="w">${w}</span></span>`)
+          .join(' ');
+      });
+    };
+    splitTitleWords();
+
     // Set initial states explicitly for Safari
     gsap.set(".hero__badge", { opacity: 0, y: 20 });
-    gsap.set(".hero__title", { opacity: 0, y: 30 });
+    gsap.set(".hero__title", { opacity: 1, y: 0 });
+    gsap.set(".hero__title .w", { yPercent: 115, rotate: 5 });
     gsap.set(".hero__description", { opacity: 0, y: 20 });
     gsap.set(".hero__actions", { opacity: 0, y: 20 });
     gsap.set(".hero__trust", { opacity: 0, y: 20 });
-    gsap.set(".mosaic__item", { opacity: 0 });
+    gsap.set(".mosaic__item", { opacity: 1, clipPath: "inset(100% 0% 0% 0% round 20px)" });
+    gsap.set(".mosaic__img", { scale: 1.18 });
     gsap.set(".mosaic__shape", { opacity: 0, scale: 0 });
 
-    const masterTL = gsap.timeline({ 
+    const masterTL = gsap.timeline({
       defaults: { ease: "power4.out" }
     });
 
     // Content animations
     masterTL
-      .to(".hero__badge", { 
-        opacity: 1, 
-        y: 0, 
-        duration: 0.8 
+      .to(".hero__badge", {
+        opacity: 1,
+        y: 0,
+        duration: 0.8
       })
-      .to(".hero__title", { 
-        opacity: 1, 
-        y: 0, 
-        duration: 1 
+      .to(".hero__title .w", {
+        yPercent: 0,
+        rotate: 0,
+        duration: 1.1,
+        stagger: 0.07
       }, "-=0.5")
-      .to(".hero__description", { 
-        opacity: 1, 
-        y: 0, 
-        duration: 0.8 
-      }, "-=0.6")
-      .to(".hero__actions", { 
-        opacity: 1, 
-        y: 0, 
-        duration: 0.8 
+      .to(".hero__description", {
+        opacity: 1,
+        y: 0,
+        duration: 0.8
+      }, "-=0.9")
+      .to(".hero__actions", {
+        opacity: 1,
+        y: 0,
+        duration: 0.8
       }, "-=0.5")
-      .to(".hero__trust", { 
-        opacity: 1, 
-        y: 0, 
-        duration: 0.8 
+      .to(".hero__trust", {
+        opacity: 1,
+        y: 0,
+        duration: 0.8
       }, "-=0.5");
 
     // Mosaic animations with stagger
-    const mosaicTL = gsap.timeline({ 
+    const mosaicTL = gsap.timeline({
       defaults: { ease: "power3.out" }
     });
 
     // Shapes first
     mosaicTL
-      .fromTo(".mosaic__shape--1", 
+      .fromTo(".mosaic__shape--1",
         { scale: 0, rotation: -45, opacity: 0 },
         { scale: 1, rotation: 12, opacity: 0.6, duration: 1.2, ease: "elastic.out(1, 0.6)" }
       )
-      .fromTo(".mosaic__shape--2", 
+      .fromTo(".mosaic__shape--2",
         { scale: 0, rotation: 45, opacity: 0 },
         { scale: 1, rotation: -8, opacity: 0.8, duration: 1, ease: "elastic.out(1, 0.7)" },
         "-=0.8"
       );
 
-    // Images with creative entrances
+    // Images : rideau clip-path + settle du zoom (Ken Burns d'entrée)
+    const revealItem = (sel: string, dur: number) => {
+      const tl = gsap.timeline();
+      tl.to(`${sel}`, { clipPath: "inset(0% 0% 0% 0% round 20px)", duration: dur, ease: "power4.inOut" })
+        .to(`${sel} .mosaic__img`, { scale: 1, duration: dur + 0.4, ease: "power3.out" }, "<");
+      return tl;
+    };
+
     mosaicTL
-      .fromTo(".mosaic__item--main", 
-        { opacity: 0, y: 80, scale: 0.9 },
-        { opacity: 1, y: 0, scale: 1, duration: 1.2 },
-        "-=0.6"
-      )
-      .fromTo(".mosaic__item--top", 
-        { opacity: 0, x: -60, y: -40 },
-        { opacity: 1, x: 0, y: 0, duration: 1 },
-        "-=0.8"
-      )
-      .fromTo(".mosaic__item--bottom", 
-        { opacity: 0, y: 60, scale: 0.85 },
-        { opacity: 1, y: 0, scale: 1, duration: 1.1 },
-        "-=0.7"
-      )
-      .fromTo(".mosaic__item--accent", 
-        { opacity: 0, scale: 0.5, rotation: -15 },
-        { opacity: 1, scale: 1, rotation: 0, duration: 0.9, ease: "back.out(1.5)" },
-        "-=0.5"
-      );
+      .add(revealItem(".mosaic__item--main", 1.1), "-=0.6")
+      .add(revealItem(".mosaic__item--top", 0.9), "-=0.9")
+      .add(revealItem(".mosaic__item--bottom", 0.9), "-=0.75")
+      .add(revealItem(".mosaic__item--accent", 0.8), "-=0.6");
 
     // Start mosaic animation slightly after content
     masterTL.add(mosaicTL, 0.3);

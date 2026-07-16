@@ -10,8 +10,8 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import MobileNav from '../components/MobileNav.astro';
 import { getImage } from 'astro:assets';
-import image6 from '../assets/image6.webp';
-import heroMain from '../assets/sections/hero-main.webp';
+import ogPhoto from '../assets/gallery/locaux/deco-j-co-15.webp';
+import heroMain from '../assets/gallery/cuisine/cuisine-avec-ziaad-29.webp';
 
 interface Props {
 	title: string;
@@ -26,7 +26,7 @@ const heroImage = preloadHeroImage ? await getImage({ src: heroMain, width: 600,
 const base = import.meta.env.BASE_URL;
 
 // OpenGraph absolu par environnement (prod / preview) via Astro.site
-const ogImage = await getImage({ src: image6, width: 1200, format: 'webp' });
+const ogImage = await getImage({ src: ogPhoto, width: 1200, format: 'webp' });
 const ogImageUrl = new URL(ogImage.src, Astro.site);
 const ogUrl = new URL(Astro.url.pathname, Astro.site);
 ---

@@ -2,6 +2,8 @@
 import Layout from '../layouts/Layout.astro';
 import Icon from '../components/Icon.astro';
 import CuisineSection from '../components/CuisineSection.astro';
+import { Image } from 'astro:assets';
+import headerPhoto from '../assets/gallery/locaux/deco-j-co-3.webp';
 const base = import.meta.env.BASE_URL;
 
 const intervenants = [
@@ -123,6 +125,9 @@ const data = {
         <span class="badge">Accompagnement Intensif</span>
         <h1>Programme <span class="highlight">Impulsion</span></h1>
         <p class="subtitle">Un emploi du temps structuré pour favoriser le raccrochage scolaire, le bien-être physique et la réinsertion sociale.</p>
+      </div>
+      <div class="header-photo reveal">
+        <Image src={headerPhoto} alt="L'espace commun des locaux de Jeunesse & Co" widths={[800, 1200, 1600]} sizes="(max-width: 768px) 100vw, 1100px" loading="eager" fetchpriority="high" />
       </div>
     </div>
   </section>
@@ -733,7 +738,27 @@ const data = {
     padding-bottom: 80px;
     background-color: var(--color-primary);
     text-align: center;
-    
+
+    .header-photo {
+      max-width: 1100px;
+      margin: 64px auto 0;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.35);
+
+      img {
+        width: 100%;
+        height: clamp(240px, 40vw, 460px);
+        object-fit: cover;
+        display: block;
+      }
+
+      @media (max-width: 768px) {
+        margin: 40px auto 0;
+        border-radius: 16px;
+      }
+    }
+
     .badge {
       display: inline-block;
       padding: 8px 16px;

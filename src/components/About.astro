@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
-import aboutMain from '../assets/sections/about-main.webp';
-import about2 from '../assets/sections/about-2.webp';
+import aboutMain from '../assets/gallery/cuisine/cuisine-avec-ziaad-12.webp';
+import about2 from '../assets/gallery/locaux/deco-j-co-6.webp';
 ---
 <section id="about" class="about">
   <div class="container">
@@ -22,7 +22,7 @@ import about2 from '../assets/sections/about-2.webp';
 
     <div class="about__grid mt-80">
       <div class="about__card about__card--main reveal">
-        <Image src={aboutMain} alt="L'équipe au travail" class="img-cover" width={800} height={500} loading="lazy" />
+        <Image src={aboutMain} alt="Accompagnement des jeunes pendant l'atelier cuisine" class="img-cover" width={800} height={500} loading="lazy" />
         <div class="about__card-content">
           <blockquote class="serif">
             "Nous remettons le jeune au centre de son projet en fonction de ses compétences et ses objectifs."
@@ -36,7 +36,7 @@ import about2 from '../assets/sections/about-2.webp';
       </div>
 
       <div class="about__card about__card--img reveal">
-        <Image src={about2} alt="Interaction" class="img-cover" width={400} height={400} loading="lazy" />
+        <Image src={about2} alt="Coin d'entretien de nos locaux" class="img-cover" width={400} height={400} loading="lazy" />
       </div>
 
       <div class="about__card about__card--text bg-accent reveal">
