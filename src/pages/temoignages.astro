@@ -1,80 +1,68 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { Image } from 'astro:assets';
 
-// ⚠️ TEXTES D'EXEMPLE (placeholders) — à remplacer par les vrais témoignages
-// fournis par le client (textes + photos). Structure prête : il suffit de
-// modifier ce tableau. `photo` est optionnel : si absent, un avatar avec
-// les initiales est affiché.
-const temoignages = [
-	{
-		quote: "Avant, je ne voyais pas l'intérêt de retourner en cours. Ici, on m'a écouté sans me juger et on a construit un programme qui me ressemble. Aujourd'hui, j'ai repris une formation et je sais où je vais.",
-		name: 'Léa',
-		context: '17 ans — Programme Impulsion',
-	},
-	{
-		quote: "Ce qui change tout, c'est qu'on n'est pas un dossier. Les éducateurs sont là tous les jours, même quand ça ne va pas. La boxe m'a appris à canaliser ce que j'avais en moi.",
-		name: 'Mehdi',
-		context: '16 ans — Ateliers sportifs',
-	},
-	{
-		quote: "L'atelier vidéo m'a donné envie de me lever le matin. On a réalisé un clip de A à Z, et pour la première fois, j'étais fier de montrer quelque chose que j'avais fait.",
-		name: 'Dylan',
-		context: '18 ans — Ateliers audiovisuels',
-	},
-	{
-		quote: "Notre fils était en rupture totale depuis des mois. L'équipe de Jeunesse & Co a su recréer le lien là où nous n'y arrivions plus. Nous avons retrouvé le dialogue à la maison.",
-		name: 'Mme B.',
-		context: 'Parent',
-	},
-	{
-		quote: "En tant que partenaire institutionnel, nous apprécions la réactivité de l'équipe et la qualité du suivi. Les bilans sont précis, les objectifs co-construits avec le jeune.",
-		name: 'C. Rossier',
-		context: 'Partenaire réseau',
-	},
-	{
-		quote: "Le projet d'entraide m'a fait découvrir que je pouvais être utile aux autres. On a organisé une collecte pour les sans-abri, c'est nous qui avons tout décidé et tout géré.",
-		name: 'Sofia',
-		context: "19 ans — Projet d'entraide",
-	},
-];
+// ⚠️ PLACEHOLDER — à remplacer par le vrai témoignage fourni par le client
+// (texte + photo du jeune, et éventuellement une vidéo plus tard).
+// La photo ci-dessous vient du reportage cuisine, en attendant le vrai portrait.
+import photoTemoin from '../assets/gallery/cuisine/cuisine-avec-ziaad-14.webp';
 
-const initials = (name: string) =>
-	name.split(/\s+/).map((p) => p[0]).join('').toUpperCase().slice(0, 2);
+const temoignage = {
+	quote: "Avant, je ne voyais pas l'intérêt de retourner en cours. Ici, on m'a écouté sans me juger et on a construit un programme qui me ressemble. Les éducateurs sont là tous les jours, même quand ça ne va pas. Aujourd'hui, j'ai repris une formation et je sais où je vais.",
+	name: 'Léa',
+	context: '17 ans — Programme Impulsion',
+	photoAlt: "Portrait d'une jeune accompagnée par Jeunesse & Co",
+};
 ---
 <Layout
 	title="Témoignages | Jeunesse & Co"
-	description="Ils ont vécu l'accompagnement Jeunesse & Co : les jeunes, leurs proches et nos partenaires témoignent."
+	description="Ils ont vécu l'accompagnement Jeunesse & Co : les jeunes racontent leur parcours."
 >
 	<section class="temoignages-header">
 		<div class="container">
 			<div class="header-content reveal">
 				<span class="badge">Ils en parlent</span>
 				<h1>Leurs <span class="highlight">mots</span>, leur parcours</h1>
-				<p class="subtitle">Les jeunes, leurs proches et nos partenaires racontent l'accompagnement Jeunesse & Co.</p>
+				<p class="subtitle">Les jeunes racontent l'accompagnement Jeunesse & Co, avec leurs mots à eux.</p>
 			</div>
 		</div>
 	</section>
 
-	<section class="temoignages-section">
+	<section class="temoignage-feature">
 		<div class="container">
-			<div class="temoignages-grid">
-				{temoignages.map((t) => (
-					<figure class="temoignage-card reveal">
-						<svg class="quote-mark" width="32" height="32" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-							<path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
-						</svg>
-						<blockquote>{t.quote}</blockquote>
-						<figcaption>
-							<span class="avatar" aria-hidden="true">{initials(t.name)}</span>
-							<span class="who">
-								<span class="name">{t.name}</span>
-								<span class="context">{t.context}</span>
-							</span>
-						</figcaption>
-					</figure>
-				))}
-			</div>
+			<div class="feature-grid">
+				<div class="feature-photo reveal">
+					<div class="photo-frame">
+						<Image
+							src={photoTemoin}
+							alt={temoignage.photoAlt}
+							widths={[500, 800, 1100]}
+							sizes="(max-width: 900px) 100vw, 45vw"
+							loading="eager"
+						/>
+					</div>
+					<div class="photo-shape" aria-hidden="true"></div>
+				</div>
 
+				<div class="feature-content reveal">
+					<svg class="quote-mark" width="56" height="56" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+						<path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
+					</svg>
+					<blockquote>{temoignage.quote}</blockquote>
+					<div class="feature-author">
+						<span class="author-line" aria-hidden="true"></span>
+						<div class="author-meta">
+							<span class="name">{temoignage.name}</span>
+							<span class="context">{temoignage.context}</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="temoignages-cta-section">
+		<div class="container">
 			<div class="temoignages-cta reveal">
 				<h2>Tu as vécu l'accompagnement Jeunesse&nbsp;&&nbsp;Co&nbsp;?</h2>
 				<p>Ton expérience peut aider d'autres jeunes à franchir le pas. Écris-nous pour partager ton témoignage.</p>
@@ -143,102 +131,132 @@ const initials = (name: string) =>
 		}
 	}
 
-	.temoignages-section {
-		padding: 100px 0 140px;
+	.temoignage-feature {
+		padding: 120px 0;
 		background-color: var(--color-bg);
 
 		@media (max-width: 768px) {
-			padding: 60px 0 80px;
+			padding: 64px 0;
 		}
 	}
 
-	.temoignages-grid {
+	.feature-grid {
 		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 24px;
+		grid-template-columns: 5fr 6fr;
+		gap: clamp(40px, 6vw, 96px);
+		align-items: center;
 
-		@media (max-width: 1024px) {
-			grid-template-columns: repeat(2, 1fr);
-		}
-
-		@media (max-width: 640px) {
+		@media (max-width: 900px) {
 			grid-template-columns: 1fr;
-			gap: 16px;
+			gap: 48px;
 		}
 	}
 
-	.temoignage-card {
-		margin: 0;
-		background: var(--color-white);
-		border: 1px solid var(--color-border);
-		border-radius: 24px;
-		padding: 32px;
-		display: flex;
-		flex-direction: column;
-		gap: 20px;
-		transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
+	.feature-photo {
+		position: relative;
 
-		&:hover {
-			transform: translateY(-4px);
-			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+		.photo-frame {
+			position: relative;
+			border-radius: 32px;
+			overflow: hidden;
+			aspect-ratio: 4 / 5;
+			box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
+			z-index: 1;
+
+			img {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				display: block;
+			}
+
+			@media (max-width: 480px) {
+				border-radius: 20px;
+			}
 		}
 
+		// Accent jaune décalé derrière la photo, comme les shapes du hero
+		.photo-shape {
+			position: absolute;
+			width: 140px;
+			height: 140px;
+			background: var(--color-accent);
+			border-radius: 28px;
+			top: -28px;
+			right: -28px;
+			transform: rotate(10deg);
+			z-index: 0;
+
+			@media (max-width: 900px) {
+				width: 96px;
+				height: 96px;
+				top: -18px;
+				right: -8px;
+			}
+		}
+	}
+
+	.feature-content {
 		.quote-mark {
 			color: var(--color-accent);
-			flex-shrink: 0;
+			margin-bottom: 28px;
 		}
 
 		blockquote {
-			margin: 0;
-			font-size: 16px;
-			line-height: 1.7;
-			color: var(--color-text);
-			flex: 1;
-		}
-
-		figcaption {
-			display: flex;
-			align-items: center;
-			gap: 14px;
-			padding-top: 20px;
-			border-top: 1px solid var(--color-border);
-		}
-
-		.avatar {
-			width: 48px;
-			height: 48px;
-			border-radius: 50%;
-			background: var(--color-accent);
-			color: var(--color-primary);
-			display: flex;
-			align-items: center;
-			justify-content: center;
+			margin: 0 0 40px;
 			font-family: var(--font-headline);
-			font-weight: 700;
-			font-size: 16px;
-			flex-shrink: 0;
-		}
-
-		.who {
-			display: flex;
-			flex-direction: column;
-		}
-
-		.name {
-			font-weight: 700;
+			font-size: clamp(22px, 2.6vw, 32px);
+			line-height: 1.45;
+			font-weight: 500;
+			letter-spacing: -0.01em;
 			color: var(--color-text);
 		}
 
-		.context {
-			font-size: 13px;
-			color: var(--color-text-muted);
-			text-transform: uppercase;
-			letter-spacing: 0.04em;
+		.feature-author {
+			display: flex;
+			align-items: center;
+			gap: 20px;
+
+			.author-line {
+				width: 56px;
+				height: 3px;
+				background: var(--color-accent);
+				border-radius: 2px;
+				flex-shrink: 0;
+			}
+
+			.author-meta {
+				display: flex;
+				flex-direction: column;
+			}
+
+			.name {
+				font-family: var(--font-headline);
+				font-weight: 700;
+				font-size: 20px;
+				color: var(--color-text);
+			}
+
+			.context {
+				font-size: 13px;
+				color: var(--color-text-muted);
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+				margin-top: 4px;
+			}
+		}
+	}
+
+	.temoignages-cta-section {
+		padding: 0 0 140px;
+		background-color: var(--color-bg);
+
+		@media (max-width: 768px) {
+			padding-bottom: 80px;
 		}
 	}
 
 	.temoignages-cta {
-		margin-top: 100px;
 		text-align: center;
 		background: var(--color-primary);
 		border-radius: 32px;
@@ -258,7 +276,6 @@ const initials = (name: string) =>
 		}
 
 		@media (max-width: 768px) {
-			margin-top: 60px;
 			border-radius: 20px;
 		}
 	}
