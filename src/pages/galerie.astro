@@ -1,19 +1,27 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import VideoPlayer from '../components/VideoPlayer.astro';
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 
 // Toutes les photos déco des locaux (import.meta.glob → tri par numéro)
 const modules = import.meta.glob<{ default: ImageMetadata }>(
 	'../assets/gallery/locaux/*.webp',
 	{ eager: true }
 );
-const photos = Object.entries(modules)
+const sorted = Object.entries(modules)
 	.map(([path, mod]) => ({
 		src: mod.default,
 		num: Number(path.match(/deco-j-co-(\d+)\.webp$/)?.[1] ?? 0),
 	}))
 	.sort((a, b) => a.num - b.num);
+
+// Variante pleine taille dédiée au lightbox (les vignettes plafonnent à 1000px)
+const photos = await Promise.all(
+	sorted.map(async (photo) => ({
+		...photo,
+		full: (await getImage({ src: photo.src, width: 2000, format: 'webp' })).src,
+	}))
+);
 ---
 <Layout
 	title="Galerie | Jeunesse & Co"
@@ -41,7 +49,7 @@ const photos = Object.entries(modules)
 		<div class="container">
 			<div class="galerie-grid">
 				{photos.map((photo, i) => (
-					<button class="galerie-item reveal" data-lightbox={i} aria-label={`Agrandir la photo ${i + 1}`}>
+					<button class="galerie-item reveal" data-full={photo.full} aria-label={`Agrandir la photo ${i + 1}`}>
 						<Image
 							src={photo.src}
 							alt={`Les locaux de Jeunesse & Co — photo ${i + 1}`}
@@ -194,8 +202,18 @@ const photos = Object.entries(modules)
 		border: none;
 		padding: 0;
 		background: transparent;
-		max-width: min(92vw, 1400px);
-		max-height: 90vh;
+		// Le dialog occupe tout l'écran et centre son contenu (le margin auto
+		// par défaut ne centrait pas verticalement de façon fiable)
+		width: 100vw;
+		max-width: 100vw;
+		height: 100dvh;
+		max-height: 100dvh;
+		overflow: hidden;
+
+		&[open] {
+			display: grid;
+			place-items: center;
+		}
 
 		&::backdrop {
 			background: rgba(17, 17, 17, 0.92);
@@ -203,12 +221,13 @@ const photos = Object.entries(modules)
 		}
 
 		&__img {
-			max-width: min(92vw, 1400px);
-			max-height: 86vh;
+			max-width: 94vw;
+			max-height: 92dvh;
 			width: auto;
 			height: auto;
+			object-fit: contain;
 			display: block;
-			border-radius: 16px;
+			border-radius: 12px;
 		}
 
 		&__close {
@@ -242,12 +261,10 @@ const photos = Object.entries(modules)
 	if (lightbox && lightboxImg && closeBtn) {
 		document.querySelectorAll<HTMLElement>('.galerie-item').forEach((item) => {
 			item.addEventListener('click', () => {
+				const full = item.dataset.full;
 				const img = item.querySelector('img');
-				if (!img) return;
-				// La plus grande variante générée par Astro
-				const srcset = img.getAttribute('srcset');
-				const biggest = srcset ? srcset.split(',').pop()?.trim().split(' ')[0] : img.src;
-				lightboxImg.src = biggest || img.src;
+				if (!full && !img) return;
+				lightboxImg.src = full || img!.src;
 				lightbox.showModal();
 			});
 		});
