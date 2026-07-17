@@ -2,16 +2,23 @@
 import Layout from '../layouts/Layout.astro';
 import { Image } from 'astro:assets';
 
-// ⚠️ PLACEHOLDER — à remplacer par le vrai témoignage fourni par le client
-// (texte + photo du jeune, et éventuellement une vidéo plus tard).
-// La photo ci-dessous vient du reportage cuisine, en attendant le vrai portrait.
-import photoTemoin from '../assets/gallery/cuisine/cuisine-avec-ziaad-14.webp';
+// Témoignage réel (anonymisé). Photo d'ambiance des espaces d'accueil J&Co
+// plutôt qu'un portrait, par respect de l'anonymat du jeune.
+import photoTemoin from '../assets/gallery/locaux/deco-j-co-8.webp';
 
 const temoignage = {
-	quote: "Avant, je ne voyais pas l'intérêt de retourner en cours. Ici, on m'a écouté sans me juger et on a construit un programme qui me ressemble. Les éducateurs sont là tous les jours, même quand ça ne va pas. Aujourd'hui, j'ai repris une formation et je sais où je vais.",
-	name: 'Léa',
-	context: '17 ans — Programme Impulsion',
-	photoAlt: "Portrait d'une jeune accompagnée par Jeunesse & Co",
+	lead: "J'ai eu la chance de connaître Hacene en juillet 2022, à l'âge de 15 ans. À cette époque, ma situation personnelle et professionnelle était au plus bas.",
+	body: [
+		"Je n'avais aucun objectif précis et je vivais sans penser au lendemain. Cela m'a conduit à être presque déscolarisé, à fuir toute aide extérieure, à quitter mon domicile pendant plusieurs jours et à commettre plusieurs délits et infractions. L'une d'elles m'a amené devant un juge qui m'a imposé un accompagnement avec Hacene.",
+		"Comme beaucoup de jeunes dans ma situation, j'ai d'abord vu cela comme une punition. Je pensais avoir affaire à quelqu'un qui allait me surveiller, me contrôler et être du côté de la justice contre moi. Mais en apprenant à le connaître et en l'écoutant, j'ai compris que son objectif était avant tout d'aider les jeunes qui sont perdus ou qui ont besoin d'aide, parfois sans même s'en rendre compte.",
+		"Petit à petit, je l'ai vu comme un exemple à suivre. J'ai commencé à écouter ses conseils et à accepter l'aide qu'il me proposait. Grâce à lui, j'ai trouvé un chemin que je n'aurais probablement jamais emprunté seul : celui d'écouter un adulte qui connaît ces difficultés et qui comprend réellement ce que vivent certains jeunes.",
+		"Avec son aide, j'ai pu découvrir différents milieux professionnels grâce à plusieurs stages, ce qui m'a permis de trouver ma voie. Il m'a aussi aidé à avancer sur le plan personnel et familial, et à retrouver un équilibre dans ma vie.",
+		"J'ai finalement choisi de commencer un apprentissage CFC de maçon, que j'ai réussi à terminer avec succès cette année, en 2026. Aujourd'hui, je suis dans une situation stable, avec un travail, un CFC en poche et même un appartement que j'ai pu obtenir grâce à son soutien et à ses conseils.",
+		"Je suis très reconnaissant envers Hacene pour tout ce qu'il a fait pour moi. Sans son accompagnement, je ne serais certainement pas la personne que je suis aujourd'hui. Son accompagnement avec moi s'est officiellement terminé en septembre 2025, mais Hacene garde une place très importante dans ma vie. Au fil des années, il est devenu bien plus qu'un éducateur ou un accompagnant. Aujourd'hui, je le considère comme un ami, voire plutôt comme le grand frère que je n'ai jamais eu. Merci pour ton aide, ta patience et pour avoir cru en moi quand moi-même je n'y croyais pas encore.",
+	],
+	name: 'Paul B.',
+	context: 'Apprenti maçon CFC — accompagné de 2022 à 2025',
+	photoAlt: "Un des espaces d'accueil de Jeunesse & Co",
 };
 ---
 <Layout
@@ -48,7 +55,10 @@ const temoignage = {
 					<svg class="quote-mark" width="56" height="56" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
 						<path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
 					</svg>
-					<blockquote>{temoignage.quote}</blockquote>
+					<blockquote>
+						<p class="lead">{temoignage.lead}</p>
+						{temoignage.body.map((p) => <p>{p}</p>)}
+					</blockquote>
 					<div class="feature-author">
 						<span class="author-line" aria-hidden="true"></span>
 						<div class="author-meta">
@@ -144,7 +154,7 @@ const temoignage = {
 		display: grid;
 		grid-template-columns: 5fr 6fr;
 		gap: clamp(40px, 6vw, 96px);
-		align-items: center;
+		align-items: start;
 
 		@media (max-width: 900px) {
 			grid-template-columns: 1fr;
@@ -154,6 +164,13 @@ const temoignage = {
 
 	.feature-photo {
 		position: relative;
+		position: sticky;
+		top: 120px;
+
+		@media (max-width: 900px) {
+			position: relative;
+			top: 0;
+		}
 
 		.photo-frame {
 			position: relative;
@@ -204,12 +221,28 @@ const temoignage = {
 
 		blockquote {
 			margin: 0 0 40px;
-			font-family: var(--font-headline);
-			font-size: clamp(22px, 2.6vw, 32px);
-			line-height: 1.45;
-			font-weight: 500;
-			letter-spacing: -0.01em;
 			color: var(--color-text);
+
+			p {
+				margin: 0 0 20px;
+				font-size: 17px;
+				line-height: 1.75;
+				color: var(--color-text-muted);
+
+				&:last-child {
+					margin-bottom: 0;
+				}
+			}
+
+			.lead {
+				font-family: var(--font-headline);
+				font-size: clamp(22px, 2.6vw, 30px);
+				line-height: 1.45;
+				font-weight: 500;
+				letter-spacing: -0.01em;
+				color: var(--color-text);
+				margin-bottom: 28px;
+			}
 		}
 
 		.feature-author {
