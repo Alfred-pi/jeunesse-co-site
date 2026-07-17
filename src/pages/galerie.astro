@@ -1,0 +1,260 @@
+---
+import Layout from '../layouts/Layout.astro';
+import VideoPlayer from '../components/VideoPlayer.astro';
+import { Image } from 'astro:assets';
+
+// Toutes les photos déco des locaux (import.meta.glob → tri par numéro)
+const modules = import.meta.glob<{ default: ImageMetadata }>(
+	'../assets/gallery/locaux/*.webp',
+	{ eager: true }
+);
+const photos = Object.entries(modules)
+	.map(([path, mod]) => ({
+		src: mod.default,
+		num: Number(path.match(/deco-j-co-(\d+)\.webp$/)?.[1] ?? 0),
+	}))
+	.sort((a, b) => a.num - b.num);
+---
+<Layout
+	title="Galerie | Jeunesse & Co"
+	description="Découvrez nos locaux du Quai du Seujet en images : des espaces chaleureux pensés pour accueillir les jeunes."
+>
+	<section class="galerie-header">
+		<div class="container">
+			<div class="header-content reveal">
+				<span class="badge">Nos locaux en images</span>
+				<h1>La <span class="highlight">Galerie</span></h1>
+				<p class="subtitle">Des espaces chaleureux au cœur de Genève, pensés pour que chacun s'y sente accueilli.</p>
+			</div>
+		</div>
+	</section>
+
+	<section class="galerie-video">
+		<div class="container">
+			<div class="video-wrap reveal">
+				<VideoPlayer src="assets/locaux-jco.mp4" poster="assets/locaux-jco-poster.webp" label="Visite en vidéo des locaux de Jeunesse & Co" />
+			</div>
+		</div>
+	</section>
+
+	<section class="galerie-grid-section">
+		<div class="container">
+			<div class="galerie-grid">
+				{photos.map((photo, i) => (
+					<button class="galerie-item reveal" data-lightbox={i} aria-label={`Agrandir la photo ${i + 1}`}>
+						<Image
+							src={photo.src}
+							alt={`Les locaux de Jeunesse & Co — photo ${i + 1}`}
+							widths={[400, 700, 1000]}
+							sizes="(max-width: 768px) 50vw, 33vw"
+							loading={i < 3 ? 'eager' : 'lazy'}
+						/>
+					</button>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<!-- Lightbox -->
+	<dialog class="lightbox" id="lightbox">
+		<button class="lightbox__close" id="lightbox-close" aria-label="Fermer">
+			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+			</svg>
+		</button>
+		<img class="lightbox__img" id="lightbox-img" src="" alt="Photo agrandie des locaux" />
+	</dialog>
+</Layout>
+
+<style lang="scss">
+	.galerie-header {
+		padding: 180px 0 64px;
+		background-color: var(--color-primary);
+		text-align: center;
+
+		.badge {
+			display: inline-block;
+			padding: 8px 16px;
+			border: 1px solid var(--color-accent);
+			border-radius: 100px;
+			font-size: 12px;
+			text-transform: uppercase;
+			letter-spacing: 0.1em;
+			color: var(--color-accent);
+			margin-bottom: 24px;
+			background: rgba(255, 223, 92, 0.1);
+			font-weight: 700;
+		}
+
+		h1 {
+			font-size: clamp(42px, 7vw, 88px);
+			margin-bottom: 24px;
+			letter-spacing: -0.03em;
+			color: var(--color-white);
+
+			.highlight {
+				font-family: var(--font-headline);
+				font-style: italic;
+				position: relative;
+
+				&::after {
+					content: '';
+					position: absolute;
+					bottom: 10px;
+					left: -5%;
+					width: 110%;
+					height: 0.3em;
+					background: var(--color-accent);
+					opacity: 0.8;
+					z-index: -1;
+					transform: rotate(-2deg);
+				}
+			}
+		}
+
+		.subtitle {
+			max-width: 560px;
+			margin: 0 auto;
+			color: rgba(255, 255, 255, 0.75);
+			font-size: 18px;
+			line-height: 1.6;
+		}
+
+		@media (max-width: 768px) {
+			padding: 140px 0 48px;
+		}
+	}
+
+	.galerie-video {
+		background-color: var(--color-primary);
+		padding-bottom: 100px;
+
+		.video-wrap {
+			max-width: 1100px;
+			margin: 0 auto;
+		}
+
+		@media (max-width: 768px) {
+			padding-bottom: 60px;
+		}
+	}
+
+	.galerie-grid-section {
+		padding: 100px 0 140px;
+		background-color: var(--color-bg);
+
+		@media (max-width: 768px) {
+			padding: 60px 0 80px;
+		}
+	}
+
+	.galerie-grid {
+		columns: 3;
+		column-gap: 24px;
+
+		@media (max-width: 1024px) {
+			columns: 2;
+		}
+
+		@media (max-width: 480px) {
+			column-gap: 16px;
+		}
+	}
+
+	.galerie-item {
+		display: block;
+		width: 100%;
+		break-inside: avoid;
+		margin-bottom: 24px;
+		border-radius: 20px;
+		overflow: hidden;
+		background: var(--color-surface);
+		border: none;
+		padding: 0;
+		cursor: zoom-in;
+
+		@media (max-width: 480px) {
+			margin-bottom: 16px;
+			border-radius: 14px;
+		}
+
+		img {
+			width: 100%;
+			height: auto;
+			display: block;
+			transition: transform 0.6s var(--ease-out);
+		}
+
+		&:hover img {
+			transform: scale(1.04);
+		}
+	}
+
+	.lightbox {
+		border: none;
+		padding: 0;
+		background: transparent;
+		max-width: min(92vw, 1400px);
+		max-height: 90vh;
+
+		&::backdrop {
+			background: rgba(17, 17, 17, 0.92);
+			backdrop-filter: blur(8px);
+		}
+
+		&__img {
+			max-width: min(92vw, 1400px);
+			max-height: 86vh;
+			width: auto;
+			height: auto;
+			display: block;
+			border-radius: 16px;
+		}
+
+		&__close {
+			position: fixed;
+			top: 24px;
+			right: 24px;
+			width: 48px;
+			height: 48px;
+			border-radius: 50%;
+			border: none;
+			background: rgba(255, 255, 255, 0.12);
+			color: white;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: background 0.3s ease;
+
+			&:hover {
+				background: rgba(255, 255, 255, 0.25);
+			}
+		}
+	}
+</style>
+
+<script>
+	const lightbox = document.getElementById('lightbox') as HTMLDialogElement | null;
+	const lightboxImg = document.getElementById('lightbox-img') as HTMLImageElement | null;
+	const closeBtn = document.getElementById('lightbox-close');
+
+	if (lightbox && lightboxImg && closeBtn) {
+		document.querySelectorAll<HTMLElement>('.galerie-item').forEach((item) => {
+			item.addEventListener('click', () => {
+				const img = item.querySelector('img');
+				if (!img) return;
+				// La plus grande variante générée par Astro
+				const srcset = img.getAttribute('srcset');
+				const biggest = srcset ? srcset.split(',').pop()?.trim().split(' ')[0] : img.src;
+				lightboxImg.src = biggest || img.src;
+				lightbox.showModal();
+			});
+		});
+
+		closeBtn.addEventListener('click', () => lightbox.close());
+		lightbox.addEventListener('click', (e) => {
+			if (e.target === lightbox) lightbox.close();
+		});
+	}
+</script>
