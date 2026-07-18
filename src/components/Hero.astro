@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import heroMain from '../assets/gallery/cuisine/cuisine-avec-ziaad-29.webp';
 import hero2 from '../assets/gallery/locaux/deco-j-co-4.webp';
 import hero3 from '../assets/gallery/locaux/deco-j-co-1.webp';
-import hero4 from '../assets/gallery/locaux/deco-j-co-22.webp';
+import hero4 from '../assets/gallery/cuisine/cuisine-avec-ziaad-12.webp';
 const base = import.meta.env.BASE_URL;
 ---
 <section class="hero">
@@ -66,7 +66,7 @@ const base = import.meta.env.BASE_URL;
 
             <div class="mosaic__item mosaic__item--small">
               <div class="mosaic__image-wrap">
-                <Image src={hero4} alt="Détail de l'entrée de nos locaux" class="mosaic__img" width={340} height={380} loading="lazy" />
+                <Image src={hero4} alt="Un éducateur et un jeune préparent un repas ensemble" class="mosaic__img" width={480} height={280} loading="lazy" />
               </div>
             </div>
           </div>
@@ -393,6 +393,11 @@ const base = import.meta.env.BASE_URL;
 
   .mosaic__item--small {
     flex: 1;
+
+    // Tuile large et basse : on remonte le cadrage pour garder les visages
+    .mosaic__img {
+      object-position: center 32%;
+    }
 
     @media (max-width: 768px) {
       display: none;
