@@ -1,9 +1,9 @@
 ---
 import { Image } from 'astro:assets';
 import heroMain from '../assets/gallery/cuisine/cuisine-avec-ziaad-29.webp';
-import hero2 from '../assets/gallery/locaux/deco-j-co-14.webp';
-import hero3 from '../assets/gallery/locaux/deco-j-co-20.webp';
-import hero4 from '../assets/gallery/locaux/deco-j-co-16.webp';
+import hero2 from '../assets/gallery/locaux/deco-j-co-4.webp';
+import hero3 from '../assets/gallery/cuisine/cuisine-avec-ziaad-21.webp';
+import hero4 from '../assets/gallery/locaux/deco-j-co-11.webp';
 const base = import.meta.env.BASE_URL;
 ---
 <section class="hero">
@@ -43,34 +43,37 @@ const base = import.meta.env.BASE_URL;
       
       <div class="hero__mosaic">
         <div class="mosaic__grid">
-          <div class="mosaic__item mosaic__item--main" data-speed="1.1">
-            <div class="mosaic__image-wrap">
-              <Image src={heroMain} alt="Atelier cuisine dans les locaux de Jeunesse & Co" class="mosaic__img" width={600} height={450} loading="eager" fetchpriority="high" />
+          <div class="mosaic__col mosaic__col--a">
+            <div class="mosaic__item mosaic__item--tall">
+              <div class="mosaic__image-wrap">
+                <Image src={hero2} alt="Espace d'accueil de Jeunesse & Co, baigné de lumière" class="mosaic__img" width={440} height={620} loading="lazy" />
+              </div>
+            </div>
+
+            <div class="mosaic__item mosaic__item--wide">
+              <div class="mosaic__image-wrap">
+                <Image src={hero3} alt="Atelier cuisine : préparation d'un repas" class="mosaic__img" width={440} height={330} loading="lazy" />
+              </div>
             </div>
           </div>
-          
-          <div class="mosaic__item mosaic__item--top" data-speed="0.9">
-            <div class="mosaic__image-wrap">
-              <Image src={hero2} alt="Salle d'accueil de nos locaux" class="mosaic__img" width={400} height={300} loading="lazy" />
+
+          <div class="mosaic__col mosaic__col--b">
+            <div class="mosaic__item mosaic__item--main">
+              <div class="mosaic__image-wrap">
+                <Image src={heroMain} alt="Atelier cuisine dans les locaux de Jeunesse & Co" class="mosaic__img" width={620} height={780} loading="eager" fetchpriority="high" />
+              </div>
             </div>
-          </div>
-          
-          <div class="mosaic__item mosaic__item--bottom" data-speed="1.2">
-            <div class="mosaic__image-wrap">
-              <Image src={hero3} alt="Coin détente de nos espaces" class="mosaic__img" width={350} height={400} loading="lazy" />
-            </div>
-          </div>
-          
-          <div class="mosaic__item mosaic__item--accent" data-speed="0.8">
-            <div class="mosaic__image-wrap">
-              <Image src={hero4} alt="Entrée de nos locaux" class="mosaic__img" width={250} height={250} loading="lazy" />
+
+            <div class="mosaic__item mosaic__item--small">
+              <div class="mosaic__image-wrap">
+                <Image src={hero4} alt="Détail de nos espaces : affiches et lampe" class="mosaic__img" width={340} height={380} loading="lazy" />
+              </div>
             </div>
           </div>
         </div>
-        
+
         <div class="mosaic__shapes">
           <div class="mosaic__shape mosaic__shape--1"></div>
-          <div class="mosaic__shape mosaic__shape--2"></div>
         </div>
       </div>
     </div>
@@ -283,18 +286,51 @@ const base = import.meta.env.BASE_URL;
     }
   }
 
+  // Grille éditoriale : deux colonnes décalées, gouttières régulières, zéro chevauchement
   .mosaic__grid {
     position: relative;
+    z-index: 2;
     width: 100%;
     height: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 16px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+
+  .mosaic__col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 0;
+
+    // Décalage vertical : c'est lui qui donne le rythme, pas la superposition
+    &--a { padding-top: 48px; }
+    &--b { padding-bottom: 48px; }
+
+    @media (max-width: 1024px) {
+      &--a { padding-top: 32px; }
+      &--b { padding-bottom: 32px; }
+    }
+
+    @media (max-width: 768px) {
+      &--a { display: none; }
+      &--b { padding-bottom: 0; gap: 0; }
+    }
   }
 
   .mosaic__item {
-    position: absolute;
+    position: relative;
     border-radius: 20px;
     overflow: hidden;
+    min-height: 0;
     opacity: 0;
     will-change: transform;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
 
     @media (max-width: 480px) {
       border-radius: 14px;
@@ -341,66 +377,24 @@ const base = import.meta.env.BASE_URL;
     }
   }
 
-  // Main image - large, center-right
+  // Proportions des tuiles (flex-grow au sein de leur colonne)
+  .mosaic__item--tall { flex: 1.45; }
+  .mosaic__item--wide { flex: 1; }
+
   .mosaic__item--main {
-    width: 65%;
-    height: 75%;
-    top: 12%;
-    right: 0;
-    z-index: 3;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
+    flex: 1.85;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.22);
 
     @media (max-width: 768px) {
-      width: 100%;
-      height: 100%;
-      top: 0;
-      right: 0;
+      flex: 1;
       border-radius: 16px;
     }
   }
 
-  // Top left image - hide on mobile
-  .mosaic__item--top {
-    width: 42%;
-    height: 40%;
-    top: 0;
-    left: 0;
-    z-index: 2;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+  .mosaic__item--small {
+    flex: 1;
 
     @media (max-width: 768px) {
-      display: none;
-    }
-  }
-
-  // Bottom left image - hide on mobile
-  .mosaic__item--bottom {
-    width: 35%;
-    height: 45%;
-    bottom: 0;
-    left: 5%;
-    z-index: 4;
-    border: 5px solid var(--color-bg);
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.14);
-
-    @media (max-width: 768px) {
-      display: none;
-    }
-  }
-
-  // Accent small image - hide on tablet/mobile
-  .mosaic__item--accent {
-    width: 25%;
-    aspect-ratio: 1;
-    top: 50%;
-    left: 30%;
-    transform: translateY(-50%);
-    z-index: 5;
-    border: 4px solid var(--color-bg);
-    border-radius: 16px;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
-
-    @media (max-width: 1024px) {
       display: none;
     }
   }
@@ -419,37 +413,20 @@ const base = import.meta.env.BASE_URL;
     opacity: 0;
     will-change: transform;
 
+    // Carré d'accent jaune, discret, derrière la grille
     &--1 {
-      width: 120px;
-      height: 120px;
+      width: 96px;
+      height: 96px;
       background: var(--color-accent);
-      top: -20px;
-      right: 15%;
-      z-index: 0;
+      border-radius: 20px;
+      top: 8px;
+      right: -28px;
 
       @media (max-width: 1024px) {
-        width: 80px;
-        height: 80px;
-        top: -15px;
-        right: 0;
+        width: 72px;
+        height: 72px;
+        right: -12px;
       }
-
-      @media (max-width: 480px) {
-        width: 60px;
-        height: 60px;
-        top: -10px;
-        right: -5px;
-      }
-    }
-
-    &--2 {
-      width: 80px;
-      height: 80px;
-      background: var(--color-surface);
-      border: 2px solid var(--color-border);
-      bottom: 10%;
-      right: -20px;
-      z-index: 0;
 
       @media (max-width: 768px) {
         display: none;
@@ -538,16 +515,11 @@ const base = import.meta.env.BASE_URL;
       defaults: { ease: "power3.out" }
     });
 
-    // Shapes first
+    // Shape first
     mosaicTL
       .fromTo(".mosaic__shape--1",
-        { scale: 0, rotation: -45, opacity: 0 },
-        { scale: 1, rotation: 12, opacity: 0.6, duration: 1.2, ease: "elastic.out(1, 0.6)" }
-      )
-      .fromTo(".mosaic__shape--2",
-        { scale: 0, rotation: 45, opacity: 0 },
-        { scale: 1, rotation: -8, opacity: 0.8, duration: 1, ease: "elastic.out(1, 0.7)" },
-        "-=0.8"
+        { scale: 0, rotation: -20, opacity: 0 },
+        { scale: 1, rotation: 8, opacity: 0.7, duration: 1.1, ease: "elastic.out(1, 0.7)" }
       );
 
     // Images : rideau clip-path + settle du zoom (Ken Burns d'entrée)
@@ -560,29 +532,19 @@ const base = import.meta.env.BASE_URL;
 
     mosaicTL
       .add(revealItem(".mosaic__item--main", 1.1), "-=0.6")
-      .add(revealItem(".mosaic__item--top", 0.9), "-=0.9")
-      .add(revealItem(".mosaic__item--bottom", 0.9), "-=0.75")
-      .add(revealItem(".mosaic__item--accent", 0.8), "-=0.6");
+      .add(revealItem(".mosaic__item--tall", 0.9), "-=0.9")
+      .add(revealItem(".mosaic__item--wide", 0.9), "-=0.75")
+      .add(revealItem(".mosaic__item--small", 0.8), "-=0.7");
 
     // Start mosaic animation slightly after content
     masterTL.add(mosaicTL, 0.3);
 
     // Scroll-based parallax (desktop only)
     if (window.innerWidth > 768) {
-      // Parallax on scroll
-      gsap.to(".mosaic__item--main", {
-        y: -60,
-        scrollTrigger: {
-          trigger: ".hero",
-          start: "top top",
-          end: "bottom top",
-          scrub: 1
-        }
-      });
-
-      gsap.to(".mosaic__item--top", {
-        y: -100,
-        x: -20,
+      // Parallax : les deux colonnes glissent à des vitesses différentes,
+      // ce qui garde les gouttières intactes tout en créant de la profondeur.
+      gsap.to(".mosaic__col--a", {
+        y: -70,
         scrollTrigger: {
           trigger: ".hero",
           start: "top top",
@@ -591,46 +553,24 @@ const base = import.meta.env.BASE_URL;
         }
       });
 
-      gsap.to(".mosaic__item--bottom", {
-        y: -40,
+      gsap.to(".mosaic__col--b", {
+        y: -30,
         scrollTrigger: {
           trigger: ".hero",
           start: "top top",
           end: "bottom top",
-          scrub: 0.8
-        }
-      });
-
-      gsap.to(".mosaic__item--accent", {
-        y: -80,
-        rotation: 8,
-        scrollTrigger: {
-          trigger: ".hero",
-          start: "top top",
-          end: "bottom top",
-          scrub: 1
+          scrub: 0.9
         }
       });
 
       gsap.to(".mosaic__shape--1", {
-        y: -120,
-        rotation: 30,
+        y: -110,
+        rotation: 24,
         scrollTrigger: {
           trigger: ".hero",
           start: "top top",
           end: "bottom top",
           scrub: 1.5
-        }
-      });
-
-      gsap.to(".mosaic__shape--2", {
-        y: -50,
-        rotation: -20,
-        scrollTrigger: {
-          trigger: ".hero",
-          start: "top top",
-          end: "bottom top",
-          scrub: 1
         }
       });
 
