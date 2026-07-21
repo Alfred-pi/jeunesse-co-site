@@ -1,16 +1,14 @@
 ---
 import { Image } from 'astro:assets';
 import VideoPlayer from './VideoPlayer.astro';
-import cuisine14 from '../assets/gallery/cuisine/cuisine-avec-ziaad-14.webp';
 import cuisine21 from '../assets/gallery/cuisine/cuisine-avec-ziaad-21.webp';
 import cuisine32 from '../assets/gallery/cuisine/cuisine-avec-ziaad-32.webp';
-import cuisine38 from '../assets/gallery/cuisine/cuisine-avec-ziaad-38.webp';
+import cuisine41 from '../assets/gallery/cuisine/cuisine-avec-ziaad-41.webp';
 
 const photos = [
-	{ src: cuisine14, alt: 'Deux jeunes cuisinent ensemble aux fourneaux' },
 	{ src: cuisine21, alt: "Découpe des légumes pendant l'atelier cuisine" },
 	{ src: cuisine32, alt: 'Préparation du repas — plat mijoté' },
-	{ src: cuisine38, alt: "Dressage des assiettes à la fin de l'atelier" },
+	{ src: cuisine41, alt: "Service des assiettes à la fin de l'atelier" },
 ];
 ---
 <section class="cuisine-section">
@@ -33,7 +31,7 @@ const photos = [
       <div class="cuisine-gallery">
         {photos.map((photo) => (
           <div class="cuisine-photo reveal">
-            <Image src={photo.src} alt={photo.alt} widths={[400, 700]} sizes="(max-width: 768px) 50vw, 25vw" loading="lazy" />
+            <Image src={photo.src} alt={photo.alt} widths={[400, 700]} sizes="(max-width: 640px) 100vw, 33vw" loading="lazy" />
           </div>
         ))}
       </div>
@@ -93,13 +91,13 @@ const photos = [
 
   .cuisine-gallery {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 24px;
     max-width: 1100px;
     margin: 0 auto;
 
-    @media (max-width: 1024px) {
-      grid-template-columns: repeat(2, 1fr);
+    @media (max-width: 640px) {
+      grid-template-columns: 1fr;
     }
 
     @media (max-width: 480px) {
