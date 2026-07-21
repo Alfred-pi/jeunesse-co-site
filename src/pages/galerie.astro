@@ -3,21 +3,27 @@ import Layout from '../layouts/Layout.astro';
 import VideoPlayer from '../components/VideoPlayer.astro';
 import { Image, getImage } from 'astro:assets';
 
-// Toutes les photos déco des locaux (import.meta.glob → tri par numéro)
-const modules = import.meta.glob<{ default: ImageMetadata }>(
-	'../assets/gallery/locaux/*.webp',
-	{ eager: true }
-);
-const sorted = Object.entries(modules)
-	.map(([path, mod]) => ({
-		src: mod.default,
-		num: Number(path.match(/deco-j-co-(\d+)\.webp$/)?.[1] ?? 0),
-	}))
-	.sort((a, b) => a.num - b.num);
+import photo10 from '../assets/gallery/locaux/deco-j-co-10.webp';
+import photo14 from '../assets/gallery/locaux/deco-j-co-14.webp';
+import photo16 from '../assets/gallery/locaux/deco-j-co-16.webp';
+import photo19 from '../assets/gallery/locaux/deco-j-co-19.webp';
+import photo20 from '../assets/gallery/locaux/deco-j-co-20.webp';
+import photo21 from '../assets/gallery/locaux/deco-j-co-21.webp';
+
+// Sélection curée : uniquement des photos inédites (le reste de la série est
+// déjà affiché sur les autres pages) et sans doublon de la même pièce.
+const selection = [
+	{ src: photo14, alt: "Vue d'ensemble de l'espace d'accueil et ses miroirs" },
+	{ src: photo16, alt: 'Détail de la console — livre Matisse et fleurs séchées' },
+	{ src: photo20, alt: "Coin lecture avec eucalyptus et fauteuils en bois clair" },
+	{ src: photo19, alt: 'Le miroir rond et les luminaires du couloir' },
+	{ src: photo10, alt: 'Matières et textures du salon — bouclé, laine et monstera' },
+	{ src: photo21, alt: "L'étagère noire et son calendrier rétro" },
+];
 
 // Variante pleine taille dédiée au lightbox (les vignettes plafonnent à 1000px)
 const photos = await Promise.all(
-	sorted.map(async (photo) => ({
+	selection.map(async (photo) => ({
 		...photo,
 		full: (await getImage({ src: photo.src, width: 2000, format: 'webp' })).src,
 	}))
@@ -54,16 +60,21 @@ const photos = await Promise.all(
 				</div>
 
 				<div class="story-body reveal">
+					<h3 class="story-subtitle">Aller vers les jeunes</h3>
 					<p class="story-lede">Quand nous avons lancé Jeunesse&amp;Co en 2022, nous avons fait un choix clair : aller vers les jeunes plutôt que d'attendre qu'ils viennent à nous. Notre travail s'est construit sur le terrain, dans les quartiers, au plus près de leur quotidien et de leurs réalités. Ce parti pris n'était pas un manque, c'était une conviction. L'accompagnement éducatif en ambulatoire, sans barrière entre les jeunes et nous, reste aujourd'hui encore au cœur de notre mission, et il le restera.</p>
 
 					<p>Mais au fil des années, un besoin s'est imposé de lui-même. À force de tisser des liens et de suivre des parcours, nous avons compris qu'il nous manquait un lieu bien à nous. Un espace stable, où l'on peut se retrouver, échanger, souffler, et surtout construire dans la durée. Un point de repère physique, autant pour les jeunes que pour notre équipe. C'est ce besoin qui nous a poussés à franchir une nouvelle étape et à développer de nouvelles prestations.</p>
 
+					<h3 class="story-subtitle">Le programme IMPULSION</h3>
 					<p>Parmi elles, le programme IMPULSION. Un dispositif d'insertion socioprofessionnelle sur mesure, pensé pour les jeunes en rupture, qui ne trouvent plus leur place dans les circuits classiques. IMPULSION ne propose pas une solution toute faite : il part de chaque jeune, de sa situation, de ses freins et de ses ressources, pour l'aider à se remobiliser, à retrouver confiance et à se projeter concrètement dans un avenir. Un tel accompagnement demande un cadre : un lieu où l'on peut recevoir, travailler ensemble, poser les choses et avancer pas à pas. Sans espace dédié, ce type de programme ne peut tout simplement pas exister.</p>
 
+					<h3 class="story-subtitle">Un lieu central, accessible à tous</h3>
 					<p>Encore fallait-il que ce lieu soit accessible. Nos jeunes viennent de tout le canton, et c'est précisément là que beaucoup de dispositifs échouent : relégués en périphérie, difficiles à rejoindre, ils se heurtent à un obstacle tout bête mais décisif — la distance. Quand un jeune est déjà fragilisé, quelques kilomètres de trop suffisent à casser une dynamique. Nous avons donc fait de la centralité une priorité absolue. Un point d'ancrage en ville, ce n'est pas un luxe : c'est une condition de la réussite, et une manière de dire à chaque jeune que sa venue en vaut la peine.</p>
 
+					<h3 class="story-subtitle">Une rencontre décisive</h3>
 					<p>Trouver ce lieu n'a rien eu d'évident. Nous sommes une entreprise sociale et solidaire, sans aucune subvention : chaque franc que nous engageons, nous le pesons. Pendant des années, nous avons cherché, visité, comparé, en nous confrontant à un marché genevois exigeant, où l'espace se paie cher et se trouve rarement. Puis nous avons eu la chance de rencontrer un propriétaire sensible à notre démarche et touché par notre engagement auprès des jeunes du canton. Grâce à sa confiance et à son soutien, nous avons pu nous installer dans un lieu d'exception, à des conditions qui défient toute concurrence à Genève. Ce que cet endroit est aujourd'hui, nous le lui devons.</p>
 
+					<h3 class="story-subtitle">Un message à nos jeunes</h3>
 					<blockquote class="story-quote serif">
 						Accueillir un jeune dans un lieu digne, pensé et chaleureux, ce n'est pas une question d'apparence. C'est un message. C'est lui dire, avant même le premier mot : ici, on te respecte, on te prend au sérieux, et on met tout en œuvre pour t'ouvrir de vraies perspectives.
 					</blockquote>
@@ -84,10 +95,10 @@ const photos = await Promise.all(
 		<div class="container">
 			<div class="galerie-grid">
 				{photos.map((photo, i) => (
-					<button class="galerie-item reveal" data-full={photo.full} aria-label={`Agrandir la photo ${i + 1}`}>
+					<button class="galerie-item reveal" data-full={photo.full} aria-label={`Agrandir : ${photo.alt}`}>
 						<Image
 							src={photo.src}
-							alt={`Les locaux de Jeunesse & Co — photo ${i + 1}`}
+							alt={photo.alt}
 							widths={[400, 700, 1000]}
 							sizes="(max-width: 768px) 50vw, 33vw"
 							loading={i < 3 ? 'eager' : 'lazy'}
@@ -227,6 +238,30 @@ const photos = await Promise.all(
 	}
 
 	.story-body {
+		.story-subtitle {
+			display: flex;
+			align-items: center;
+			gap: 14px;
+			font-family: var(--font-headline);
+			font-style: italic;
+			font-size: clamp(21px, 2.4vw, 25px);
+			letter-spacing: -0.01em;
+			margin: 56px 0 20px;
+
+			&::before {
+				content: '';
+				flex: 0 0 auto;
+				width: 28px;
+				height: 4px;
+				border-radius: 2px;
+				background: var(--color-accent);
+			}
+
+			&:first-child {
+				margin-top: 0;
+			}
+		}
+
 		p {
 			font-size: 17px;
 			line-height: 1.75;
