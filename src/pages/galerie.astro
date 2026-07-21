@@ -45,6 +45,41 @@ const photos = await Promise.all(
 		</div>
 	</section>
 
+	<section class="galerie-story">
+		<div class="container">
+			<div class="story-content">
+				<div class="story-header reveal">
+					<span class="section-tag">Le mot de l'équipe</span>
+					<h2>Notre espace — <span class="serif">un lieu à la hauteur de nos jeunes</span></h2>
+				</div>
+
+				<div class="story-body reveal">
+					<p class="story-lede">Quand nous avons lancé Jeunesse&amp;Co en 2022, nous avons fait un choix clair : aller vers les jeunes plutôt que d'attendre qu'ils viennent à nous. Notre travail s'est construit sur le terrain, dans les quartiers, au plus près de leur quotidien et de leurs réalités. Ce parti pris n'était pas un manque, c'était une conviction. L'accompagnement éducatif en ambulatoire, sans barrière entre les jeunes et nous, reste aujourd'hui encore au cœur de notre mission, et il le restera.</p>
+
+					<p>Mais au fil des années, un besoin s'est imposé de lui-même. À force de tisser des liens et de suivre des parcours, nous avons compris qu'il nous manquait un lieu bien à nous. Un espace stable, où l'on peut se retrouver, échanger, souffler, et surtout construire dans la durée. Un point de repère physique, autant pour les jeunes que pour notre équipe. C'est ce besoin qui nous a poussés à franchir une nouvelle étape et à développer de nouvelles prestations.</p>
+
+					<p>Parmi elles, le programme IMPULSION. Un dispositif d'insertion socioprofessionnelle sur mesure, pensé pour les jeunes en rupture, qui ne trouvent plus leur place dans les circuits classiques. IMPULSION ne propose pas une solution toute faite : il part de chaque jeune, de sa situation, de ses freins et de ses ressources, pour l'aider à se remobiliser, à retrouver confiance et à se projeter concrètement dans un avenir. Un tel accompagnement demande un cadre : un lieu où l'on peut recevoir, travailler ensemble, poser les choses et avancer pas à pas. Sans espace dédié, ce type de programme ne peut tout simplement pas exister.</p>
+
+					<p>Encore fallait-il que ce lieu soit accessible. Nos jeunes viennent de tout le canton, et c'est précisément là que beaucoup de dispositifs échouent : relégués en périphérie, difficiles à rejoindre, ils se heurtent à un obstacle tout bête mais décisif — la distance. Quand un jeune est déjà fragilisé, quelques kilomètres de trop suffisent à casser une dynamique. Nous avons donc fait de la centralité une priorité absolue. Un point d'ancrage en ville, ce n'est pas un luxe : c'est une condition de la réussite, et une manière de dire à chaque jeune que sa venue en vaut la peine.</p>
+
+					<p>Trouver ce lieu n'a rien eu d'évident. Nous sommes une entreprise sociale et solidaire, sans aucune subvention : chaque franc que nous engageons, nous le pesons. Pendant des années, nous avons cherché, visité, comparé, en nous confrontant à un marché genevois exigeant, où l'espace se paie cher et se trouve rarement. Puis nous avons eu la chance de rencontrer un propriétaire sensible à notre démarche et touché par notre engagement auprès des jeunes du canton. Grâce à sa confiance et à son soutien, nous avons pu nous installer dans un lieu d'exception, à des conditions qui défient toute concurrence à Genève. Ce que cet endroit est aujourd'hui, nous le lui devons.</p>
+
+					<blockquote class="story-quote serif">
+						Accueillir un jeune dans un lieu digne, pensé et chaleureux, ce n'est pas une question d'apparence. C'est un message. C'est lui dire, avant même le premier mot : ici, on te respecte, on te prend au sérieux, et on met tout en œuvre pour t'ouvrir de vraies perspectives.
+					</blockquote>
+
+					<p>Si nous avons choisi d'y investir avec soin, c'est par conviction profonde. Trop de jeunes ont appris à ne rien attendre. Nous voulons leur prouver le contraire, jusque dans les murs qui les accueillent.</p>
+
+					<p>Le résultat est à la hauteur de cette ambition, et nous en sommes fiers. Il porte la marque de tous ceux qui y ont cru.</p>
+
+					<div class="story-thanks">
+						<p>Merci à notre propriétaire pour sa confiance et sa générosité. Et merci à Jenna (Interiostique) pour son accompagnement et pour un résultat tout simplement remarquable.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
 	<section class="galerie-grid-section">
 		<div class="container">
 			<div class="galerie-grid">
@@ -144,6 +179,92 @@ const photos = await Promise.all(
 
 		@media (max-width: 768px) {
 			padding-bottom: 60px;
+		}
+	}
+
+	.galerie-story {
+		padding: 100px 0 20px;
+		background-color: var(--color-bg);
+
+		@media (max-width: 768px) {
+			padding: 64px 0 8px;
+		}
+	}
+
+	.story-content {
+		max-width: 720px;
+		margin: 0 auto;
+	}
+
+	.story-header {
+		text-align: center;
+		margin-bottom: 48px;
+
+		.section-tag {
+			display: inline-block;
+			font-size: 13px;
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 0.08em;
+			color: var(--color-primary);
+			background: var(--color-accent);
+			padding: 6px 14px;
+			border-radius: 100px;
+			margin-bottom: 20px;
+		}
+
+		h2 {
+			font-size: clamp(30px, 4.5vw, 44px);
+			letter-spacing: -0.02em;
+			line-height: 1.15;
+
+			.serif {
+				font-family: var(--font-headline);
+				font-style: italic;
+				color: var(--color-text);
+			}
+		}
+	}
+
+	.story-body {
+		p {
+			font-size: 17px;
+			line-height: 1.75;
+			color: var(--color-text-muted);
+			margin-bottom: 24px;
+		}
+
+		.story-lede {
+			font-size: 19px;
+			color: var(--color-text);
+		}
+	}
+
+	.story-quote {
+		font-family: var(--font-headline);
+		font-style: italic;
+		font-size: clamp(20px, 2.6vw, 26px);
+		line-height: 1.5;
+		color: var(--color-text);
+		border-left: 3px solid var(--color-accent);
+		padding: 8px 0 8px 28px;
+		margin: 40px 0;
+	}
+
+	.story-thanks {
+		background: var(--color-surface);
+		border-radius: 20px;
+		padding: 32px 36px;
+		margin-top: 40px;
+
+		p {
+			margin-bottom: 0;
+			font-size: 16px;
+		}
+
+		@media (max-width: 480px) {
+			padding: 24px;
+			border-radius: 14px;
 		}
 	}
 
