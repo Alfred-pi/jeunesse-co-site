@@ -70,7 +70,7 @@ const axes = [
 
       .label {
         display: inline-block;
-        font-size: 12px;
+        font-size: var(--fs-xs);
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.1em;
@@ -84,7 +84,7 @@ const axes = [
 
       h2 {
         color: var(--color-white);
-        font-size: clamp(32px, 5vw, 56px);
+        font-size: var(--fs-lg);
         
         span {
           color: var(--color-accent);
@@ -164,7 +164,7 @@ const axes = [
         top: 20px;
         right: 30px;
         font-family: var(--font-headline);
-        font-size: 64px;
+        font-size: var(--fs-xl);
         font-weight: 700;
         color: var(--color-white);
         opacity: 0.05;
@@ -194,14 +194,14 @@ const axes = [
       }
 
       h3 {
-        font-size: 22px;
+        font-size: var(--fs-md);
         margin-bottom: 0;
         color: var(--color-white);
       }
 
       .axis-desc {
         color: rgba(255, 255, 255, 0.6);
-        font-size: 16px;
+        font-size: var(--fs-base);
         line-height: 1.6;
         margin: 0;
         position: relative;

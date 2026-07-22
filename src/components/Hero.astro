@@ -162,7 +162,7 @@ const base = import.meta.env.BASE_URL;
       background: rgba(255, 223, 92, 0.1);
       border: 1px solid var(--color-accent);
       border-radius: 100px;
-      font-size: 12px;
+      font-size: var(--fs-xs);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -182,7 +182,7 @@ const base = import.meta.env.BASE_URL;
 
     &__title {
       font-family: var(--font-headline);
-      font-size: clamp(36px, 5vw, 64px);
+      font-size: var(--fs-xl);
       line-height: 1.15;
       letter-spacing: -0.025em;
       margin-bottom: 24px;
@@ -255,8 +255,8 @@ const base = import.meta.env.BASE_URL;
       }
 
       .trust-item { display: flex; flex-direction: column; }
-      .trust-num { font-family: var(--font-headline); font-size: 28px; font-weight: 700; color: var(--color-white); }
-      .trust-text { font-size: 12px; font-weight: 700; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); letter-spacing: 0.02em; }
+      .trust-num { font-family: var(--font-headline); font-size: var(--fs-md); font-weight: 700; color: var(--color-white); }
+      .trust-text { font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); letter-spacing: 0.02em; }
       .trust-divider { width: 1px; height: 32px; background: rgba(255, 255, 255, 0.2); }
     }
   }
@@ -361,7 +361,7 @@ const base = import.meta.env.BASE_URL;
     left: 16px;
     background: var(--color-white);
     padding: 8px 14px;
-    font-size: 11px;
+    font-size: var(--fs-xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -371,7 +371,7 @@ const base = import.meta.env.BASE_URL;
 
     @media (max-width: 480px) {
       padding: 6px 10px;
-      font-size: 9px;
+      font-size: var(--fs-xs);
       bottom: 12px;
       left: 12px;
     }

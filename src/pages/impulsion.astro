@@ -764,7 +764,7 @@ const data = {
       padding: 8px 16px;
       border: 1px solid var(--color-accent);
       border-radius: 100px;
-      font-size: 12px;
+      font-size: var(--fs-xs);
       text-transform: uppercase;
       letter-spacing: 0.1em;
       color: var(--color-accent);
@@ -774,7 +774,7 @@ const data = {
     }
     
     h1 {
-      font-size: clamp(42px, 7vw, 88px);
+      font-size: var(--fs-xl);
       margin-bottom: 24px;
       letter-spacing: -0.03em;
       color: var(--color-white);
@@ -803,7 +803,7 @@ const data = {
     .subtitle {
       max-width: 600px;
       margin: 0 auto;
-      font-size: 20px;
+      font-size: var(--fs-md);
       color: rgba(255, 255, 255, 0.8);
       line-height: 1.6;
     }
@@ -840,7 +840,7 @@ const data = {
   .intro-left {
     .section-tag {
       display: inline-block;
-      font-size: 12px;
+      font-size: var(--fs-xs);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.1em;
@@ -852,7 +852,7 @@ const data = {
     }
 
     h2 {
-      font-size: clamp(28px, 4vw, 38px);
+      font-size: var(--fs-lg);
       line-height: 1.2;
       letter-spacing: -0.02em;
       margin: 0;
@@ -862,7 +862,7 @@ const data = {
 
   .intro-right {
     p {
-      font-size: 17px;
+      font-size: var(--fs-base);
       line-height: 1.7;
       color: rgba(255, 255, 255, 0.7);
       margin: 0 0 24px 0;
@@ -878,7 +878,7 @@ const data = {
       background: rgba(255, 255, 255, 0.03);
       border-radius: 16px;
       border-left: 3px solid var(--color-accent);
-      font-size: 16px;
+      font-size: var(--fs-base);
       font-style: italic;
       line-height: 1.6;
       color: rgba(255, 255, 255, 0.9);
@@ -886,7 +886,7 @@ const data = {
       cite {
         display: block;
         margin-top: 12px;
-        font-size: 13px;
+        font-size: var(--fs-xs);
         font-style: normal;
         font-weight: 600;
         color: rgba(255, 255, 255, 0.5);
@@ -904,7 +904,7 @@ const data = {
   }
 
   .pillars-title {
-    font-size: 14px;
+    font-size: var(--fs-base);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -964,7 +964,7 @@ const data = {
     }
 
     h4 {
-      font-size: 15px;
+      font-size: var(--fs-base);
       font-weight: 700;
       margin-bottom: 8px;
       color: var(--color-white);
@@ -972,7 +972,7 @@ const data = {
     }
 
     p {
-      font-size: 13px;
+      font-size: var(--fs-xs);
       color: rgba(255, 255, 255, 0.6);
       line-height: 1.5;
       margin: 0;
@@ -1008,14 +1008,14 @@ const data = {
     }
 
     h3 {
-      font-size: 24px;
+      font-size: var(--fs-md);
       margin: 0;
       flex-shrink: 0;
       color: var(--color-white);
     }
 
     p {
-      font-size: 15px;
+      font-size: var(--fs-base);
       color: rgba(255, 255, 255, 0.6);
       margin: 0;
       max-width: 400px;
@@ -1056,7 +1056,7 @@ const data = {
     }
 
     .service-num {
-      font-size: 13px;
+      font-size: var(--fs-xs);
       font-weight: 700;
       color: var(--color-primary);
       background: var(--color-accent);
@@ -1072,14 +1072,14 @@ const data = {
     .service-content {
       strong {
         display: block;
-        font-size: 16px;
+        font-size: var(--fs-base);
         margin-bottom: 6px;
         color: var(--color-white);
         transition: color 0.3s ease;
       }
 
       p {
-        font-size: 14px;
+        font-size: var(--fs-base);
         color: rgba(255, 255, 255, 0.6);
         line-height: 1.6;
         margin: 0;
@@ -1106,20 +1106,20 @@ const data = {
   }
 
   .cta-quote {
-    font-size: 20px;
+    font-size: var(--fs-md);
     font-style: italic;
     line-height: 1.6;
     color: var(--color-primary);
     opacity: 0.95;
 
     @media (max-width: 768px) {
-      font-size: 18px;
+      font-size: var(--fs-base);
     }
   }
 
   .cta-action {
     p {
-      font-size: 15px;
+      font-size: var(--fs-base);
       color: var(--color-text-muted);
       margin: 0 0 20px 0;
 
@@ -1133,7 +1133,7 @@ const data = {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    font-size: 15px;
+    font-size: var(--fs-base);
     font-weight: 600;
     color: var(--color-white);
     text-decoration: none;
@@ -1181,7 +1181,7 @@ const data = {
     border-radius: 20px;
 
     .nav-title {
-      font-size: 12px;
+      font-size: var(--fs-xs);
       text-transform: uppercase;
       letter-spacing: 0.1em;
       color: var(--color-text-muted);
@@ -1205,12 +1205,12 @@ const data = {
       overflow: hidden;
       .day-num {
         font-family: var(--font-headline);
-        font-size: 14px;
+        font-size: var(--fs-base);
         color: var(--color-text-muted);
         opacity: 0.5;
       }
       .day-name {
-        font-size: 16px;
+        font-size: var(--fs-base);
         font-weight: 600;
         color: var(--color-text);
       }
@@ -1271,7 +1271,7 @@ const data = {
     gap: 16px;
     align-items: flex-start;
     .icon { color: var(--color-primary); }
-    p { font-size: 14px; margin: 0; line-height: 1.5; color: var(--color-text); }
+    p { font-size: var(--fs-base); margin: 0; line-height: 1.5; color: var(--color-text); }
   }
 
   .schedule-container {
@@ -1295,7 +1295,7 @@ const data = {
     border-bottom: 1px solid rgba(0,0,0,0.05);
     padding-bottom: 32px;
     h2 {
-      font-size: 48px;
+      font-size: var(--fs-lg);
       margin: 0;
       font-weight: 700;
     }
@@ -1306,7 +1306,7 @@ const data = {
       gap: 24px;
 
       h2 {
-        font-size: clamp(28px, 10vw, 36px);
+        font-size: var(--fs-lg);
       }
     }
   }
@@ -1319,7 +1319,7 @@ const data = {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 11px;
+      font-size: var(--fs-xs);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -1363,7 +1363,7 @@ const data = {
 
     .section-tag {
       display: inline-block;
-      font-size: 12px;
+      font-size: var(--fs-xs);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.1em;
@@ -1375,14 +1375,14 @@ const data = {
     }
 
     h2 {
-      font-size: clamp(32px, 5vw, 48px);
+      font-size: var(--fs-lg);
       margin: 0 0 20px 0;
       color: var(--color-primary);
       letter-spacing: -0.02em;
     }
 
     .autoportrait-intro {
-      font-size: 18px;
+      font-size: var(--fs-base);
       color: var(--color-text-muted);
       max-width: 700px;
       margin: 0 auto;
@@ -1431,7 +1431,7 @@ const data = {
       height: 40px;
       background: var(--color-primary);
       color: var(--color-white);
-      font-size: 14px;
+      font-size: var(--fs-base);
       font-weight: 700;
       border-radius: 12px;
       margin-bottom: 20px;
@@ -1439,7 +1439,7 @@ const data = {
     }
 
     h4 {
-      font-size: 18px;
+      font-size: var(--fs-base);
       font-weight: 700;
       color: var(--color-primary);
       margin: 0 0 12px 0;
@@ -1447,7 +1447,7 @@ const data = {
     }
 
     p {
-      font-size: 15px;
+      font-size: var(--fs-base);
       line-height: 1.7;
       color: var(--color-text-muted);
       margin: 0;
@@ -1466,14 +1466,14 @@ const data = {
     }
 
     h3 {
-      font-size: 24px;
+      font-size: var(--fs-md);
       color: var(--color-white);
       margin: 0 0 12px 0;
       text-align: center;
     }
 
     .supports-intro {
-      font-size: 16px;
+      font-size: var(--fs-base);
       color: rgba(255, 255, 255, 0.7);
       text-align: center;
       margin: 0 0 40px 0;
@@ -1530,14 +1530,14 @@ const data = {
     .support-content {
       strong {
         display: block;
-        font-size: 16px;
+        font-size: var(--fs-base);
         font-weight: 700;
         color: var(--color-white);
         margin-bottom: 4px;
       }
 
       span {
-        font-size: 14px;
+        font-size: var(--fs-base);
         color: rgba(255, 255, 255, 0.6);
         line-height: 1.5;
       }
@@ -1552,7 +1552,7 @@ const data = {
     border: 1px solid var(--color-border);
 
     blockquote {
-      font-size: 20px;
+      font-size: var(--fs-md);
       font-style: italic;
       line-height: 1.6;
       color: var(--color-primary);
@@ -1561,7 +1561,7 @@ const data = {
       margin: 0 auto;
 
       @media (max-width: 768px) {
-        font-size: 18px;
+        font-size: var(--fs-base);
       }
     }
   }
@@ -1578,7 +1578,7 @@ const data = {
 
     .section-tag {
       display: inline-block;
-      font-size: 12px;
+      font-size: var(--fs-xs);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.1em;
@@ -1590,14 +1590,14 @@ const data = {
     }
 
     h2 {
-      font-size: clamp(32px, 5vw, 48px);
+      font-size: var(--fs-lg);
       margin: 0 0 20px 0;
       color: var(--color-white);
       letter-spacing: -0.02em;
     }
 
     .entraide-intro {
-      font-size: 18px;
+      font-size: var(--fs-base);
       color: rgba(255, 255, 255, 0.7);
       max-width: 700px;
       margin: 0 auto;
@@ -1624,14 +1624,14 @@ const data = {
 
     .principle-text {
       h3 {
-        font-size: 28px;
+        font-size: var(--fs-md);
         color: var(--color-white);
         margin: 0 0 20px 0;
         letter-spacing: -0.02em;
       }
 
       p {
-        font-size: 16px;
+        font-size: var(--fs-base);
         line-height: 1.8;
         color: rgba(255, 255, 255, 0.75);
         margin: 0 0 16px 0;
@@ -1673,7 +1673,7 @@ const data = {
         }
 
         span {
-          font-size: 14px;
+          font-size: var(--fs-base);
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.05em;
@@ -1687,7 +1687,7 @@ const data = {
     margin-bottom: 60px;
 
     h3 {
-      font-size: 20px;
+      font-size: var(--fs-md);
       color: var(--color-white);
       margin: 0 0 24px 0;
       text-align: center;
@@ -1744,7 +1744,7 @@ const data = {
     }
 
     span {
-      font-size: 13px;
+      font-size: var(--fs-xs);
       font-weight: 600;
       color: rgba(255, 255, 255, 0.8);
       line-height: 1.4;
@@ -1759,13 +1759,13 @@ const data = {
       margin-bottom: 32px;
 
       h3 {
-        font-size: 24px;
+        font-size: var(--fs-md);
         color: var(--color-white);
         margin: 0 0 12px 0;
       }
 
       p {
-        font-size: 16px;
+        font-size: var(--fs-base);
         color: rgba(255, 255, 255, 0.6);
         margin: 0;
       }
@@ -1813,14 +1813,14 @@ const data = {
     }
 
     h4 {
-      font-size: 18px;
+      font-size: var(--fs-base);
       font-weight: 700;
       color: var(--color-white);
       margin: 0 0 12px 0;
     }
 
     p {
-      font-size: 15px;
+      font-size: var(--fs-base);
       line-height: 1.7;
       color: rgba(255, 255, 255, 0.65);
       margin: 0;
@@ -1831,7 +1831,7 @@ const data = {
     margin-bottom: 40px;
 
     h3 {
-      font-size: 20px;
+      font-size: var(--fs-md);
       color: var(--color-white);
       margin: 0 0 24px 0;
       text-align: center;
@@ -1862,7 +1862,7 @@ const data = {
     }
 
     .ambition-num {
-      font-size: 32px;
+      font-size: var(--fs-lg);
       font-weight: 800;
       color: var(--color-primary);
       opacity: 0.3;
@@ -1871,14 +1871,14 @@ const data = {
 
     .ambition-content {
       h4 {
-        font-size: 18px;
+        font-size: var(--fs-base);
         font-weight: 700;
         color: var(--color-primary);
         margin: 0 0 8px 0;
       }
 
       p {
-        font-size: 15px;
+        font-size: var(--fs-base);
         line-height: 1.6;
         color: var(--color-primary);
         opacity: 0.8;
@@ -1895,7 +1895,7 @@ const data = {
     border: 1px solid rgba(255, 255, 255, 0.08);
 
     blockquote {
-      font-size: 20px;
+      font-size: var(--fs-md);
       font-style: italic;
       line-height: 1.6;
       color: var(--color-white);
@@ -1904,7 +1904,7 @@ const data = {
       margin: 0 auto;
 
       @media (max-width: 768px) {
-        font-size: 18px;
+        font-size: var(--fs-base);
       }
     }
   }
@@ -1921,7 +1921,7 @@ const data = {
 
     .section-tag {
       display: inline-block;
-      font-size: 12px;
+      font-size: var(--fs-xs);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.1em;
@@ -1933,14 +1933,14 @@ const data = {
     }
 
     h2 {
-      font-size: clamp(32px, 5vw, 48px);
+      font-size: var(--fs-lg);
       margin: 0 0 16px 0;
       color: var(--color-primary);
       letter-spacing: -0.02em;
     }
 
     p {
-      font-size: 18px;
+      font-size: var(--fs-base);
       color: var(--color-text-muted);
       max-width: 500px;
       margin: 0 auto;
@@ -2004,7 +2004,7 @@ const data = {
 
       span {
         color: white;
-        font-size: 14px;
+        font-size: var(--fs-base);
         font-weight: 600;
         padding: 12px 24px;
         background: var(--color-primary);
@@ -2017,7 +2017,7 @@ const data = {
     padding: 28px;
 
     h3 {
-      font-size: 24px;
+      font-size: var(--fs-md);
       margin: 0 0 8px 0;
       color: var(--color-primary);
       letter-spacing: -0.02em;
@@ -2025,7 +2025,7 @@ const data = {
 
     .intervenant-role {
       display: inline-block;
-      font-size: 12px;
+      font-size: var(--fs-xs);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -2115,14 +2115,14 @@ const data = {
 
     &__info {
       h3 {
-        font-size: 28px;
+        font-size: var(--fs-md);
         margin: 0 0 8px 0;
         color: var(--color-primary);
       }
 
       span {
         display: inline-block;
-        font-size: 12px;
+        font-size: var(--fs-xs);
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -2134,7 +2134,7 @@ const data = {
       }
 
       p {
-        font-size: 14px;
+        font-size: var(--fs-base);
         color: var(--color-text-muted);
         margin: 8px 0 0 0;
       }
@@ -2142,7 +2142,7 @@ const data = {
 
     &__body {
       p {
-        font-size: 16px;
+        font-size: var(--fs-base);
         line-height: 1.8;
         color: var(--color-text);
         margin: 0 0 16px 0;
@@ -2225,7 +2225,7 @@ const data = {
   }
 
   .activity-card .time-block .time-start {
-    font-size: 16px;
+    font-size: var(--fs-base);
     font-weight: 600;
     color: var(--color-text);
     letter-spacing: -0.02em;
@@ -2242,7 +2242,7 @@ const data = {
   }
 
   .activity-card .time-block .time-end {
-    font-size: 13px;
+    font-size: var(--fs-xs);
     font-weight: 500;
     color: var(--color-text-muted);
     font-variant-numeric: tabular-nums;
@@ -2258,7 +2258,7 @@ const data = {
   }
 
   .activity-card .content-area .activity-title {
-    font-size: 18px;
+    font-size: var(--fs-base);
     font-weight: 600;
     margin: 0;
     color: var(--color-text);
@@ -2270,7 +2270,7 @@ const data = {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 11px;
+    font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -2355,13 +2355,13 @@ const data = {
       border-radius: 10px;
     }
 
-    .activity-card .time-block .time-start { font-size: 14px; }
+    .activity-card .time-block .time-start { font-size: var(--fs-base); }
     .activity-card .time-block .time-divider { width: 10px; margin: 4px 0; }
-    .activity-card .time-block .time-end { font-size: 12px; }
+    .activity-card .time-block .time-end { font-size: var(--fs-xs); }
 
     .activity-card .content-area { gap: 4px; }
-    .activity-card .content-area .activity-title { font-size: 16px; }
-    .activity-card .content-area .category-badge { font-size: 10px; }
+    .activity-card .content-area .activity-title { font-size: var(--fs-base); }
+    .activity-card .content-area .category-badge { font-size: var(--fs-xs); }
 
     .activity-card .icon-wrapper {
       width: 40px;

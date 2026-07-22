@@ -126,7 +126,7 @@ const WEB3FORMS_KEY = "1cf130da-891f-440f-a9f5-b6798f537674";
 
       .label {
         display: inline-block;
-        font-size: 12px;
+        font-size: var(--fs-xs);
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.1em;
@@ -138,7 +138,7 @@ const WEB3FORMS_KEY = "1cf130da-891f-440f-a9f5-b6798f537674";
       }
 
       h2 {
-        font-size: clamp(32px, 5vw, 56px);
+        font-size: var(--fs-lg);
         margin-bottom: 24px;
         
         .text-accent {
@@ -219,14 +219,14 @@ const WEB3FORMS_KEY = "1cf130da-891f-440f-a9f5-b6798f537674";
 
       &__content {
         h3 {
-          font-size: 16px;
+          font-size: var(--fs-base);
           font-weight: 700;
           margin-bottom: 6px;
           font-family: var(--font-headline);
         }
 
         p {
-          font-size: 14px;
+          font-size: var(--fs-base);
           color: var(--color-text-muted);
           line-height: 1.5;
           margin-bottom: 12px;
@@ -234,7 +234,7 @@ const WEB3FORMS_KEY = "1cf130da-891f-440f-a9f5-b6798f537674";
       }
       
       .link-large {
-        font-size: 15px;
+        font-size: var(--fs-base);
         font-weight: 700;
         color: var(--color-primary);
         text-decoration: none;
@@ -246,7 +246,7 @@ const WEB3FORMS_KEY = "1cf130da-891f-440f-a9f5-b6798f537674";
       }
 
       .link-arrow {
-        font-size: 13px;
+        font-size: var(--fs-xs);
         font-weight: 600;
         color: var(--color-primary);
         text-decoration: none;
@@ -290,7 +290,7 @@ const WEB3FORMS_KEY = "1cf130da-891f-440f-a9f5-b6798f537674";
 
     label {
       display: block;
-      font-size: 13px;
+      font-size: var(--fs-xs);
       font-weight: 600;
       color: var(--color-primary);
       margin-bottom: 8px;
@@ -308,7 +308,7 @@ const WEB3FORMS_KEY = "1cf130da-891f-440f-a9f5-b6798f537674";
       background: #f8f9fa;
       border: 2px solid transparent;
       border-radius: 14px;
-      font-size: 15px;
+      font-size: var(--fs-base);
       color: var(--color-primary);
       transition: all 0.3s ease;
       font-family: inherit;
@@ -338,7 +338,7 @@ const WEB3FORMS_KEY = "1cf130da-891f-440f-a9f5-b6798f537674";
       width: 100%;
       padding: 18px 32px;
       margin-top: 8px;
-      font-size: 15px;
+      font-size: var(--fs-base);
       font-weight: 700;
       display: inline-flex;
       align-items: center;
@@ -398,14 +398,14 @@ const WEB3FORMS_KEY = "1cf130da-891f-440f-a9f5-b6798f537674";
 
   .form-success h3 {
     font-family: var(--font-headline);
-    font-size: 24px;
+    font-size: var(--fs-md);
     font-weight: 700;
     color: var(--color-primary);
     margin-bottom: 8px;
   }
 
   .form-success p {
-    font-size: 15px;
+    font-size: var(--fs-base);
     color: var(--color-text-muted);
     line-height: 1.6;
   }

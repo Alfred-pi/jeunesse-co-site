@@ -122,7 +122,7 @@ import historyProtection from '../assets/gallery/locaux/deco-j-co-12.webp';
     }
 
     &__title {
-      font-size: clamp(32px, 4vw, 56px);
+      font-size: var(--fs-lg);
       line-height: 1.1;
       margin-top: 24px;
     }
@@ -133,14 +133,14 @@ import historyProtection from '../assets/gallery/locaux/deco-j-co-12.webp';
       
       .pillar-label {
         display: block;
-        font-size: 11px;
+        font-size: var(--fs-xs);
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.1em;
         color: var(--color-text-muted);
         margin-bottom: 8px;
       }
-      p { font-size: 15px; margin: 0; line-height: 1.4; }
+      p { font-size: var(--fs-base); margin: 0; line-height: 1.4; }
     }
 
     &__sidebar-image {
@@ -171,14 +171,14 @@ import historyProtection from '../assets/gallery/locaux/deco-j-co-12.webp';
       padding: 6px 16px;
       background: var(--color-bg);
       border-radius: 100px;
-      font-size: 13px;
+      font-size: var(--fs-xs);
       font-weight: 700;
       color: var(--color-primary);
       margin-bottom: 20px;
     }
 
     .era-content {
-      p { font-size: clamp(16px, 1.5vw, 18px); line-height: 1.7; max-width: 600px; }
+      p { font-size: var(--fs-base); line-height: 1.7; max-width: 600px; }
     }
 
     .era-image {

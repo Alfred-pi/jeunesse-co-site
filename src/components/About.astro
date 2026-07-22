@@ -127,7 +127,7 @@ import about2 from '../assets/gallery/locaux/deco-j-co-6.webp';
           color: var(--color-white);
 
           blockquote {
-            font-size: clamp(20px, 3vw, 36px);
+            font-size: var(--fs-lg);
             line-height: 1.3;
             text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
           }
@@ -182,7 +182,7 @@ import about2 from '../assets/gallery/locaux/deco-j-co-6.webp';
     }
 
     &__label {
-      font-size: 12px;
+      font-size: var(--fs-xs);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -230,17 +230,17 @@ import about2 from '../assets/gallery/locaux/deco-j-co-6.webp';
 
     &__name {
       font-family: var(--font-headline);
-      font-size: 18px;
+      font-size: var(--fs-base);
       font-weight: 700;
       color: var(--color-primary);
 
       @media (max-width: 768px) {
-        font-size: 16px;
+        font-size: var(--fs-base);
       }
     }
 
     &__badge {
-      font-size: 11px;
+      font-size: var(--fs-xs);
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.03em;
@@ -250,7 +250,7 @@ import about2 from '../assets/gallery/locaux/deco-j-co-6.webp';
       border-radius: 100px;
 
       @media (max-width: 768px) {
-        font-size: 10px;
+        font-size: var(--fs-xs);
       }
     }
   }

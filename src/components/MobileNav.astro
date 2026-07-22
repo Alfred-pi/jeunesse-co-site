@@ -137,7 +137,7 @@ const base = import.meta.env.BASE_URL;
 
     .mobile-link {
       font-family: var(--font-body);
-      font-size: 15px;
+      font-size: var(--fs-base);
       font-weight: 500;
       text-decoration: none;
       color: var(--color-text);
@@ -153,7 +153,7 @@ const base = import.meta.env.BASE_URL;
       
       &--cta {
         margin-top: 16px;
-        font-size: 13px;
+        font-size: var(--fs-xs);
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -176,7 +176,7 @@ const base = import.meta.env.BASE_URL;
       border-top: 1px solid rgba(0, 0, 0, 0.06);
       
       p { 
-        font-size: 12px; 
+        font-size: var(--fs-xs); 
         color: var(--color-text-muted); 
         line-height: 1.5;
         margin: 0;
@@ -184,7 +184,7 @@ const base = import.meta.env.BASE_URL;
       a { 
         display: inline-block;
         margin-top: 12px;
-        font-size: 13px;
+        font-size: var(--fs-xs);
         font-weight: 600; 
         color: var(--color-primary); 
         text-decoration: none;

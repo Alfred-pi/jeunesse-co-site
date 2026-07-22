@@ -16,6 +16,13 @@
   --section-spacing: #{$section-spacing};
   --grid-margin: #{$grid-margin};
   --grid-gap: #{$grid-gap};
+
+  // Échelle typographique unique — ne jamais déclarer de font-size en dur.
+  --fs-xs: 12px;                          // badges, tags, labels, mentions
+  --fs-base: clamp(15px, 1.1vw, 17px);    // texte courant, nav, boutons
+  --fs-md: clamp(19px, 2vw, 24px);        // leads, intertitres, citations, h3
+  --fs-lg: clamp(28px, 4vw, 46px);        // titres de section (h2)
+  --fs-xl: clamp(38px, 6.5vw, 80px);      // titres de page / hero (h1)
 }
 
 *, *::before, *::after {
@@ -116,12 +123,12 @@ h1, h2, h3 {
 }
 
 h1 {
-  font-size: clamp(42px, 7vw, 88px);
+  font-size: var(--fs-xl);
   letter-spacing: -0.02em;
 }
 
 h2 {
-  font-size: clamp(32px, 5vw, 56px);
+  font-size: var(--fs-lg);
   letter-spacing: -0.01em;
   margin-bottom: 0.6em;
   
@@ -131,29 +138,34 @@ h2 {
 }
 
 h3 {
-  font-size: clamp(24px, 4vw, 40px);
+  font-size: var(--fs-md);
   margin-bottom: 0.8em;
 }
 
 p {
-  font-size: clamp(16px, 1.2vw, 18px);
+  font-size: var(--fs-base);
   line-height: 1.6;
   color: var(--color-text);
   margin-bottom: 1.2em;
-  text-align: justify;
-  
+  text-align: left;
+
   &:last-child {
     margin-bottom: 0;
   }
-  
+
   &.text-large {
-    font-size: clamp(18px, 2vw, 24px);
+    font-size: var(--fs-md);
     line-height: 1.5;
   }
-  
+
   &.text-muted {
     color: var(--color-text-muted);
   }
+}
+
+// ≥16px obligatoire sur les champs : en dessous, iOS Safari zoome au focus
+input, textarea, select {
+  font-size: 16px;
 }
 
 .img-cover {
@@ -163,51 +175,11 @@ p {
   display: block;
 }
 
-h1 {
-  font-size: clamp(48px, 8vw, 100px);
-  letter-spacing: -0.02em;
-}
-
-h2 {
-  font-size: clamp(36px, 5vw, 64px);
-  letter-spacing: -0.01em;
-  margin-bottom: 0.6em;
-  
-  span {
-    color: var(--color-accent);
-  }
-}
-
-h3 {
-  font-size: clamp(28px, 3vw, 40px);
-  margin-bottom: 0.8em;
-}
-
-p {
-  font-size: 18px;
-  line-height: 1.6;
-  color: var(--color-text);
-  margin-bottom: 1.2em;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-  
-  &.text-large {
-    font-size: clamp(20px, 2vw, 24px);
-    line-height: 1.5;
-  }
-  
-  &.text-muted {
-    color: var(--color-text-muted);
-  }
-}
-
 .label {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  font-size: 14px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -227,7 +199,7 @@ p {
   display: inline-flex;
   align-items: center;
   padding: 18px 36px;
-  font-size: 15px;
+  font-size: var(--fs-base);
   font-weight: 700;
   border-radius: 100px;
   transition: all 0.4s #{$ease-out};
