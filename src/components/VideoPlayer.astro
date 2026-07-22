@@ -31,6 +31,21 @@ const { src, poster, label = 'Vidéo Jeunesse & Co' } = Astro.props;
     </span>
   </button>
 
+  <button class="jc-player__fullscreen" aria-label="Passer en plein écran">
+    <svg class="jc-player__fs-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 3H5a2 2 0 0 0-2 2v3"/>
+      <path d="M16 3h3a2 2 0 0 1 2 2v3"/>
+      <path d="M8 21H5a2 2 0 0 1-2-2v-3"/>
+      <path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+    </svg>
+    <svg class="jc-player__fs-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+      <path d="M8 3v3a2 2 0 0 1-2 2H3"/>
+      <path d="M16 3v3a2 2 0 0 0 2 2h3"/>
+      <path d="M8 21v-3a2 2 0 0 0-2-2H3"/>
+      <path d="M16 21v-3a2 2 0 0 1 2-2h3"/>
+    </svg>
+  </button>
+
   <button class="jc-player__sound" aria-label="Activer ou couper le son">
     <svg class="jc-player__sound-off" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M11 5L6 9H2v6h4l5 4V5z"/>
@@ -90,7 +105,8 @@ const { src, poster, label = 'Vidéo Jeunesse & Co' } = Astro.props;
       transform: scale(1.1);
     }
 
-    &__sound {
+    &__sound,
+    &__fullscreen {
       position: absolute;
       bottom: 20px;
       right: 20px;
@@ -117,6 +133,26 @@ const { src, poster, label = 'Vidéo Jeunesse & Co' } = Astro.props;
         height: 40px;
         bottom: 12px;
         right: 12px;
+      }
+    }
+
+    &__fullscreen {
+      right: 80px;
+
+      @media (max-width: 480px) {
+        right: 62px;
+      }
+    }
+
+    // En plein écran : coins droits et vidéo sur toute la hauteur
+    &:fullscreen {
+      border-radius: 0;
+      width: 100%;
+      height: 100%;
+
+      .jc-player__video {
+        height: 100%;
+        aspect-ratio: auto;
       }
     }
   }
@@ -170,5 +206,31 @@ const { src, poster, label = 'Vidéo Jeunesse & Co' } = Astro.props;
         soundOn.style.display = video.muted ? 'none' : 'block';
       }
     });
+
+    // Plein écran — sur iPhone, seul video.webkitEnterFullscreen() existe
+    const fsToggle = player.querySelector('.jc-player__fullscreen') as HTMLElement | null;
+    const fsOpen = player.querySelector('.jc-player__fs-open') as SVGElement | null;
+    const fsClose = player.querySelector('.jc-player__fs-close') as SVGElement | null;
+
+    if (fsToggle) {
+      fsToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        } else if (player.requestFullscreen) {
+          player.requestFullscreen();
+        } else if ((video as any).webkitEnterFullscreen) {
+          (video as any).webkitEnterFullscreen();
+        }
+      });
+
+      document.addEventListener('fullscreenchange', () => {
+        const active = document.fullscreenElement === player;
+        if (fsOpen && fsClose) {
+          fsOpen.style.display = active ? 'none' : 'block';
+          fsClose.style.display = active ? 'block' : 'none';
+        }
+      });
+    }
   });
 </script>
