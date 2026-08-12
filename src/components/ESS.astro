@@ -41,12 +41,12 @@ const pillars = [
 
     <div class="ess__infographic mt-100 reveal">
       <div class="infographic-box">
-        <div class="infographic-img lightbox-trigger">
+        <button type="button" class="infographic-img lightbox-trigger" aria-label="Agrandir le diagramme ESS">
           <Image src={diagramme} alt="Diagramme ESS" class="img-cover" width={600} height={400} loading="lazy" />
-          <div class="zoom-icon">
+          <span class="zoom-icon" aria-hidden="true">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-          </div>
-        </div>
+          </span>
+        </button>
         <div class="infographic-text">
           <p class="serif">Environ 10% des entreprises en Suisse romande ont adopté ce modèle éthique.</p>
         </div>
@@ -55,10 +55,10 @@ const pillars = [
   </div>
 
   <!-- Lightbox Modal -->
-  <div id="lightbox" class="lightbox">
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Diagramme ESS agrandi" aria-hidden="true">
     <div class="lightbox__overlay"></div>
     <div class="lightbox__content">
-      <img id="lightbox-img" src="" alt="Full size diagram" />
+      <img id="lightbox-img" alt="Diagramme ESS agrandi" />
       <button class="lightbox__close" aria-label="Fermer">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
@@ -73,6 +73,12 @@ const pillars = [
     .infographic-img {
       position: relative;
       cursor: zoom-in;
+      display: block;
+      width: 100%;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
       
       .zoom-icon {
         position: absolute;
@@ -239,13 +245,22 @@ const pillars = [
       if (img) {
         lightboxImg.src = img.src;
         lightbox.classList.add('is-active');
+        lightbox.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden'; // Prevent scroll
+        window.setTimeout(() => {
+          if (lightbox.classList.contains('is-active')) {
+            (closeBtn as HTMLElement | null)?.focus({ preventScroll: true });
+          }
+        }, 420);
       }
     });
 
     const closeLightbox = () => {
+      if (!lightbox.classList.contains('is-active')) return;
       lightbox.classList.remove('is-active');
+      lightbox.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
+      (trigger as HTMLElement).focus();
     };
 
     closeBtn?.addEventListener('click', closeLightbox);

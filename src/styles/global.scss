@@ -1,4 +1,4 @@
-@import './variables';
+@use './variables' as *;
 
 :root {
   --color-primary: #{$color-primary};
@@ -34,6 +34,11 @@
 a {
   text-decoration: none;
   color: inherit;
+}
+
+:where(a, button, [role="button"], input, textarea, select):focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
 }
 
 html {

@@ -612,7 +612,7 @@ const data = {
     </div>
 
     <!-- Modal Intervenant -->
-    <div class="intervenant-modal" id="intervenantModal" aria-hidden="true">
+    <div class="intervenant-modal" id="intervenantModal" role="dialog" aria-modal="true" aria-labelledby="modalName" aria-hidden="true">
       <div class="intervenant-modal__backdrop"></div>
       <div class="intervenant-modal__container">
         <div class="intervenant-modal__content">
@@ -622,7 +622,7 @@ const data = {
             </svg>
           </button>
           <div class="intervenant-modal__header">
-            <img id="modalPhoto" src="" alt="" class="intervenant-modal__photo" />
+            <img id="modalPhoto" alt="" class="intervenant-modal__photo" />
             <div class="intervenant-modal__info">
               <h3 id="modalName"></h3>
               <span id="modalRole"></span>
@@ -648,9 +648,11 @@ const data = {
       const closeBtn = modal.querySelector('.intervenant-modal__close');
       const backdrop = modal.querySelector('.intervenant-modal__backdrop');
       const cards = document.querySelectorAll('.intervenant-card');
+      let activeCard = null;
 
-      function openModal(index) {
+      function openModal(index, trigger) {
         const intervenant = intervenants[index];
+        activeCard = trigger;
         modalName.textContent = intervenant.name;
         modalRole.textContent = intervenant.role;
         modalJob.textContent = intervenant.job;
@@ -660,24 +662,29 @@ const data = {
         modal.classList.add('active');
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
+        window.setTimeout(() => {
+          if (modal.classList.contains('active')) closeBtn?.focus({ preventScroll: true });
+        }, 320);
       }
 
       function closeModal() {
         modal.classList.remove('active');
         modal.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
+        activeCard?.focus();
+        activeCard = null;
       }
 
       cards.forEach(card => {
         card.addEventListener('click', () => {
           const index = parseInt(card.dataset.intervenantIndex);
-          openModal(index);
+          openModal(index, card);
         });
         card.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             const index = parseInt(card.dataset.intervenantIndex);
-            openModal(index);
+            openModal(index, card);
           }
         });
       });
@@ -2079,8 +2086,8 @@ const data = {
       position: absolute;
       top: 20px;
       right: 20px;
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       border: none;
       background: #f5f5f5;
       border-radius: 50%;

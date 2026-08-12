@@ -134,7 +134,7 @@ Cofondateur et codirecteur de Jeunesse & Co, il s'investit pleinement dans le d√
   </div>
 
   <!-- Modal -->
-  <div class="team-modal" id="teamModal" aria-hidden="true">
+  <div class="team-modal" id="teamModal" role="dialog" aria-modal="true" aria-labelledby="modalName" aria-hidden="true">
     <div class="team-modal__backdrop"></div>
     <div class="team-modal__container">
       <div class="team-modal__content">
@@ -168,9 +168,11 @@ Cofondateur et codirecteur de Jeunesse & Co, il s'investit pleinement dans le d√
     const closeBtn = modal.querySelector('.team-modal__close');
     const backdrop = modal.querySelector('.team-modal__backdrop');
     const members = document.querySelectorAll('.team__member');
+    let activeMember = null;
 
-    function openModal(index) {
+    function openModal(index, trigger) {
       const member = team[index];
+      activeMember = trigger;
       modalName.textContent = member.name;
       modalRole.textContent = member.role;
       modalBio.innerHTML = member.bio.split('\n\n').map(p => `<p>${p}</p>`).join('');
@@ -178,25 +180,30 @@ Cofondateur et codirecteur de Jeunesse & Co, il s'investit pleinement dans le d√
       modal.classList.add('active');
       modal.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
+      window.setTimeout(() => {
+        if (modal.classList.contains('active')) closeBtn?.focus({ preventScroll: true });
+      }, 420);
     }
 
     function closeModal() {
       modal.classList.remove('active');
       modal.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
+      activeMember?.focus();
+      activeMember = null;
     }
 
     members.forEach((member) => {
       member.addEventListener('click', () => {
         const index = parseInt(member.dataset.memberIndex);
-        openModal(index);
+        openModal(index, member);
       });
 
       member.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           const index = parseInt(member.dataset.memberIndex);
-          openModal(index);
+          openModal(index, member);
         }
       });
     });
@@ -513,8 +520,8 @@ Cofondateur et codirecteur de Jeunesse & Co, il s'investit pleinement dans le d√
       @media (max-width: 768px) {
         top: 16px;
         right: 16px;
-        width: 40px;
-        height: 40px;
+        width: 44px;
+        height: 44px;
       }
     }
 

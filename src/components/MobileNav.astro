@@ -1,19 +1,19 @@
 ---
 const base = import.meta.env.BASE_URL;
 ---
-<div class="mobile-nav" id="mobile-nav">
+<div class="mobile-nav" id="mobile-nav" role="dialog" aria-modal="true" aria-label="Navigation mobile" aria-hidden="true">
   <div class="mobile-nav__overlay"></div>
   <div class="mobile-nav__content">
     <div class="mobile-nav__header">
       <img src={`${base}assets/Logo1.svg`} alt="Jeunesse & Co" class="mobile-nav__logo" width="140" height="32" />
-      <button class="mobile-nav__close" id="mobile-nav-close">
+      <button class="mobile-nav__close" id="mobile-nav-close" type="button" aria-label="Fermer le menu">
         <span></span>
         <span></span>
       </button>
     </div>
     
-    <nav class="mobile-nav__links">
-      <a href={`${base}#about`} class="mobile-link">L'équipe</a>
+    <nav class="mobile-nav__links" aria-label="Navigation principale">
+      <a href={`${base}#team`} class="mobile-link">L'équipe</a>
       <a href={`${base}#method`} class="mobile-link">Méthode</a>
       <a href={`${base}#metier`} class="mobile-link">Le Métier</a>
       <a href={`${base}galerie`} class="mobile-link">Galerie</a>
@@ -104,8 +104,8 @@ const base = import.meta.env.BASE_URL;
     &__close {
       background: rgba(0, 0, 0, 0.05);
       border: none;
-      width: 32px;
-      height: 32px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       position: relative;
       cursor: pointer;
@@ -197,16 +197,37 @@ const base = import.meta.env.BASE_URL;
   const nav = document.getElementById('mobile-nav');
   const closeBtn = document.getElementById('mobile-nav-close');
   const toggleBtn = document.querySelector('.menu-toggle');
+  const overlay = nav?.querySelector('.mobile-nav__overlay');
   const links = document.querySelectorAll('.mobile-link');
 
-  const toggleNav = () => nav?.classList.toggle('is-active');
+  const setNavOpen = (open: boolean, returnFocus = true) => {
+    if (!nav || !toggleBtn) return;
 
-  toggleBtn?.addEventListener('click', toggleNav);
-  closeBtn?.addEventListener('click', toggleNav);
+    nav.classList.toggle('is-active', open);
+    nav.setAttribute('aria-hidden', String(!open));
+    toggleBtn.setAttribute('aria-expanded', String(open));
+    document.body.style.overflow = open ? 'hidden' : '';
+
+    if (open) {
+      window.setTimeout(() => closeBtn?.focus(), 50);
+    } else if (returnFocus) {
+      (toggleBtn as HTMLElement).focus();
+    }
+  };
+
+  toggleBtn?.addEventListener('click', () => setNavOpen(!nav?.classList.contains('is-active')));
+  closeBtn?.addEventListener('click', () => setNavOpen(false));
+  overlay?.addEventListener('click', () => setNavOpen(false));
   
   links.forEach(link => {
     link.addEventListener('click', () => {
-      nav?.classList.remove('is-active');
+      setNavOpen(false, false);
     });
+  });
+
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && nav?.classList.contains('is-active')) {
+      setNavOpen(false);
+    }
   });
 </script>

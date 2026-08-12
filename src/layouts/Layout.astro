@@ -21,8 +21,8 @@ interface Props {
 
 const { title, description = "Jeunesse & Co - L'accompagnement éducatif sur mesure", preloadHeroImage = false } = Astro.props;
 
-// Précharge la même image que Hero.astro affiche en LCP (mêmes dimensions)
-const heroImage = preloadHeroImage ? await getImage({ src: heroMain, width: 600, height: 450, format: 'webp' }) : null;
+// Précharge exactement la variante LCP générée dans Hero.astro.
+const heroImage = preloadHeroImage ? await getImage({ src: heroMain, width: 620, height: 780, format: 'webp' }) : null;
 const base = import.meta.env.BASE_URL;
 
 // OpenGraph absolu par environnement (prod / preview) via Astro.site

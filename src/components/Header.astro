@@ -3,7 +3,7 @@ const base = import.meta.env.BASE_URL;
 ---
 <header class="header" id="header">
   <div class="header__inner container">
-    <a href={base} class="header__logo">
+    <a href={base} class="header__logo" aria-label="Accueil Jeunesse & Co">
       <img src={`${base}assets/Logo1-Blanc.svg`} alt="Jeunesse & Co" class="header__logo-img" width="140" height="32" />
     </a>
     
@@ -18,7 +18,7 @@ const base = import.meta.env.BASE_URL;
 
     <div class="header__actions">
       <a href={`${base}#contact`} class="btn btn--header hide-mobile">Contact</a>
-      <button class="menu-toggle" aria-label="Menu">
+      <button class="menu-toggle" type="button" aria-label="Menu" aria-controls="mobile-nav" aria-expanded="false">
         <span></span>
         <span></span>
       </button>
@@ -51,6 +51,10 @@ const base = import.meta.env.BASE_URL;
     }
 
     &__logo {
+      display: flex;
+      align-items: center;
+      min-height: 44px;
+
       &-img {
         height: 48px;
         width: auto;
@@ -120,6 +124,10 @@ const base = import.meta.env.BASE_URL;
       border: none;
       cursor: pointer;
       padding: 10px;
+      min-width: 44px;
+      min-height: 44px;
+      align-items: center;
+      justify-content: center;
 
       span {
         display: block;
