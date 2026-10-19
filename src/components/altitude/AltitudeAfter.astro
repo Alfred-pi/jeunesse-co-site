@@ -145,6 +145,7 @@ const legend = [
 </figure>
 
 <script>
+  import { seenStart } from '../../scripts/altitude-motion';
   const initAfter = () => {
     const fig = document.querySelector<HTMLElement>('[data-after]');
     if (!fig || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -202,9 +203,10 @@ const legend = [
           }
         };
 
+        // Démarre quand la frise affichée est à l'écran (entière, ou remplissant l'écran sur mobile).
         ScrollTrigger.create({
-          trigger: fig,
-          start: 'top 75%',
+          trigger: root,
+          start: seenStart(root),
           once: true,
           onEnter: () => gsap.to(sweep, { m: MONTHS, duration: 3.2, ease: 'power1.inOut', onStart: render, onUpdate: render }),
         });

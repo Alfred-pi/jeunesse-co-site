@@ -150,6 +150,7 @@ const zones = [
 </figure>
 
 <script>
+  import { seenStart } from '../../scripts/altitude-motion';
   const initCurve = () => {
     const fig = document.querySelector<HTMLElement>('[data-curve]');
     if (!fig || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -207,7 +208,8 @@ const zones = [
         gsap.set(caption, { opacity: 0 });
 
         gsap.timeline({
-          scrollTrigger: { trigger: fig, start: 'top 75%', once: true },
+          // Démarre quand le graphique est entièrement à l'écran.
+          scrollTrigger: { trigger: plot, start: seenStart(plot), once: true },
           onComplete: () => {
             classic.style.clipPath = '';
             altitude.style.clipPath = '';

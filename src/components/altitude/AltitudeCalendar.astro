@@ -186,6 +186,7 @@ const markers = terraces.map((t) => {
 </section>
 
 <script>
+  import { seenStart } from '../../scripts/altitude-motion';
   import { reducedMotion } from '../../scripts/altitude-motion';
 
   const initCalendar = async () => {
@@ -226,7 +227,7 @@ const markers = terraces.map((t) => {
 
     ScrollTrigger.create({
       trigger: head[0] ?? root,
-      start: 'top 85%',
+      start: seenStart(head[0] ?? root),
       once: true,
       onEnter: () => gsap.to(head, { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out', stagger: 0.12 }),
     });
@@ -252,7 +253,7 @@ const markers = terraces.map((t) => {
         .to(q('[data-cal-text]', step), { opacity: 1, x: 0, duration: 0.7, ease: 'back.out(1.8)', stagger: 0.08 }, at + 0.6);
     });
 
-    ScrollTrigger.create({ trigger: stage, start: 'top 72%', once: true, onEnter: () => tl.play() });
+    ScrollTrigger.create({ trigger: stage, start: seenStart(stage), once: true, onEnter: () => tl.play() });
   };
 
   if (document.readyState === 'complete') initCalendar();

@@ -104,6 +104,7 @@ const conditions = [
 </div>
 
 <script>
+  import { seenStart } from '../../scripts/altitude-motion';
   const init = () => {
     const root = document.querySelector<HTMLElement>('[data-evidence]');
     if (!root) return;
@@ -114,7 +115,7 @@ const conditions = [
         gsap.registerPlugin(ScrollTrigger);
         const ease = 'power3.out';
         const on = (el: Element, tl: gsap.core.Timeline) =>
-          ScrollTrigger.create({ trigger: el, start: 'top 75%', once: true, onEnter: () => tl.play() });
+          ScrollTrigger.create({ trigger: el, start: seenStart(el), once: true, onEnter: () => tl.play() });
 
         // Anneau 76 % + compteur
         const ring = root.querySelector('[data-evi="ring"]');

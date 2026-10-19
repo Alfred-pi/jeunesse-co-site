@@ -98,7 +98,7 @@ const departure = [
 </div>
 
 <script>
-  import { prepareIcon, popDrawIcon, reducedMotion } from '../../scripts/altitude-motion';
+  import { prepareIcon, popDrawIcon, reducedMotion, seenStart } from '../../scripts/altitude-motion';
 
   // États cachés posés ici seulement : sans JS ou avec reduced-motion, tout reste dans son état final.
   // Seuls transform et opacité sont animés (plus une découpe sur le petit trait de la route).
@@ -143,7 +143,7 @@ const departure = [
       // Le total rebondit une fois la semaine pleine.
       tl.to(totalEl, { scale: 1.14, duration: 0.16, ease: 'power2.out', yoyo: true, repeat: 1, transformOrigin: '0% 85%' }, at);
 
-      ScrollTrigger.create({ trigger: week, start: 'top 75%', once: true, onEnter: () => tl.play() });
+      ScrollTrigger.create({ trigger: week, start: seenStart(week), once: true, onEnter: () => tl.play() });
     }
 
     // ---------- Départ : chaque condition cochée fait avancer l'avion vers Katmandou ----------
@@ -187,7 +187,7 @@ const departure = [
       tl.to(stamp, { opacity: 1, scale: 1, rotate: -8, duration: 0.42, ease: 'back.out(1.8)' }, end);
       tl.to(pass, { y: 5, duration: 0.07, ease: 'power1.out', yoyo: true, repeat: 1 }, end + 0.16);
 
-      ScrollTrigger.create({ trigger: pass, start: 'top 75%', once: true, onEnter: () => tl.play() });
+      ScrollTrigger.create({ trigger: pass, start: seenStart(pass), once: true, onEnter: () => tl.play() });
     }
   };
 

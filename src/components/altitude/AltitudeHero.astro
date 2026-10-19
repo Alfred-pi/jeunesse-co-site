@@ -306,17 +306,21 @@ const letters = 'ALTITUDE'.split('');
           gsap.set(tags, { opacity: 0, scale: 0.6, y: 10 });
           root.classList.remove('hero-intro');
 
-          // Léger délai : l'intro démarre après l'initialisation des autres visuels de la page,
-          // qui occupe les premières images après le chargement.
-          const tl = gsap.timeline({ delay: 0.4, defaults: { ease: 'power3.out' } });
-          tl.to(fades[0], { opacity: 1, y: 0, duration: 0.6 }, 0)
-            .to(sun, { yPercent: 0, opacity: 1, duration: 1.6, ease: 'expo.out' }, 0)
-            .to(arc, { strokeDashoffset: 0, duration: 1.4, ease: 'power2.inOut', clearProps: 'strokeDasharray,strokeDashoffset' }, 0.25)
-            .to(layers, { yPercent: 0, duration: 1.5, stagger: 0.14, ease: 'power4.out' }, 0.1)
+          // Texte : joue au chargement, après un léger délai (l'initialisation des autres visuels
+          // de la page occupe les premières images).
+          gsap.timeline({ delay: 0.4, defaults: { ease: 'power3.out' } })
+            .to(fades[0], { opacity: 1, y: 0, duration: 0.6 }, 0)
             .to(letters, { yPercent: 0, duration: 0.9, stagger: 0.045, ease: 'expo.out' }, 0.15)
             .to(lines, { scaleX: 1, duration: 0.8, ease: 'expo.out' }, 0.6)
             .to(ruleText, { opacity: 1, y: 0, duration: 0.6 }, 0.7)
-            .to(fades.slice(1), { opacity: 1, y: 0, duration: 0.8, stagger: 0.08 }, 0.8)
+            .to(fades.slice(1), { opacity: 1, y: 0, duration: 0.8, stagger: 0.08 }, 0.8);
+
+          // Paysage : joue quand on le voit. Sur grand écran, il est visible dès le chargement ;
+          // sur mobile, il est sous le pli et attend que l'on fasse défiler jusqu'à lui.
+          const landTl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } })
+            .to(sun, { yPercent: 0, opacity: 1, duration: 1.6, ease: 'expo.out' }, 0)
+            .to(arc, { strokeDashoffset: 0, duration: 1.4, ease: 'power2.inOut', clearProps: 'strokeDasharray,strokeDashoffset' }, 0.25)
+            .to(layers, { yPercent: 0, duration: 1.5, stagger: 0.14, ease: 'power4.out' }, 0.1)
             // Le sentier : les points rebondissent l'un après l'autre jusqu'au camp.
             .to(dots, { scale: 1, duration: 0.55, ease: 'back.out(4)', stagger: 0.02 }, 1.05)
             // Puis la tente surgit, le mât se plante et le fanion se déroule.
@@ -324,6 +328,12 @@ const letters = 'ALTITUDE'.split('');
             .to(pole, { scaleY: 1, duration: 0.5, ease: 'back.out(2.4)' }, '-=0.35')
             .to(pennant, { scaleX: 1, duration: 1.1, ease: 'elastic.out(1.1, 0.4)' }, '-=0.2')
             .to(tags, { opacity: 1, scale: 1, y: 0, duration: 0.7, ease: 'back.out(2.2)', stagger: 0.12 }, '-=1');
+          const land = hero.querySelector<HTMLElement>('.hero__land');
+          if (!land || land.getBoundingClientRect().top < window.innerHeight * 0.7) {
+            gsap.delayedCall(0.4, () => landTl.play());
+          } else {
+            ScrollTrigger.create({ trigger: land, start: 'top 60%', once: true, onEnter: () => landTl.play() });
+          }
         }
 
         // Parallaxe : le soleil se couche derrière le sommet, la chaîne du fond descend un peu, le texte remonte.

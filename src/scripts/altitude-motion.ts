@@ -16,6 +16,10 @@ export const seenStart = (el: Element) => () => {
   return h <= window.innerHeight * 0.8 ? 'clamp(bottom 92%)' : 'clamp(top 25%)';
 };
 
+/** Même règle pour ScrollTrigger.batch, dont le départ fonctionnel reçoit l'instance ScrollTrigger. */
+export const seenStartSelf = (self: { trigger?: Element | null }) =>
+  self.trigger ? seenStart(self.trigger)() : 'clamp(top 75%)';
+
 const STROKES = 'path, circle, rect, line, polyline, polygon, ellipse';
 
 /**

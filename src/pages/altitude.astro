@@ -441,31 +441,21 @@ const svgIcon = (body: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const { gsap } = await import('gsap');
     const { ScrollTrigger } = await import('gsap/ScrollTrigger');
-    const { prepareIcon, popDrawIcon } = await import('../scripts/altitude-motion');
+    const { prepareIcon, popDrawIcon, seenStart, seenStartSelf } = await import('../scripts/altitude-motion');
     gsap.registerPlugin(ScrollTrigger);
     // Les mesures (compteurs, escalier) se font avec les polices définitives.
     await document.fonts.ready;
 
-    const onEnter = (el: Element, play: () => void, start = 'top 82%') =>
-      ScrollTrigger.create({ trigger: el, start, once: true, onEnter: play });
+    // Tout démarre quand on le voit : en entier s'il tient dans l'écran, sinon quand il le remplit.
+    const onEnter = (el: Element, play: () => void) =>
+      ScrollTrigger.create({ trigger: el, start: seenStart(el), once: true, onEnter: play });
 
-    document.querySelectorAll<HTMLElement>('[data-stagger]').forEach((group) => {
-      const items = Array.from(group.children);
-      gsap.set(items, { opacity: 0, y: 32 });
-      onEnter(group, () => gsap.to(items, { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out', stagger: 0.09 }));
-    });
-
-    // Icônes : la pastille rebondit puis le trait se dessine, juste après l'arrivée de sa carte.
-    // Même déclencheur que la liste qui la porte, décalé de la position de la carte dans la liste.
-    document.querySelectorAll<HTMLElement>('[data-draw]').forEach((icon) => {
-      const strokes = prepareIcon(gsap, icon);
-      const group = icon.closest<HTMLElement>('[data-stagger]');
-      const card = group ? Array.from(group.children).find((c) => c.contains(icon)) : null;
-      const index = card && group ? Array.from(group.children).indexOf(card) : 0;
-      onEnter(group ?? icon, () => popDrawIcon(gsap, icon, strokes, 0.3 + index * 0.09));
-    });
+    // Icônes et compteurs : préparés ici, joués avec la carte qui les porte.
+    const icons = new Map<Element, SVGGeometryElement[]>();
+    document.querySelectorAll<HTMLElement>('[data-draw]').forEach((icon) => icons.set(icon, prepareIcon(gsap, icon)));
 
     // Chiffres clés de « En bref » seulement : le 76 % de la recherche a son propre compteur.
+    const counters = new Map<Element, (delay: number) => void>();
     document.querySelectorAll<HTMLElement>('.alt-facts [data-count]').forEach((el) => {
       const end = Number(el.dataset.count);
       const counter = { v: 0 };
@@ -476,10 +466,42 @@ const svgIcon = (body: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="
       el.style.whiteSpace = 'nowrap';
       el.style.width = `${(el.getBoundingClientRect().width / fs).toFixed(3)}em`;
       el.textContent = '0';
-      onEnter(el, () => gsap.to(counter, {
-        v: end, duration: 1.6, ease: 'power2.out', delay: 0.2,
+      counters.set(el, (delay) => gsap.to(counter, {
+        v: end, duration: 1.6, ease: 'power2.out', delay,
         onUpdate: () => { el.textContent = String(Math.round(counter.v)); },
       }));
+    });
+
+    const playInside = (item: Element, delay: number) => {
+      item.querySelectorAll('[data-draw]').forEach((icon) => {
+        const strokes = icons.get(icon);
+        if (strokes) popDrawIcon(gsap, icon, strokes, delay + 0.3);
+      });
+      item.querySelectorAll('[data-count]').forEach((el) => counters.get(el)?.(delay + 0.2));
+    };
+
+    // Cartes et listes : chaque élément apparaît quand il est entièrement à l'écran ; ceux qui y entrent
+    // ensemble arrivent en cascade (ScrollTrigger.batch). Une longue liste se révèle au fil du défilement,
+    // et l'icône ou le compteur d'une carte joue avec elle.
+    document.querySelectorAll<HTMLElement>('[data-stagger]').forEach((group) => {
+      const items = Array.from(group.children);
+      gsap.set(items, { opacity: 0, y: 32 });
+      ScrollTrigger.batch(items, {
+        start: seenStartSelf,
+        once: true,
+        onEnter: (batch: Element[]) => {
+          gsap.to(batch, { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out', stagger: 0.09 });
+          batch.forEach((item, i) => playInside(item, i * 0.09));
+        },
+      });
+    });
+
+    // Icônes ou compteurs hors liste : leur propre déclencheur.
+    icons.forEach((strokes, icon) => {
+      if (!icon.closest('[data-stagger]')) onEnter(icon, () => popDrawIcon(gsap, icon, strokes, 0.1));
+    });
+    counters.forEach((play, el) => {
+      if (!el.closest('[data-stagger]')) onEnter(el, () => play(0.2));
     });
 
     document.querySelectorAll<HTMLElement>('[data-grow]').forEach((bar) => {
@@ -492,7 +514,7 @@ const svgIcon = (body: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="
     document.querySelectorAll<HTMLElement>('[data-grow-line]').forEach((line) => {
       const vertical = line.offsetHeight > line.offsetWidth;
       gsap.set(line, vertical ? { scaleY: 0, transformOrigin: 'center top' } : { scaleX: 0, transformOrigin: 'left center' });
-      onEnter(line.parentElement!, () => gsap.to(line, { scaleX: 1, scaleY: 1, duration: 1.8, ease: 'power2.inOut' }), 'top 75%');
+      onEnter(line.parentElement!, () => gsap.to(line, { scaleX: 1, scaleY: 1, duration: 1.8, ease: 'power2.inOut' }));
     });
 
     // Escalier : les marches poussent, puis le marcheur suit le sentier ; chaque phrase apparaît à son palier.
@@ -561,7 +583,7 @@ const svgIcon = (body: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="
             walker.style.transform = '';
           },
         }, 0.7)
-        .to(flag, { scale: 1, duration: 0.6, ease: 'back.out(2.2)' }, '-=0.2'), 'top 72%');
+        .to(flag, { scale: 1, duration: 0.6, ease: 'back.out(2.2)' }, '-=0.2'));
     });
 
     document.querySelectorAll<HTMLElement>('[data-strike]').forEach((list) => {
@@ -573,6 +595,10 @@ const svgIcon = (body: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="
         .to(words, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', stagger: 0.12 })
         .to(lines, { scaleX: 1, duration: 0.5, ease: 'power2.inOut', stagger: 0.16 }, '-=0.2'));
     });
+
+    // Les autres visuels s'initialisent aussi au chargement (états cachés, mesures) : positions de
+    // départ recalculées une fois tout en place, pour qu'aucune animation ne parte trop tôt.
+    setTimeout(() => ScrollTrigger.refresh(), 500);
   };
 
   if (document.readyState === 'complete') initMotion();

@@ -195,7 +195,7 @@ const pct = (v: number, max: number) => `${((v / max) * 100).toFixed(3)}%`;
     const root = document.querySelector<HTMLElement>('[data-adm]');
     if (!root || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    const [{ gsap }, { ScrollTrigger }, { prepareIcon, popDrawIcon }] = await Promise.all([
+    const [{ gsap }, { ScrollTrigger }, { prepareIcon, popDrawIcon, seenStart }] = await Promise.all([
       import('gsap'),
       import('gsap/ScrollTrigger'),
       import('../../scripts/altitude-motion'),
@@ -260,8 +260,8 @@ const pct = (v: number, max: number) => `${((v / max) * 100).toFixed(3)}%`;
       }
 
       // Déclenché par la liste (toujours affichée) : si la fenêtre passe en version mobile avant,
-      // les textes apparaissent quand même. Liste à 92 % de l'écran = paysage entièrement visible.
-      ScrollTrigger.create({ trigger: list, start: 'top 92%', once: true, onEnter: () => tl.play() });
+      // les textes apparaissent quand même. Liste entièrement à l'écran = paysage au-dessus visible aussi.
+      ScrollTrigger.create({ trigger: list, start: seenStart(list), once: true, onEnter: () => tl.play() });
       return;
     }
 
@@ -287,7 +287,7 @@ const pct = (v: number, max: number) => `${((v / max) * 100).toFixed(3)}%`;
           onComplete: () => { link.style.clipPath = ''; },
         }, 0.35);
       }
-      ScrollTrigger.create({ trigger: li, start: 'top 85%', once: true, onEnter: () => tl.play() });
+      ScrollTrigger.create({ trigger: li, start: seenStart(li), once: true, onEnter: () => tl.play() });
     });
   };
 

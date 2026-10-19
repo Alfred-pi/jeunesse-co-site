@@ -300,6 +300,7 @@ const walkData = {
 </script>
 
 <script>
+  import { seenStart } from '../../scripts/altitude-motion';
   type WalkData = { days: number[]; places: string[]; vbW: number; vbH: number; altMax: number; x0: number; xw: number };
 
   const init = () => {
@@ -438,7 +439,8 @@ const walkData = {
           .to(hud, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 1.0)
           .add(() => { walk(); }, 1.3);
 
-        ScrollTrigger.create({ trigger: plot, start: 'top 72%', once: true, onEnter: () => intro.play() });
+        // Démarre quand le paysage est entièrement à l'écran : la marche se voit de Katmandou au retour.
+        ScrollTrigger.create({ trigger: plot, start: seenStart(plot), once: true, onEnter: () => intro.play() });
 
         // aria-disabled plutôt que disabled : le bouton garde le focus clavier pendant la relecture.
         replay.addEventListener('click', () => {
