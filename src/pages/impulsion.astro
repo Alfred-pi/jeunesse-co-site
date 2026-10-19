@@ -76,6 +76,26 @@ C'est ce que je veux transmettre aujourd'hui, notamment aux jeunes en rupture : 
 En lien avec l'approche de Jeunesse&Co, j'apporte un outil concret et puissant — le sport, et particulièrement la boxe — pour travailler la discipline, l'estime de soi, la gestion des émotions, la persévérance et l'envie de se projeter.
 
 Mon objectif : aider chacun à retrouver sa place, à se relever, et à construire quelque chose de solide, étape par étape.`
+  },
+  {
+    name: "Ziad Maalem",
+    role: "Éducateur social",
+    job: "Éducateur • Cuisinier • Professeur de capoeira • Rugbyman • Alpiniste",
+    photo: "ziad-maalem.jpeg",
+    link: { href: "altitude", label: "Référent du programme Altitude" },
+    bio: `Je m'appelle Ziad Maalem et je suis éducateur social à Jeunesse&Co. Mon parcours est fait d'expériences très différentes, mais elles ont un point commun : le plaisir de partager, de transmettre et d'accompagner les autres.
+
+Au quotidien, j'accompagne des jeunes dans leur autonomie, leur confiance en eux et la construction de leurs projets. Mon propre parcours m'a appris l'importance des rencontres et des expériences qui ouvrent de nouvelles perspectives. C'est ce que j'essaie d'offrir à mon tour : un cadre bienveillant et exigeant, où chaque jeune avance à son rythme et découvre ce dont il est capable.
+
+La cuisine m'a appris l'organisation, la rigueur et le travail d'équipe. Ce sont des choses qui se transmettent très bien autour d'une table ou d'un plan de travail.
+
+J'enseigne la capoeira, une discipline qui associe mouvement, rythme, expression et respect de l'autre. On y apprend à écouter, à trouver sa place dans le groupe et à s'exprimer autrement que par les mots.
+
+Le rugby occupe aussi une grande place dans ma vie. J'entraîne des jeunes et je participe à des projets de réinsertion de personnes en situation de handicap par le rugby. Ce sport porte des valeurs qui me tiennent à cœur : l'engagement, la solidarité et le fait que personne n'avance seul.
+
+Enfin, la montagne est ma grande passion. J'ai gravi l'Everest, le Kilimandjaro, le Lobuche East, le pic Lénine et le Cervin, et plusieurs fois le Mont Blanc. Ces ascensions m'ont appris la préparation, la persévérance, l'humilité face à la nature et le respect de ses propres limites. Je partage cette expérience avec des jeunes lors de sorties en moyenne montagne, où chacun peut se dépasser, prendre confiance et découvrir ses ressources.
+
+Toutes ces expériences nourrissent ma manière de travailler. Je crois qu'un jeune se révèle souvent quand il agit, qu'il partage un effort avec d'autres et qu'un adulte lui fait confiance. C'est ce que je cherche à créer, avec chacun d'eux.`
   }
 ];
 
@@ -579,7 +599,7 @@ const data = {
 
   <CuisineSection />
 
-  <section class="intervenants-section">
+  <section class="intervenants-section" id="intervenants">
     <div class="container">
       <div class="intervenants-header reveal">
         <span class="section-tag">Nos Experts</span>
@@ -632,6 +652,7 @@ const data = {
           <div class="intervenant-modal__body">
             <p id="modalBio"></p>
           </div>
+          <a id="modalLink" class="intervenant-modal__link" hidden></a>
         </div>
       </div>
     </div>
@@ -645,6 +666,7 @@ const data = {
       const modalJob = document.getElementById('modalJob');
       const modalBio = document.getElementById('modalBio');
       const modalPhoto = document.getElementById('modalPhoto');
+      const modalLink = document.getElementById('modalLink');
       const closeBtn = modal.querySelector('.intervenant-modal__close');
       const backdrop = modal.querySelector('.intervenant-modal__backdrop');
       const cards = document.querySelectorAll('.intervenant-card');
@@ -659,6 +681,13 @@ const data = {
         modalBio.innerHTML = intervenant.bio.split('\n\n').map(p => `<p>${p}</p>`).join('');
         modalPhoto.src = `${base}assets/intervenants/${intervenant.photo}`;
         modalPhoto.alt = intervenant.name;
+        if (intervenant.link) {
+          modalLink.href = `${base}${intervenant.link.href}`;
+          modalLink.textContent = `${intervenant.link.label} →`;
+          modalLink.hidden = false;
+        } else {
+          modalLink.hidden = true;
+        }
         modal.classList.add('active');
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
@@ -1954,21 +1983,32 @@ const data = {
     }
   }
 
+  // Flex plutôt que grid : la dernière rangée incomplète reste centrée.
   .intervenants-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 32px;
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
   }
 
   .intervenant-card {
+    flex: 0 1 calc((100% - 64px) / 3);
     background: #FDFBF7;
     border-radius: 28px;
     overflow: hidden;
     border: 1px solid var(--color-border);
     transition: all 0.3s ease;
     cursor: pointer;
+
+    @media (max-width: 1024px) {
+      flex-basis: calc((100% - 32px) / 2);
+    }
+
+    @media (max-width: 640px) {
+      flex-basis: 100%;
+    }
 
     &:hover {
       transform: translateY(-6px);
@@ -2157,6 +2197,28 @@ const data = {
         &:last-child {
           margin-bottom: 0;
         }
+      }
+    }
+
+    &__link {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 32px;
+      padding: 14px 24px;
+      border-radius: 100px;
+      background: var(--color-accent);
+      color: var(--color-primary);
+      font-weight: 700;
+      font-size: var(--fs-base);
+      transition: background-color 0.3s ease, color 0.3s ease;
+
+      &[hidden] {
+        display: none;
+      }
+
+      &:hover {
+        background: var(--color-primary);
+        color: var(--color-accent);
       }
     }
 
