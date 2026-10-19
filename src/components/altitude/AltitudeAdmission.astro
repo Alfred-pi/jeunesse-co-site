@@ -1,0 +1,98 @@
+---
+// Admission : six étapes, de l'orientation au contrat (dossier ALTITUDE).
+const admission = [
+  { title: 'Orientation', text: 'Par l’autorité judiciaire, un service (SPMi, Hospice général, DIP…), la famille ou le réseau.' },
+  { title: 'Rencontre', text: 'Le programme est présenté au jeune et à ses proches, sans rien cacher de ses exigences.' },
+  { title: 'Réflexion', text: 'C’est au jeune de reprendre contact s’il souhaite poursuivre.' },
+  { title: 'Entretien', text: 'Le jeune explique avec ses mots pourquoi il veut s’engager.' },
+  { title: 'Bilan médical', text: 'Aptitude à l’effort prolongé et à l’altitude.' },
+  { title: 'Contrat', text: 'Signé par le jeune, ses représentants légaux et Jeunesse&Co.' },
+];
+---
+
+  <section class="alt-section alt-admission alt-dark">
+    <div class="container">
+      <div class="alt-head alt-head--split reveal">
+        <div>
+          <span class="alt-kicker">Admission</span>
+          <h2>Un engagement <span class="alt-mark">choisi</span></h2>
+        </div>
+        <p class="alt-lead">Une décision judiciaire peut ouvrir la porte du programme. Elle ne peut pas remplacer l’adhésion du jeune.</p>
+      </div>
+
+      <div class="alt-steps">
+        <span class="alt-steps__line" aria-hidden="true" data-grow-line></span>
+        <ol>
+          {admission.map((a, i) => (
+            <li data-stagger>
+              <span class="alt-steps__n">{i + 1}</span>
+              <h3>{a.title}</h3>
+              <p>{a.text}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  </section>
+
+<style lang="scss">
+  // ---------- Admission ----------
+  .alt-steps {
+    position: relative;
+
+    ol {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 24px;
+
+      @media (max-width: 1100px) { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 48px; }
+      @media (max-width: 640px) { grid-template-columns: 1fr; row-gap: 32px; }
+    }
+
+    h3 { font-size: var(--fs-md); margin-bottom: 8px; line-height: 1.2; }
+    p { font-size: var(--fs-base); }
+  }
+
+  .alt-steps__line {
+    position: absolute;
+    top: 27px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(255, 223, 92, 0.5);
+
+    @media (max-width: 1100px) { display: none; }
+  }
+
+  .alt-steps__n {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    border: 2px solid var(--color-accent);
+    color: var(--color-accent);
+    font-family: var(--font-headline);
+    font-weight: 700;
+    font-size: var(--fs-md);
+    margin-bottom: 24px;
+  }
+
+  // Mobile : numéro à gauche du texte pour raccourcir la liste.
+  @media (max-width: 640px) {
+    .alt-steps li {
+      display: grid;
+      grid-template-columns: 56px minmax(0, 1fr);
+      column-gap: 16px;
+      align-items: start;
+
+      > :first-child { grid-row: span 2; }
+    }
+
+    .alt-steps__n { width: 48px; height: 48px; margin: 0; }
+    .alt-steps h3 { margin: 4px 0 6px; }
+  }
+</style>

@@ -1,0 +1,168 @@
+---
+// Temps 1 · Avant : semaine type de 40 heures et conditions du départ (dossier ALTITUDE).
+const week = [
+  { h: 12, label: 'Préparation physique' },
+  { h: 12, label: 'Projet post-séjour' },
+  { h: 8, label: 'Construction du séjour' },
+  { h: 4, label: 'Culture, santé, sécurité' },
+  { h: 4, label: 'Bilans et entretiens' },
+];
+
+const departure = [
+  'Assiduité régulière sur toute la préparation',
+  'Capacité physique validée lors de la sortie test',
+  'Projet post-séjour défini et engagé',
+  'Aptitude médicale confirmée, vaccinations à jour',
+  'Respect du cadre et des règles de vie du groupe',
+  'Documents en ordre : passeport, visa, autorisations',
+];
+
+const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>`;
+---
+
+      <div class="alt-avant__bottom">
+        <figure class="alt-week reveal">
+          <figcaption>Une semaine type, 40 heures</figcaption>
+          <div class="alt-week__bar" data-grow role="img" aria-label="Environ 12 heures de préparation physique, 12 heures de projet post-séjour, 8 heures de construction du séjour, 4 heures de culture, santé et sécurité, 4 heures de bilans et d’entretiens.">
+            {week.map((w, i) => (
+              <span class={`alt-week__seg alt-week__seg--${i + 1}`} style={`flex-grow:${w.h}`}><b>{w.h}</b> h</span>
+            ))}
+          </div>
+          <ul class="alt-week__legend" aria-hidden="true">
+            {week.map((w, i) => <li><span class={`alt-week__dot alt-week__seg--${i + 1}`}></span>{w.label}</li>)}
+          </ul>
+        </figure>
+
+        <div class="alt-departure reveal">
+          <h3>Le départ <span class="alt-mark">se gagne</span></h3>
+          <p>L’admission ouvre la préparation, elle ne garantit pas le départ. Un bilan vérifie six conditions, avec le jeune et ses représentants légaux.</p>
+          <ul class="alt-checks" data-stagger>
+            {departure.map((d) => <li><span class="alt-checks__icon" set:html={check} />{d}</li>)}
+          </ul>
+        </div>
+      </div>
+
+<style lang="scss">
+  .alt-avant__bottom {
+    margin-top: 96px;
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
+    gap: 80px;
+    align-items: start;
+
+    @media (max-width: 1024px) { grid-template-columns: 1fr; gap: 64px; margin-top: 72px; }
+  }
+
+  .alt-week {
+    margin: 0;
+
+    figcaption {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: var(--fs-md);
+      margin-bottom: 20px;
+    }
+  }
+
+  .alt-week__bar {
+    display: flex;
+    height: 96px;
+    gap: 4px;
+
+    @media (max-width: 560px) { height: 72px; }
+  }
+
+  .alt-week__seg {
+    flex-basis: 0;
+    min-width: 0;
+    display: flex;
+    align-items: flex-end;
+    padding: 12px 14px;
+    border-radius: 14px;
+    font-size: var(--fs-base);
+    font-weight: 600;
+    white-space: nowrap;
+
+    b {
+      font-family: var(--font-headline);
+      font-size: clamp(22px, 2.6vw, 36px);
+      line-height: 0.9;
+      margin-right: 2px;
+    }
+
+    @media (max-width: 560px) {
+      padding: 8px;
+      justify-content: center;
+      font-size: 12px;
+
+      b { font-size: 18px; }
+    }
+
+    &--1 { background: var(--color-accent); color: var(--color-primary); }
+    &--2 { background: var(--color-primary); color: #F2F0EB; }
+    &--3 { background: #4A4740; color: #F2F0EB; }
+    &--4 { background: #B8B0A3; color: var(--color-primary); }
+    &--5 { background: #DDD6CA; color: var(--color-primary); }
+  }
+
+  .alt-week__legend {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 24px;
+    margin-top: 24px;
+    font-size: var(--fs-base);
+
+    li { display: inline-flex; align-items: center; gap: 12px; }
+  }
+
+  .alt-week__dot {
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    padding: 0;
+    border-radius: 4px;
+  }
+
+  .alt-departure {
+    padding: 48px;
+    border-radius: 28px;
+    background: var(--color-primary);
+
+    @media (max-width: 560px) { padding: 32px 24px; }
+
+    h3 { font-size: var(--fs-lg); color: #F2F0EB; }
+    > p { color: rgba(242, 240, 235, 0.72); margin-bottom: 24px; }
+
+    .alt-mark {
+      color: var(--color-accent) !important;
+      background-image: none;
+      padding: 0;
+    }
+  }
+
+  .alt-checks {
+    list-style: none;
+
+    li {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      padding: 14px 0;
+      border-top: 1px solid rgba(242, 240, 235, 0.12);
+      font-size: var(--fs-base);
+      color: #F2F0EB;
+    }
+  }
+
+  .alt-checks__icon {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: var(--color-primary);
+  }
+</style>

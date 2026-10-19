@@ -1,0 +1,67 @@
+---
+// Calendrier du programme (dossier ALTITUDE).
+const calendar = [
+  { when: 'Automne – hiver 2026', text: 'Présentations, orientations, entretiens d’admission' },
+  { when: 'Jusqu’au départ', text: 'Préparation à 40 h par semaine, sortie test, bilan de départ' },
+  { when: 'Printemps 2027', text: '60 jours au Népal, région du Kanchenjunga' },
+  { when: 'Retour + 6 mois', text: 'Entrée dans le projet, suivi, restitution publique' },
+];
+---
+
+<section class="alt-section alt-calendar-section alt-dark">
+  <div class="container">
+      <div class="alt-calendar">
+        <h3 class="reveal">Calendrier</h3>
+        <ol data-stagger>
+          {calendar.map((c, i) => (
+            <li class:list={{ 'is-now': i === 2 }}><span class="alt-calendar__when">{c.when}</span><p>{c.text}</p></li>
+          ))}
+        </ol>
+        <p class="alt-calendar__note reveal">Les dates précises seront communiquées dès la constitution du groupe.</p>
+      </div>
+  </div>
+</section>
+
+<style lang="scss">
+  .alt-calendar {
+    margin-top: 120px;
+    padding-top: 56px;
+    border-top: 1px solid rgba(242, 240, 235, 0.14);
+
+    @media (max-width: 768px) { margin-top: 80px; }
+
+    h3 { font-size: var(--fs-lg); margin-bottom: 40px; }
+
+    ol {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 32px;
+
+      @media (max-width: 1024px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      @media (max-width: 560px) { grid-template-columns: 1fr; }
+    }
+
+    li {
+      padding-top: 20px;
+      border-top: 4px solid rgba(242, 240, 235, 0.2);
+
+      &.is-now { border-top-color: var(--color-accent); }
+    }
+  }
+
+  .alt-calendar__when {
+    display: block;
+    font-family: var(--font-headline);
+    font-weight: 700;
+    font-size: var(--fs-md);
+    color: #F2F0EB;
+    margin-bottom: 8px;
+  }
+
+  .alt-calendar__note {
+    margin-top: 40px;
+    font-size: var(--fs-xs);
+    color: rgba(242, 240, 235, 0.5) !important;
+  }
+</style>

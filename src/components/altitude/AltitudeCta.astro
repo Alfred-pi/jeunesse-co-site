@@ -1,0 +1,98 @@
+---
+// Appel à orienter un jeune : contacts de la direction.
+
+---
+
+  <section class="alt-section alt-cta" id="orienter">
+    <div class="container alt-cta__grid">
+      <div class="reveal">
+        <h2>Orienter un jeune vers ALTITUDE</h2>
+        <p class="alt-cta__lead">Autorités, services, familles : la direction de Jeunesse&Co répond à vos questions, vous rencontre et présente le programme au jeune et à sa famille.</p>
+      </div>
+      <div class="alt-cta__contact" data-stagger>
+        <a class="alt-cta__link" href="mailto:info@jeunesseandco.ch?subject=Programme%20ALTITUDE">
+          <span>Écrire</span>
+          info@jeunesseandco.ch
+        </a>
+        <a class="alt-cta__link" href="tel:+41227311947">
+          <span>Appeler</span>
+          +41 (0)22 731 19 47
+        </a>
+        <p class="alt-cta__sign">Hacene Debbah, directeur et fondateur · Quai du Seujet 14, 1201 Genève</p>
+      </div>
+    </div>
+  </section>
+
+<style lang="scss">
+  $ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  // ---------- CTA ----------
+  .alt-cta {
+    background: var(--color-accent);
+    color: var(--color-primary);
+  }
+
+  .alt-cta__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 80px;
+    align-items: end;
+
+    @media (max-width: 1024px) { grid-template-columns: 1fr; gap: 48px; }
+
+    h2 {
+      font-size: var(--fs-xl);
+      line-height: 0.98;
+      letter-spacing: -0.03em;
+      max-width: 17ch;
+      text-wrap: balance;
+    }
+  }
+
+  .alt-cta__lead {
+    font-size: var(--fs-md);
+    line-height: 1.5;
+    max-width: 36em;
+    color: var(--color-primary);
+  }
+
+  .alt-cta__contact {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .alt-cta__link {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 20px 28px;
+    border-radius: 20px;
+    background: var(--color-primary);
+    color: #F2F0EB;
+    font-family: var(--font-headline);
+    font-weight: 700;
+    font-size: var(--fs-md);
+    overflow-wrap: anywhere;
+    transition: transform 0.4s $ease, box-shadow 0.4s $ease;
+
+    span {
+      font-family: var(--font-body);
+      font-size: var(--fs-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-accent);
+    }
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 40px rgba(17, 17, 17, 0.25);
+    }
+  }
+
+  .alt-cta__sign {
+    margin-top: 12px;
+    font-size: var(--fs-xs);
+    color: rgba(17, 17, 17, 0.75);
+  }
+</style>

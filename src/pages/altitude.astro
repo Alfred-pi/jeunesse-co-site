@@ -5,6 +5,11 @@ import AltitudeCurve from '../components/altitude/AltitudeCurve.astro';
 import AltitudeProfile from '../components/altitude/AltitudeProfile.astro';
 import AltitudeAfter from '../components/altitude/AltitudeAfter.astro';
 import AltitudeEvidence from '../components/altitude/AltitudeEvidence.astro';
+import AltitudeWeek from '../components/altitude/AltitudeWeek.astro';
+import AltitudeAdmission from '../components/altitude/AltitudeAdmission.astro';
+import AltitudeCalendar from '../components/altitude/AltitudeCalendar.astro';
+import AltitudeCta from '../components/altitude/AltitudeCta.astro';
+import '../styles/altitude.scss';
 import { Image } from 'astro:assets';
 import altitudeLogo from '../assets/altitude/altitude-logo.png';
 import ziadPhoto from '../assets/altitude/ziad-maalem-himalaya.jpg';
@@ -18,23 +23,22 @@ const base = import.meta.env.BASE_URL;
 
 // Contenu tiré du dossier « ALTITUDE, programme de remobilisation » (Jeunesse&Co, octobre 2026).
 
-// Icônes au trait (24×24). pathLength="1" permet de les dessiner à l'entrée dans l'écran.
-const ico = (body: string) => body.replace(/<(path|circle|rect|line|polyline)\b/g, '<$1 pathLength="1"');
+// Icônes au trait (24×24), dessinées à l'entrée dans l'écran (voir src/scripts/altitude-motion.ts).
 const icons = {
-  mountain: ico('<path d="m3 20 6.5-11 3.5 6 2.5-4L21 20z"/><path d="m7.6 12.2 1.9-1.2 1.6 1.4"/>'),
-  map: ico('<path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5"/><path d="M15 6.5V20"/>'),
-  briefcase: ico('<rect x="2.5" y="7" width="19" height="13" rx="2"/><path d="M8.5 7V5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v2"/><path d="M2.5 13h19"/>'),
-  firstaid: ico('<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8"/><path d="M8 12h8"/>'),
-  sunrise: ico('<path d="M12 3v6"/><path d="m9 6 3-3 3 3"/><path d="M4.9 11.9 6.3 13.3"/><path d="M19.1 11.9 17.7 13.3"/><path d="M2 18h20"/><path d="M16 18a4 4 0 0 0-8 0"/>'),
-  route: ico('<circle cx="6" cy="19" r="2.5"/><path d="M8.5 19H17a3.5 3.5 0 0 0 0-7H7a3.5 3.5 0 0 1 0-7h8.5"/><circle cx="18" cy="5" r="2.5"/>'),
-  camera: ico('<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3.5"/>'),
-  fire: ico('<path d="M12 3c.5 3 4 4.5 4 9a4 4 0 0 1-8 0c0-2 1-3 2-4 0 1.5.8 2.5 2 2.5 0-3-1-5 0-7.5z"/><path d="M5 21h14"/>'),
-  stethoscope: ico('<path d="M5 3H4a1 1 0 0 0-1 1v5a5 5 0 0 0 10 0V4a1 1 0 0 0-1-1h-1"/><path d="M8 14v1a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/>'),
-  stairs: ico('<path d="M3 20h4v-4h4v-4h4V8h4V4h2"/>'),
-  pulse: ico('<path d="M2 12h4l3-8 4 16 3-8h6"/>'),
-  shield: ico('<path d="M12 21s8-3.8 8-10V5l-8-3-8 3v6c0 6.2 8 10 8 10z"/><path d="m8.5 11.5 2.5 2.5 4.5-4.5"/>'),
-  signal: ico('<path d="M5 19a10 10 0 0 1 0-14"/><path d="M8.5 15.5a5 5 0 0 1 0-7"/><circle cx="12" cy="12" r="1.5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/>'),
-  rules: ico('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/>'),
+  mountain: '<path d="m3 20 6.5-11 3.5 6 2.5-4L21 20z"/><path d="m7.6 12.2 1.9-1.2 1.6 1.4"/>',
+  map: '<path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5"/><path d="M15 6.5V20"/>',
+  briefcase: '<rect x="2.5" y="7" width="19" height="13" rx="2"/><path d="M8.5 7V5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v2"/><path d="M2.5 13h19"/>',
+  firstaid: '<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8"/><path d="M8 12h8"/>',
+  sunrise: '<path d="M12 3v6"/><path d="m9 6 3-3 3 3"/><path d="M4.9 11.9 6.3 13.3"/><path d="M19.1 11.9 17.7 13.3"/><path d="M2 18h20"/><path d="M16 18a4 4 0 0 0-8 0"/>',
+  route: '<circle cx="6" cy="19" r="2.5"/><path d="M8.5 19H17a3.5 3.5 0 0 0 0-7H7a3.5 3.5 0 0 1 0-7h8.5"/><circle cx="18" cy="5" r="2.5"/>',
+  camera: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3.5"/>',
+  fire: '<path d="M12 3c.5 3 4 4.5 4 9a4 4 0 0 1-8 0c0-2 1-3 2-4 0 1.5.8 2.5 2 2.5 0-3-1-5 0-7.5z"/><path d="M5 21h14"/>',
+  stethoscope: '<path d="M5 3H4a1 1 0 0 0-1 1v5a5 5 0 0 0 10 0V4a1 1 0 0 0-1-1h-1"/><path d="M8 14v1a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/>',
+  stairs: '<path d="M3 20h4v-4h4v-4h4V8h4V4h2"/>',
+  pulse: '<path d="M2 12h4l3-8 4 16 3-8h6"/>',
+  shield: '<path d="M12 21s8-3.8 8-10V5l-8-3-8 3v6c0 6.2 8 10 8 10z"/><path d="m8.5 11.5 2.5 2.5 4.5-4.5"/>',
+  signal: '<path d="M5 19a10 10 0 0 1 0-14"/><path d="M8.5 15.5a5 5 0 0 1 0-7"/><circle cx="12" cy="12" r="1.5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/>',
+  rules: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/>',
 };
 
 const facts = [
@@ -67,23 +71,6 @@ const chantiers = [
   { icon: icons.map, title: 'Construire le séjour', text: 'Itinéraire, budget, matériel, logistique et règles de vie : les jeunes le préparent eux-mêmes.' },
   { icon: icons.briefcase, title: 'Projet post-séjour', text: 'Stages d’observation, candidatures, entretiens : une place confirmée avant le départ.' },
   { icon: icons.firstaid, title: 'Culture, santé, sécurité', text: 'Le Népal et ses usages, premiers secours, altitude, gestion de l’effort, prise de vue.' },
-];
-
-const week = [
-  { h: 12, label: 'Préparation physique' },
-  { h: 12, label: 'Projet post-séjour' },
-  { h: 8, label: 'Construction du séjour' },
-  { h: 4, label: 'Culture, santé, sécurité' },
-  { h: 4, label: 'Bilans et entretiens' },
-];
-
-const departure = [
-  'Assiduité régulière sur toute la préparation',
-  'Capacité physique validée lors de la sortie test',
-  'Projet post-séjour défini et engagé',
-  'Aptitude médicale confirmée, vaccinations à jour',
-  'Respect du cadre et des règles de vie du groupe',
-  'Documents en ordre : passeport, visa, autorisations',
 ];
 
 const nepal = ['L’altitude impose la progressivité', 'Un dépaysement complet, dans un cadre sûr', 'La sobriété, loin des écrans', 'La rencontre d’une autre culture de l’effort'];
@@ -128,23 +115,6 @@ const safety = [
   { icon: icons.rules, title: 'Un cadre signé', text: 'Règles co-construites. Alcool et stupéfiants interdits pendant tout le séjour.' },
 ];
 
-const admission = [
-  { title: 'Orientation', text: 'Par l’autorité judiciaire, un service (SPMi, Hospice général, DIP…), la famille ou le réseau.' },
-  { title: 'Rencontre', text: 'Le programme est présenté au jeune et à ses proches, sans rien cacher de ses exigences.' },
-  { title: 'Réflexion', text: 'C’est au jeune de reprendre contact s’il souhaite poursuivre.' },
-  { title: 'Entretien', text: 'Le jeune explique avec ses mots pourquoi il veut s’engager.' },
-  { title: 'Bilan médical', text: 'Aptitude à l’effort prolongé et à l’altitude.' },
-  { title: 'Contrat', text: 'Signé par le jeune, ses représentants légaux et Jeunesse&Co.' },
-];
-
-const calendar = [
-  { when: 'Automne – hiver 2026', text: 'Présentations, orientations, entretiens d’admission' },
-  { when: 'Jusqu’au départ', text: 'Préparation à 40 h par semaine, sortie test, bilan de départ' },
-  { when: 'Printemps 2027', text: '60 jours au Népal, région du Kanchenjunga' },
-  { when: 'Retour + 6 mois', text: 'Entrée dans le projet, suivi, restitution publique' },
-];
-
-const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>`;
 const svgIcon = (body: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
 ---
 
@@ -280,27 +250,7 @@ const svgIcon = (body: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="
         ))}
       </ul>
 
-      <div class="alt-avant__bottom">
-        <figure class="alt-week reveal">
-          <figcaption>Une semaine type, 40 heures</figcaption>
-          <div class="alt-week__bar" data-grow role="img" aria-label="Environ 12 heures de préparation physique, 12 heures de projet post-séjour, 8 heures de construction du séjour, 4 heures de culture, santé et sécurité, 4 heures de bilans et d’entretiens.">
-            {week.map((w, i) => (
-              <span class={`alt-week__seg alt-week__seg--${i + 1}`} style={`flex-grow:${w.h}`}><b>{w.h}</b> h</span>
-            ))}
-          </div>
-          <ul class="alt-week__legend" aria-hidden="true">
-            {week.map((w, i) => <li><span class={`alt-week__dot alt-week__seg--${i + 1}`}></span>{w.label}</li>)}
-          </ul>
-        </figure>
-
-        <div class="alt-departure reveal">
-          <h3>Le départ <span class="alt-mark">se gagne</span></h3>
-          <p>L’admission ouvre la préparation, elle ne garantit pas le départ. Un bilan vérifie six conditions, avec le jeune et ses représentants légaux.</p>
-          <ul class="alt-checks" data-stagger>
-            {departure.map((d) => <li><span class="alt-checks__icon" set:html={check} />{d}</li>)}
-          </ul>
-        </div>
-      </div>
+      <AltitudeWeek />
     </div>
   </section>
 
@@ -477,62 +427,9 @@ const svgIcon = (body: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="
     </div>
   </section>
 
-  <!-- ADMISSION + CALENDRIER -->
-  <section class="alt-admission alt-dark">
-    <div class="container">
-      <div class="alt-head alt-head--split reveal">
-        <div>
-          <span class="alt-kicker">Admission</span>
-          <h2>Un engagement <span class="alt-mark">choisi</span></h2>
-        </div>
-        <p class="alt-lead">Une décision judiciaire peut ouvrir la porte du programme. Elle ne peut pas remplacer l’adhésion du jeune.</p>
-      </div>
-
-      <div class="alt-steps">
-        <span class="alt-steps__line" aria-hidden="true" data-grow-line></span>
-        <ol>
-          {admission.map((a, i) => (
-            <li data-stagger>
-              <span class="alt-steps__n">{i + 1}</span>
-              <h3>{a.title}</h3>
-              <p>{a.text}</p>
-            </li>
-          ))}
-        </ol>
-      </div>
-
-      <div class="alt-calendar">
-        <h3 class="reveal">Calendrier</h3>
-        <ol data-stagger>
-          {calendar.map((c, i) => (
-            <li class:list={{ 'is-now': i === 2 }}><span class="alt-calendar__when">{c.when}</span><p>{c.text}</p></li>
-          ))}
-        </ol>
-        <p class="alt-calendar__note reveal">Les dates précises seront communiquées dès la constitution du groupe.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <section class="alt-cta" id="orienter">
-    <div class="container alt-cta__grid">
-      <div class="reveal">
-        <h2>Orienter un jeune vers ALTITUDE</h2>
-        <p class="alt-cta__lead">Autorités, services, familles : la direction de Jeunesse&Co répond à vos questions, vous rencontre et présente le programme au jeune et à sa famille.</p>
-      </div>
-      <div class="alt-cta__contact" data-stagger>
-        <a class="alt-cta__link" href="mailto:info@jeunesseandco.ch?subject=Programme%20ALTITUDE">
-          <span>Écrire</span>
-          info@jeunesseandco.ch
-        </a>
-        <a class="alt-cta__link" href="tel:+41227311947">
-          <span>Appeler</span>
-          +41 (0)22 731 19 47
-        </a>
-        <p class="alt-cta__sign">Hacene Debbah, directeur et fondateur · Quai du Seujet 14, 1201 Genève</p>
-      </div>
-    </div>
-  </section>
+  <AltitudeAdmission />
+  <AltitudeCalendar />
+  <AltitudeCta />
 </Layout>
 
 <script>
@@ -542,6 +439,7 @@ const svgIcon = (body: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const { gsap } = await import('gsap');
     const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+    const { prepareIcon, popDrawIcon } = await import('../scripts/altitude-motion');
     gsap.registerPlugin(ScrollTrigger);
     // Les mesures (compteurs, escalier) se font avec les polices définitives.
     await document.fonts.ready;
@@ -555,10 +453,14 @@ const svgIcon = (body: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="
       onEnter(group, () => gsap.to(items, { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out', stagger: 0.09 }));
     });
 
-    document.querySelectorAll<HTMLElement>('[data-draw]').forEach((el) => {
-      const strokes = el.querySelectorAll('[pathLength]');
-      gsap.set(strokes, { strokeDasharray: 1, strokeDashoffset: 1 });
-      onEnter(el, () => gsap.to(strokes, { strokeDashoffset: 0, duration: 1.3, ease: 'power2.inOut', stagger: 0.12, delay: 0.25 }));
+    // Icônes : la pastille rebondit puis le trait se dessine, juste après l'arrivée de sa carte.
+    // Même déclencheur que la liste qui la porte, décalé de la position de la carte dans la liste.
+    document.querySelectorAll<HTMLElement>('[data-draw]').forEach((icon) => {
+      const strokes = prepareIcon(gsap, icon);
+      const group = icon.closest<HTMLElement>('[data-stagger]');
+      const card = group ? Array.from(group.children).find((c) => c.contains(icon)) : null;
+      const index = card && group ? Array.from(group.children).indexOf(card) : 0;
+      onEnter(group ?? icon, () => popDrawIcon(gsap, icon, strokes, 0.3 + index * 0.09));
     });
 
     // Chiffres clés de « En bref » seulement : le 76 % de la recherche a son propre compteur.
@@ -682,88 +584,6 @@ const svgIcon = (body: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="
     padding: 136px 0;
 
     @media (max-width: 768px) { padding: 88px 0; }
-  }
-
-  .alt-dark {
-    background: var(--color-primary);
-    color: var(--color-white);
-
-    h2, h3, h4 { color: #F2F0EB; }
-    p { color: rgba(242, 240, 235, 0.72); }
-    .alt-lead { color: rgba(242, 240, 235, 0.88); }
-  }
-
-  // ---------- Typographie commune ----------
-  .alt-kicker {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    font-size: var(--fs-xs);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    margin-bottom: 24px;
-    color: var(--color-text-muted);
-
-    &::before {
-      content: '';
-      width: 18px;
-      height: 2px;
-      background: var(--color-accent);
-    }
-
-    .alt-dark & { color: var(--color-accent); }
-  }
-
-  // Surlignage au feutre : un dégradé qui suit le texte sur plusieurs lignes.
-  .alt-mark {
-    color: inherit !important;
-    padding: 0 0.06em;
-    background-image: linear-gradient(transparent 60%, rgba(255, 223, 92, 0.9) 60%, rgba(255, 223, 92, 0.9) 90%, transparent 90%);
-    -webkit-box-decoration-break: clone;
-    box-decoration-break: clone;
-
-    .alt-dark & {
-      color: var(--color-accent) !important;
-      background-image: none;
-      padding: 0;
-    }
-  }
-
-  .alt-lead {
-    font-size: var(--fs-md);
-    line-height: 1.5;
-    color: var(--color-text);
-    max-width: 36em;
-  }
-
-  .alt-head {
-    margin-bottom: 72px;
-    max-width: 780px;
-
-    h2 { margin-bottom: 0.4em; }
-
-    &--split {
-      max-width: none;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: 32px 80px;
-      align-items: end;
-
-      h2 { margin-bottom: 0; }
-
-      @media (max-width: 1024px) { grid-template-columns: 1fr; }
-    }
-
-    &--center {
-      margin-left: auto;
-      margin-right: auto;
-      text-align: center;
-
-      p { text-align: center; margin: 0 auto; }
-    }
-
-    @media (max-width: 768px) { margin-bottom: 48px; }
   }
 
   // ---------- En bref ----------
@@ -1227,129 +1047,6 @@ const svgIcon = (body: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="
     :global(svg) { width: 34px; height: 34px; }
   }
 
-  .alt-avant__bottom {
-    margin-top: 96px;
-    display: grid;
-    grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
-    gap: 80px;
-    align-items: start;
-
-    @media (max-width: 1024px) { grid-template-columns: 1fr; gap: 64px; margin-top: 72px; }
-  }
-
-  .alt-week {
-    margin: 0;
-
-    figcaption {
-      font-family: var(--font-headline);
-      font-weight: 700;
-      font-size: var(--fs-md);
-      margin-bottom: 20px;
-    }
-  }
-
-  .alt-week__bar {
-    display: flex;
-    height: 96px;
-    gap: 4px;
-
-    @media (max-width: 560px) { height: 72px; }
-  }
-
-  .alt-week__seg {
-    flex-basis: 0;
-    min-width: 0;
-    display: flex;
-    align-items: flex-end;
-    padding: 12px 14px;
-    border-radius: 14px;
-    font-size: var(--fs-base);
-    font-weight: 600;
-    white-space: nowrap;
-
-    b {
-      font-family: var(--font-headline);
-      font-size: clamp(22px, 2.6vw, 36px);
-      line-height: 0.9;
-      margin-right: 2px;
-    }
-
-    @media (max-width: 560px) {
-      padding: 8px;
-      justify-content: center;
-      font-size: 12px;
-
-      b { font-size: 18px; }
-    }
-
-    &--1 { background: var(--color-accent); color: var(--color-primary); }
-    &--2 { background: var(--color-primary); color: #F2F0EB; }
-    &--3 { background: #4A4740; color: #F2F0EB; }
-    &--4 { background: #B8B0A3; color: var(--color-primary); }
-    &--5 { background: #DDD6CA; color: var(--color-primary); }
-  }
-
-  .alt-week__legend {
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px 24px;
-    margin-top: 24px;
-    font-size: var(--fs-base);
-
-    li { display: inline-flex; align-items: center; gap: 12px; }
-  }
-
-  .alt-week__dot {
-    flex: 0 0 auto;
-    width: 14px;
-    height: 14px;
-    padding: 0;
-    border-radius: 4px;
-  }
-
-  .alt-departure {
-    padding: 48px;
-    border-radius: 28px;
-    background: var(--color-primary);
-
-    @media (max-width: 560px) { padding: 32px 24px; }
-
-    h3 { font-size: var(--fs-lg); color: #F2F0EB; }
-    > p { color: rgba(242, 240, 235, 0.72); margin-bottom: 24px; }
-
-    .alt-mark {
-      color: var(--color-accent) !important;
-      background-image: none;
-      padding: 0;
-    }
-  }
-
-  .alt-checks {
-    list-style: none;
-
-    li {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      padding: 14px 0;
-      border-top: 1px solid rgba(242, 240, 235, 0.12);
-      font-size: var(--fs-base);
-      color: #F2F0EB;
-    }
-  }
-
-  .alt-checks__icon {
-    flex: 0 0 auto;
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--color-accent);
-    color: var(--color-primary);
-  }
-
   // ---------- Pendant ----------
   .alt-chips {
     list-style: none;
@@ -1768,96 +1465,8 @@ const svgIcon = (body: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="
     :global(svg) { width: 30px; height: 30px; }
   }
 
-  // ---------- Admission ----------
-  .alt-steps {
-    position: relative;
-
-    ol {
-      list-style: none;
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 24px;
-
-      @media (max-width: 1100px) { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 48px; }
-      @media (max-width: 640px) { grid-template-columns: 1fr; row-gap: 32px; }
-    }
-
-    h3 { font-size: var(--fs-md); margin-bottom: 8px; line-height: 1.2; }
-    p { font-size: var(--fs-base); }
-  }
-
-  .alt-steps__line {
-    position: absolute;
-    top: 27px;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: rgba(255, 223, 92, 0.5);
-
-    @media (max-width: 1100px) { display: none; }
-  }
-
-  .alt-steps__n {
-    position: relative;
-    display: grid;
-    place-items: center;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: var(--color-primary);
-    border: 2px solid var(--color-accent);
-    color: var(--color-accent);
-    font-family: var(--font-headline);
-    font-weight: 700;
-    font-size: var(--fs-md);
-    margin-bottom: 24px;
-  }
-
-  .alt-calendar {
-    margin-top: 120px;
-    padding-top: 56px;
-    border-top: 1px solid rgba(242, 240, 235, 0.14);
-
-    @media (max-width: 768px) { margin-top: 80px; }
-
-    h3 { font-size: var(--fs-lg); margin-bottom: 40px; }
-
-    ol {
-      list-style: none;
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 32px;
-
-      @media (max-width: 1024px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      @media (max-width: 560px) { grid-template-columns: 1fr; }
-    }
-
-    li {
-      padding-top: 20px;
-      border-top: 4px solid rgba(242, 240, 235, 0.2);
-
-      &.is-now { border-top-color: var(--color-accent); }
-    }
-  }
-
-  .alt-calendar__when {
-    display: block;
-    font-family: var(--font-headline);
-    font-weight: 700;
-    font-size: var(--fs-md);
-    color: #F2F0EB;
-    margin-bottom: 8px;
-  }
-
-  .alt-calendar__note {
-    margin-top: 40px;
-    font-size: var(--fs-xs);
-    color: rgba(242, 240, 235, 0.5) !important;
-  }
-
   // ---------- Mobile : icône à gauche du texte pour raccourcir les listes ----------
   @media (max-width: 640px) {
-    .alt-steps li,
     .alt-safety__grid li,
     .alt-day li,
     .alt-tiles li {
@@ -1869,81 +1478,11 @@ const svgIcon = (body: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="
       > :first-child { grid-row: span 2; }
     }
 
-    .alt-steps__n { width: 48px; height: 48px; margin: 0; }
-    .alt-steps h3, .alt-safety__grid h3, .alt-tiles h3 { margin: 4px 0 6px; }
+    .alt-safety__grid h3, .alt-tiles h3 { margin: 4px 0 6px; }
     .alt-day strong { margin: 6px 0 4px; }
     .alt-day__icon { width: 56px; height: 56px; }
     .alt-safety__icon, .alt-tiles__icon { width: 56px; height: 56px; }
     .alt-tiles li { padding: 24px 20px; }
   }
 
-  // ---------- CTA ----------
-  .alt-cta {
-    background: var(--color-accent);
-    color: var(--color-primary);
-  }
-
-  .alt-cta__grid {
-    display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    gap: 80px;
-    align-items: end;
-
-    @media (max-width: 1024px) { grid-template-columns: 1fr; gap: 48px; }
-
-    h2 {
-      font-size: var(--fs-xl);
-      line-height: 0.98;
-      letter-spacing: -0.03em;
-      max-width: 17ch;
-      text-wrap: balance;
-    }
-  }
-
-  .alt-cta__lead {
-    font-size: var(--fs-md);
-    line-height: 1.5;
-    max-width: 36em;
-    color: var(--color-primary);
-  }
-
-  .alt-cta__contact {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .alt-cta__link {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 20px 28px;
-    border-radius: 20px;
-    background: var(--color-primary);
-    color: #F2F0EB;
-    font-family: var(--font-headline);
-    font-weight: 700;
-    font-size: var(--fs-md);
-    overflow-wrap: anywhere;
-    transition: transform 0.4s $ease, box-shadow 0.4s $ease;
-
-    span {
-      font-family: var(--font-body);
-      font-size: var(--fs-xs);
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-accent);
-    }
-
-    &:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 16px 40px rgba(17, 17, 17, 0.25);
-    }
-  }
-
-  .alt-cta__sign {
-    margin-top: 12px;
-    font-size: var(--fs-xs);
-    color: rgba(17, 17, 17, 0.75);
-  }
 </style>

@@ -1,0 +1,92 @@
+// Styles communs de la page Altitude et de ses composants.
+// Feuille globale importée par la seule page altitude.astro : les composants (sections extraites)
+// partagent ainsi en-têtes, surlignage et fond sombre sans dupliquer le CSS.
+
+// Rythme vertical d'une section (les sections de la page ont la même règle en style local).
+.alt-section {
+  padding: 136px 0;
+
+  @media (max-width: 768px) { padding: 88px 0; }
+}
+
+.alt-dark {
+  background: var(--color-primary);
+  color: var(--color-white);
+
+  h2, h3, h4 { color: #F2F0EB; }
+  p { color: rgba(242, 240, 235, 0.72); }
+  .alt-lead { color: rgba(242, 240, 235, 0.88); }
+}
+
+// ---------- Typographie commune ----------
+.alt-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 24px;
+  color: var(--color-text-muted);
+
+  &::before {
+    content: '';
+    width: 18px;
+    height: 2px;
+    background: var(--color-accent);
+  }
+
+  .alt-dark & { color: var(--color-accent); }
+}
+
+// Surlignage au feutre : un dégradé qui suit le texte sur plusieurs lignes.
+.alt-mark {
+  color: inherit !important;
+  padding: 0 0.06em;
+  background-image: linear-gradient(transparent 60%, rgba(255, 223, 92, 0.9) 60%, rgba(255, 223, 92, 0.9) 90%, transparent 90%);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+
+  .alt-dark & {
+    color: var(--color-accent) !important;
+    background-image: none;
+    padding: 0;
+  }
+}
+
+.alt-lead {
+  font-size: var(--fs-md);
+  line-height: 1.5;
+  color: var(--color-text);
+  max-width: 36em;
+}
+
+.alt-head {
+  margin-bottom: 72px;
+  max-width: 780px;
+
+  h2 { margin-bottom: 0.4em; }
+
+  &--split {
+    max-width: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 32px 80px;
+    align-items: end;
+
+    h2 { margin-bottom: 0; }
+
+    @media (max-width: 1024px) { grid-template-columns: 1fr; }
+  }
+
+  &--center {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+
+    p { text-align: center; margin: 0 auto; }
+  }
+
+  @media (max-width: 768px) { margin-bottom: 48px; }
+}
