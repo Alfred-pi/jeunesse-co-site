@@ -99,7 +99,60 @@ const SUN = { x: 1010, y: 196, r: 98, arc: 140 };
 const CAMP = { x: 902, y: 304 };
 
 // Sentier : des contreforts en bas à gauche jusqu'au camp de base, avec deux lacets.
-const trail = `M330,492 C362,474 392,462 430,458 S508,452 548,440 S620,414 664,404 S736,392 770,378 S836,366 812,350 S842,332 872,326 S896,314 ${CAMP.x},${CAMP.y}`;
+// Courbes de Bézier (C puis S), échantillonnées au build en points espacés de 13 unités :
+// chaque point est un petit élément HTML qui rebondit à l'intro sans redessiner les montagnes.
+type P = [number, number];
+const trailStart: P = [330, 492];
+const trailCurves: { c1?: P; c2: P; to: P }[] = [
+  { c1: [362, 474], c2: [392, 462], to: [430, 458] },
+  { c2: [508, 452], to: [548, 440] },
+  { c2: [620, 414], to: [664, 404] },
+  { c2: [736, 392], to: [770, 378] },
+  { c2: [836, 366], to: [812, 350] },
+  { c2: [842, 332], to: [872, 326] },
+  { c2: [896, 314], to: [CAMP.x, CAMP.y] },
+];
+const cubic = (a: number, b: number, c: number, d: number, t: number) =>
+  (1 - t) ** 3 * a + 3 * (1 - t) ** 2 * t * b + 3 * (1 - t) * t ** 2 * c + t ** 3 * d;
+const trailLine: P[] = [trailStart];
+{
+  let from = trailStart;
+  let prevC2 = trailStart;
+  for (const seg of trailCurves) {
+    // S : premier point de contrôle = reflet du précédent par rapport au point de départ.
+    const c1: P = seg.c1 ?? [2 * from[0] - prevC2[0], 2 * from[1] - prevC2[1]];
+    for (let i = 1; i <= 60; i++) {
+      const t = i / 60;
+      trailLine.push([cubic(from[0], c1[0], seg.c2[0], seg.to[0], t), cubic(from[1], c1[1], seg.c2[1], seg.to[1], t)]);
+    }
+    prevC2 = seg.c2;
+    from = seg.to;
+  }
+}
+const DOT_GAP = 13;
+const trailDots: P[] = [];
+{
+  let walked = 0;
+  let next = 0;
+  for (let i = 1; i < trailLine.length; i++) {
+    const [x0, y0] = trailLine[i - 1];
+    const [x1, y1] = trailLine[i];
+    const len = Math.hypot(x1 - x0, y1 - y0);
+    while (next <= walked + len) {
+      const f = (next - walked) / len;
+      const dot: P = [x0 + (x1 - x0) * f, y0 + (y1 - y0) * f];
+      // Les points sous le bord du cadre ne se verraient pas.
+      if (dot[1] <= H - 2) trailDots.push(dot);
+      next += DOT_GAP;
+    }
+    walked += len;
+  }
+}
+const pctX = (x: number) => `${((x / W) * 100).toFixed(3)}%`;
+const pctY = (y: number) => `${((y / H) * 100).toFixed(3)}%`;
+
+// Camp de base : tente et drapeau dans une petite boîte de 64 × 44 unités, ancrée au camp.
+const CAMP_BOX = { x: CAMP.x - 26, y: CAMP.y - 40, w: 64, h: 44 };
 
 const letters = 'ALTITUDE'.split('');
 ---
@@ -114,61 +167,55 @@ const letters = 'ALTITUDE'.split('');
 
   <div class="hero__land" aria-hidden="true">
     <div class="hero__art" data-hero-art>
-      <svg class="hero__svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMax slice" focusable="false">
+      <!-- Un SVG par plan : chaque plan bouge en bloc (calque composité), sans redessiner les autres. -->
+      <svg class="hero__svg hero__sun" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMax slice" focusable="false" data-hero-sun data-para="140">
         <defs>
           <radialGradient id="heroSunGlow" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stop-color="#F8D541" stop-opacity="0.22" />
             <stop offset="100%" stop-color="#F8D541" stop-opacity="0" />
           </radialGradient>
-          <mask id="heroTrailMask" maskUnits="userSpaceOnUse" x="0" y="0" width={W} height={BASE}>
-            <path d={trail} pathLength="1" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round" stroke-dasharray="1 1" stroke-dashoffset="0" data-hero-trail-mask />
-          </mask>
         </defs>
-
-        <g data-para="140">
-          <g data-hero-sun>
-            <circle cx={SUN.x} cy={SUN.y} r={SUN.r * 2.6} fill="url(#heroSunGlow)" />
-            <circle cx={SUN.x} cy={SUN.y} r={SUN.r} fill="#F8D541" />
-          </g>
-          <circle cx={SUN.x} cy={SUN.y} r={SUN.arc} fill="none" stroke="#F8D541" stroke-width="3" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="0" transform={`rotate(140 ${SUN.x} ${SUN.y})`} data-hero-arc />
-        </g>
-
-        {layers.map((layer) => (
-          <g data-para={layer.speed}>
-            <g class={`hero__layer hero__layer--${layer.name}`} data-hero-layer data-rise={layer.rise}>
-              {layer.shapes.map((s) => (
-                <g>
-                  <path d={s.body} fill={layer.fill} />
-                  <path d={s.shade} fill={layer.shade} />
-                  {s.snow && (
-                    <g opacity={layer.snowOpacity} data-hero-snow>
-                      <path d={s.snow} fill="#F2F0EB" />
-                      <path d={s.snowShade} fill="#C9C5BC" />
-                    </g>
-                  )}
-                </g>
-              ))}
-            </g>
-          </g>
-        ))}
-
-        <g>
-          <path d={trail} fill="none" stroke="#F8D541" stroke-width="5" stroke-linecap="round" stroke-dasharray="0 13" mask="url(#heroTrailMask)" />
-          <g class="hero__camp" data-hero-camp>
-            <path d={`M${CAMP.x - 22},${CAMP.y + 1} L${CAMP.x - 11},${CAMP.y - 16} L${CAMP.x},${CAMP.y + 1} Z`} fill="#F2F0EB" />
-            <path d={`M${CAMP.x - 11},${CAMP.y - 16} L${CAMP.x - 7},${CAMP.y + 1} L${CAMP.x},${CAMP.y + 1} Z`} fill="#C9C5BC" />
-            <line x1={CAMP.x + 8} y1={CAMP.y + 1} x2={CAMP.x + 8} y2={CAMP.y - 34} stroke="#F2F0EB" stroke-width="2.5" stroke-linecap="round" />
-            <path d={`M${CAMP.x + 9},${CAMP.y - 34} L${CAMP.x + 32},${CAMP.y - 27} L${CAMP.x + 9},${CAMP.y - 20} Z`} fill="#F8D541" />
-          </g>
-        </g>
+        <circle cx={SUN.x} cy={SUN.y} r={SUN.r * 2.6} fill="url(#heroSunGlow)" />
+        <circle cx={SUN.x} cy={SUN.y} r={SUN.r} fill="#F8D541" />
+        <circle cx={SUN.x} cy={SUN.y} r={SUN.arc} fill="none" stroke="#F8D541" stroke-width="3" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="0" transform={`rotate(140 ${SUN.x} ${SUN.y})`} data-hero-arc />
       </svg>
 
-      <div class="hero__tags" data-hero-tags>
-        <span class="hero__tag hero__tag--summit" style={`left:${((SUN.x + SUN.arc + 14) / W) * 100}%;top:${((SUN.y - 70) / H) * 100}%`}>
-          <strong>Kanchenjunga</strong> 8’586&nbsp;m
+      {layers.map((layer) => (
+        <svg class={`hero__svg hero__layer hero__layer--${layer.name}`} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMax slice" focusable="false" data-hero-layer data-rise={layer.rise} data-para={layer.speed}>
+          {layer.shapes.map((s) => (
+            <g>
+              <path d={s.body} fill={layer.fill} />
+              <path d={s.shade} fill={layer.shade} />
+              {s.snow && (
+                <g opacity={layer.snowOpacity}>
+                  <path d={s.snow} fill="#F2F0EB" />
+                  <path d={s.snowShade} fill="#C9C5BC" />
+                </g>
+              )}
+            </g>
+          ))}
+        </svg>
+      ))}
+
+      <div class="hero__trail">
+        {trailDots.map(([x, y]) => <i class="hero__dot" style={`left:${pctX(x)};top:${pctY(y)}`} data-hero-dot></i>)}
+      </div>
+
+      <svg class="hero__camp" viewBox={`0 0 ${CAMP_BOX.w} ${CAMP_BOX.h}`} style={`left:${pctX(CAMP_BOX.x)};top:${pctY(CAMP_BOX.y)};width:${pctX(CAMP_BOX.w)}`} focusable="false">
+        <g data-hero-tent>
+          <path d="M4,41 L15,24 L26,41 Z" fill="#F2F0EB" />
+          <path d="M15,24 L19,41 L26,41 Z" fill="#C9C5BC" />
+        </g>
+        <line x1="34" y1="41" x2="34" y2="6" stroke="#F2F0EB" stroke-width="2.5" stroke-linecap="round" data-hero-pole />
+        <path d="M35,6 L58,13 L35,20 Z" fill="#F8D541" data-hero-pennant />
+      </svg>
+
+      <div class="hero__tags">
+        <span class="hero__pin hero__pin--summit" style={`left:${pctX(SUN.x + SUN.arc + 14)};top:${pctY(SUN.y - 70)}`}>
+          <span class="hero__tag" data-hero-tag><strong>Kanchenjunga</strong> 8’586&nbsp;m</span>
         </span>
-        <span class="hero__tag hero__tag--camp" style={`right:${(1 - (CAMP.x - 34) / W) * 100}%;top:${((CAMP.y - 30) / H) * 100}%`}>
-          <strong>Camp de base</strong> 5’475&nbsp;m
+        <span class="hero__pin hero__pin--camp" style={`right:${((1 - (CAMP.x - 34) / W) * 100).toFixed(3)}%;top:${pctY(CAMP.y - 30)}`}>
+          <span class="hero__tag" data-hero-tag><strong>Camp de base</strong> 5’475&nbsp;m</span>
         </span>
       </div>
     </div>
@@ -222,58 +269,68 @@ const letters = 'ALTITUDE'.split('');
         gsap.registerPlugin(ScrollTrigger);
 
         const q = (sel: string) => Array.from(hero.querySelectorAll<Element>(sel));
+        const art = hero.querySelector<HTMLElement>('[data-hero-art]')!;
         const sun = q('[data-hero-sun]');
         const arc = q('[data-hero-arc]');
         const layers = q('[data-hero-layer]');
-        const snows = q('[data-hero-snow]');
         const letters = q('[data-hero-letter]');
         const lines = q('[data-hero-line]');
         const ruleText = q('[data-hero-ruletext]');
         const fades = q('[data-hero-fade]');
-        const trailMask = q('[data-hero-trail-mask]');
-        const camp = q('[data-hero-camp]');
-        const tags = q('.hero__tag');
+        const dots = q('[data-hero-dot]');
+        const tent = q('[data-hero-tent]');
+        const pole = q('[data-hero-pole]');
+        const pennant = q('[data-hero-pennant]');
+        const tags = q('[data-hero-tag]');
 
         // Si le délai de secours a déjà révélé le hero (chargement lent), on saute l'intro.
         const intro = root.classList.contains('hero-intro');
 
         // États de départ posés par le JS seulement : sans JS, tout reste visible.
+        // Plans, points et libellés bougent en transform/opacité : le navigateur les compose sans repeindre.
         if (intro) {
-          gsap.set(sun, { y: 110, opacity: 0 });
+          gsap.set(sun, { yPercent: 24, opacity: 0 });
           gsap.set(arc, { strokeDashoffset: 1 });
-          // Les couches montent depuis sous le cadre, opaques : le soleil ne transparaît jamais à travers.
-          gsap.set(layers, { y: (i: number, el: Element) => Number(el.getAttribute('data-rise') ?? 200) });
-          gsap.set(snows, { opacity: 0 });
+          // Les plans montent opaques depuis sous le cadre : le soleil ne transparaît jamais à travers.
+          gsap.set(layers, { yPercent: (i: number, el: Element) => (Number(el.getAttribute('data-rise') ?? 200) / 480) * 100 });
           gsap.set(letters, { yPercent: 160 });
           gsap.set(lines, { scaleX: 0 });
           gsap.set(ruleText, { opacity: 0, y: 8 });
           gsap.set(fades, { opacity: 0, y: 22 });
-          gsap.set(trailMask, { strokeDashoffset: 1 });
-          gsap.set(camp, { opacity: 0, scale: 0.4, transformOrigin: '50% 100%' });
-          gsap.set(tags, { opacity: 0, y: 8 });
+          gsap.set(dots, { scale: 0 });
+          gsap.set(tent, { scale: 0, transformOrigin: '50% 100%' });
+          gsap.set(pole, { scaleY: 0, transformOrigin: '50% 100%' });
+          gsap.set(pennant, { scaleX: 0, transformOrigin: '0% 50%' });
+          gsap.set(tags, { opacity: 0, scale: 0.6, y: 10 });
           root.classList.remove('hero-intro');
 
-          const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+          // Léger délai : l'intro démarre après l'initialisation des autres visuels de la page,
+          // qui occupe les premières images après le chargement.
+          const tl = gsap.timeline({ delay: 0.4, defaults: { ease: 'power3.out' } });
           tl.to(fades[0], { opacity: 1, y: 0, duration: 0.6 }, 0)
-            .to(sun, { y: 0, opacity: 1, duration: 1.6, ease: 'expo.out' }, 0)
+            .to(sun, { yPercent: 0, opacity: 1, duration: 1.6, ease: 'expo.out' }, 0)
             .to(arc, { strokeDashoffset: 0, duration: 1.4, ease: 'power2.inOut' }, 0.25)
-            .to(layers, { y: 0, duration: 1.5, stagger: 0.14, ease: 'power4.out' }, 0.1)
+            .to(layers, { yPercent: 0, duration: 1.5, stagger: 0.14, ease: 'power4.out' }, 0.1)
             .to(letters, { yPercent: 0, duration: 0.9, stagger: 0.045, ease: 'expo.out' }, 0.15)
             .to(lines, { scaleX: 1, duration: 0.8, ease: 'expo.out' }, 0.6)
             .to(ruleText, { opacity: 1, y: 0, duration: 0.6 }, 0.7)
-            .to(snows, { opacity: (i: number, el: Element) => Number(el.getAttribute('opacity') ?? 1), duration: 0.7, stagger: 0.04 }, 0.7)
             .to(fades.slice(1), { opacity: 1, y: 0, duration: 0.8, stagger: 0.08 }, 0.8)
-            .to(trailMask, { strokeDashoffset: 0, duration: 1.1, ease: 'power2.inOut' }, 1.15)
-            .to(camp, { opacity: 1, scale: 1, duration: 0.5, ease: 'expo.out' }, 2.15)
-            .to(tags, { opacity: 1, y: 0, duration: 0.5, stagger: 0.12 }, 2.2);
+            // Le sentier : les points rebondissent l'un après l'autre jusqu'au camp.
+            .to(dots, { scale: 1, duration: 0.55, ease: 'back.out(4)', stagger: 0.02 }, 1.05)
+            // Puis la tente surgit, le mât se plante et le fanion se déroule.
+            .to(tent, { scale: 1, duration: 0.6, ease: 'back.out(3)' }, '-=0.25')
+            .to(pole, { scaleY: 1, duration: 0.5, ease: 'back.out(2.4)' }, '-=0.35')
+            .to(pennant, { scaleX: 1, duration: 1.1, ease: 'elastic.out(1.1, 0.4)' }, '-=0.2')
+            .to(tags, { opacity: 1, scale: 1, y: 0, duration: 0.7, ease: 'back.out(2.2)', stagger: 0.12 }, '-=1');
         }
 
         // Parallaxe : le soleil se couche derrière le sommet, la chaîne du fond descend un peu, le texte remonte.
         // Le paysage qui porte le sentier, le camp et les libellés reste d'un seul bloc : aucun décalage entre eux.
-        const scrub = { trigger: hero, start: 'top top', end: 'bottom top', scrub: 0.6 };
-        q('[data-para]').forEach((g) => {
-          const speed = Number(g.getAttribute('data-para'));
-          if (speed) gsap.to(g, { y: speed, ease: 'none', scrollTrigger: scrub });
+        // Décalage en px recalculé au redimensionnement (unités du dessin × échelle) ; l'intro, elle, joue sur yPercent.
+        const scrub = { trigger: hero, start: 'top top', end: 'bottom top', scrub: 0.6, invalidateOnRefresh: true };
+        q('[data-para]').forEach((el) => {
+          const speed = Number(el.getAttribute('data-para'));
+          if (speed) gsap.to(el, { y: () => (speed / 480) * art.clientHeight, ease: 'none', scrollTrigger: scrub });
         });
         gsap.to(hero.querySelector('[data-hero-content]'), { y: -90, ease: 'none', scrollTrigger: scrub });
       })
@@ -320,8 +377,9 @@ const letters = 'ALTITUDE'.split('');
   :global(html.hero-intro) .hero [data-hero-ruletext],
   :global(html.hero-intro) .hero [data-hero-layer],
   :global(html.hero-intro) .hero [data-hero-sun],
-  :global(html.hero-intro) .hero [data-hero-camp],
-  :global(html.hero-intro) .hero .hero__tag {
+  :global(html.hero-intro) .hero [data-hero-dot],
+  :global(html.hero-intro) .hero .hero__camp,
+  :global(html.hero-intro) .hero [data-hero-tag] {
     opacity: 0;
   }
 
@@ -359,9 +417,27 @@ const letters = 'ALTITUDE'.split('');
     overflow: visible;
   }
 
-  .hero__layer,
+  // Sentier : points de 6 unités du dessin, positionnés en % du dessin (même repère que le viewBox).
+  .hero__trail {
+    position: absolute;
+    inset: 0;
+  }
+
+  .hero__dot {
+    position: absolute;
+    width: calc(6 / 1440 * 100%);
+    aspect-ratio: 1;
+    // marges en % de la largeur dans les deux sens : le point reste centré sur sa position
+    margin: calc(-3 / 1440 * 100%) 0 0 calc(-3 / 1440 * 100%);
+    border-radius: 50%;
+    background: #F8D541;
+  }
+
   .hero__camp {
-    transform-box: fill-box;
+    position: absolute;
+    height: auto;
+    aspect-ratio: 64 / 44;
+    overflow: visible;
   }
 
   .hero__tags {
@@ -369,9 +445,14 @@ const letters = 'ALTITUDE'.split('');
     inset: 0;
   }
 
+  // Le conteneur porte la position (jamais animé), la pastille à l'intérieur porte l'animation.
+  .hero__pin {
+    position: absolute;
+    display: flex;
+  }
+
   // Pastille sombre : le libellé reste lisible sur la neige comme sur la roche.
   .hero__tag {
-    position: absolute;
     white-space: nowrap;
     display: flex;
     flex-direction: column;
@@ -404,17 +485,17 @@ const letters = 'ALTITUDE'.split('');
 
   // Dès que le paysage est rogné (fenêtre < 960 px), le libellé du sommet se centre au-dessus de l'arc,
   // dans le ciel réservé : il reste dans l'écran sans masquer l'arc.
-  // `translate` plutôt que `transform`, que GSAP réécrit pendant l'intro.
-  .hero__tag--summit {
+  .hero__pin--summit {
     @media (max-width: 960px) {
       left: 70.14% !important; // SUN.x / W
       top: -16% !important;
-      translate: -50% 0;
-      align-items: center;
+      transform: translateX(-50%);
+
+      .hero__tag { align-items: center; }
     }
   }
 
-  .hero__tag--camp {
+  .hero__pin--camp .hero__tag {
     text-align: right;
 
     strong { color: #F8D541; }
