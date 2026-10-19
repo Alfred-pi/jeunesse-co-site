@@ -1,7 +1,7 @@
 ---
 // Appel à orienter un jeune : contacts de la direction.
-// Grand titre dont les lettres d'ALTITUDE rebondissent, écusson du programme (soleil, montagne,
-// sentier jusqu'au camp de base) qui se monte au défilement, cartes de contact aux icônes dessinées.
+// Titre dont les lettres d'ALTITUDE rebondissent, cartes de contact aux icônes dessinées.
+// Chaque bloc s'anime quand il est à l'écran (titre d'un côté, contacts de l'autre).
 const letters = 'ALTITUDE'.split('');
 
 const contacts = [
@@ -18,62 +18,11 @@ const contacts = [
     icon: '<rect x="6.5" y="2.5" width="11" height="19" rx="2.6"/><path d="M10.4 18.4h3.2"/>',
   },
 ];
-
-// Écusson : repère 200 × 200, sol à y = 200 (le disque le rogne en cercle).
-const GROUND = 200;
-type Peak = { x: number; y: number; lw: number; rw: number; snow?: number };
-const pt = (x: number, y: number) => `${x.toFixed(1)},${y.toFixed(1)}`;
-const pct = (v: number) => `${((v / 200) * 100).toFixed(3)}%`;
-const onFace = (p: Peak, u: number, t: number) => {
-  const footX = p.x - p.lw + u * (p.lw + p.rw);
-  return pt(p.x + t * (footX - p.x), p.y + t * (GROUND - p.y));
-};
-const shapes = (p: Peak) => {
-  const ridgeU = (p.lw + p.rw * 0.16) / (p.lw + p.rw);
-  const body = `M${pt(p.x, p.y)} L${pt(p.x - p.lw, GROUND)} L${pt(p.x + p.rw, GROUND)} Z`;
-  const shade = `M${pt(p.x, p.y)} L${pt(p.x + p.rw * 0.16, GROUND)} L${pt(p.x + p.rw, GROUND)} Z`;
-  if (!p.snow) return { body, shade };
-  const t = p.snow;
-  const snow = `M${pt(p.x, p.y)} L${onFace(p, 0, t)} L${onFace(p, 0.18, t * 0.66)} L${onFace(p, 0.34, t * 1.04)} L${onFace(p, ridgeU - 0.06, t * 0.62)} L${onFace(p, 0.72, t * 0.98)} L${onFace(p, 0.88, t * 0.68)} L${onFace(p, 1, t * 0.92)} Z`;
-  const snowShade = `M${pt(p.x, p.y)} L${onFace(p, ridgeU, t * 0.7)} L${onFace(p, 0.72, t * 0.98)} L${onFace(p, 0.88, t * 0.68)} L${onFace(p, 1, t * 0.92)} Z`;
-  return { body, shade, snow, snowShade };
-};
-const far = [
-  { x: 34, y: 112, lw: 62, rw: 58 },
-  { x: 168, y: 104, lw: 60, rw: 62 },
-].map(shapes);
-const main = shapes({ x: 104, y: 52, lw: 98, rw: 92, snow: 0.34 });
-const near = 'M0,172 L36,178 L76,186 L118,188 L160,183 L200,176 L200,200 L0,200 Z';
-
-// Sentier en pointillés jusqu'au camp de base (les jeunes ne gravissent aucun sommet).
-const trail: [number, number][] = [[120, 194], [106, 187], [90, 178], [79, 170], [72, 164]];
-const trailDots: [number, number][] = [];
-{
-  const GAP = 8;
-  let walked = 0;
-  let next = 0;
-  for (let i = 1; i < trail.length; i++) {
-    const [x0, y0] = trail[i - 1];
-    const [x1, y1] = trail[i];
-    const len = Math.hypot(x1 - x0, y1 - y0);
-    while (next <= walked + len) {
-      const f = (next - walked) / len;
-      trailDots.push([x0 + (x1 - x0) * f, y0 + (y1 - y0) * f]);
-      next += GAP;
-    }
-    walked += len;
-  }
-}
-
-// Texte circulaire de l'écusson, ajusté au tour complet (textLength).
-const RING_R = 123;
-const ringPath = `M140,${140 - RING_R} A${RING_R},${RING_R} 0 1 1 139.99,${140 - RING_R} Z`;
-const ringText = 'ALTITUDE · NÉPAL · KANCHENJUNGA · PRINTEMPS 2027 · JEUNESSE&CO · ';
 ---
 
 <section class="alt-section cta" id="orienter" aria-labelledby="cta-title" data-cta>
   <div class="container cta__grid">
-    <div class="cta__main">
+    <div class="cta__main" data-cta-main>
       <p class="cta__kicker" data-cta-fade>Contact</p>
       <h2 class="cta__title" id="cta-title" aria-label="Orienter un jeune vers ALTITUDE">
         <span class="cta__clip" aria-hidden="true"><span class="cta__line" data-cta-line>Orienter un jeune vers</span></span>
@@ -84,52 +33,7 @@ const ringText = 'ALTITUDE · NÉPAL · KANCHENJUNGA · PRINTEMPS 2027 · JEUNES
       <p class="cta__lead" data-cta-fade>Autorités, services, familles&nbsp;: la direction de Jeunesse&amp;Co répond à vos questions, vous rencontre et présente le programme au jeune et à sa famille.</p>
     </div>
 
-    <div class="cta__side">
-      <div class="cta__badge" aria-hidden="true">
-        <svg class="cta__ring" viewBox="0 0 280 280" focusable="false" data-cta-ring>
-          <defs><path id="ctaRingPath" d={ringPath} /></defs>
-          <circle cx="140" cy="140" r="138" fill="none" stroke="#111" stroke-width="2" stroke-dasharray="0.1 7" stroke-linecap="round" />
-          <text class="cta__ring-text">
-            <textPath href="#ctaRingPath" textLength={(2 * Math.PI * RING_R).toFixed(1)} lengthAdjust="spacing">{ringText}</textPath>
-          </text>
-        </svg>
-        <div class="cta__disc" data-cta-disc>
-          <svg class="cta__layer" viewBox="0 0 200 200" preserveAspectRatio="none" focusable="false" data-cta-sun>
-            <defs>
-              <radialGradient id="ctaSunGlow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#F8D541" stop-opacity="0.3" />
-                <stop offset="100%" stop-color="#F8D541" stop-opacity="0" />
-              </radialGradient>
-            </defs>
-            <circle cx="100" cy="84" r="74" fill="url(#ctaSunGlow)" />
-            <circle cx="100" cy="84" r="34" fill="#F8D541" />
-          </svg>
-          <svg class="cta__layer" viewBox="0 0 200 200" preserveAspectRatio="none" focusable="false" data-cta-layer data-rise="60">
-            {far.map((s) => (<><path d={s.body} fill="#3F3D38" /><path d={s.shade} fill="#33322E" /></>))}
-          </svg>
-          <svg class="cta__layer" viewBox="0 0 200 200" preserveAspectRatio="none" focusable="false" data-cta-layer data-rise="100">
-            <path d={main.body} fill="#4A4842" />
-            <path d={main.shade} fill="#2A2925" />
-            <path d={main.snow} fill="#F2F0EB" />
-            <path d={main.snowShade} fill="#C9C5BC" />
-          </svg>
-          <svg class="cta__layer" viewBox="0 0 200 200" preserveAspectRatio="none" focusable="false" data-cta-layer data-rise="40">
-            <path d={near} fill="#1B1B1A" />
-          </svg>
-          <div class="cta__trail">
-            {trailDots.map(([x, y]) => <i class="cta__dot" style={`left:${pct(x)};top:${pct(y)}`} data-cta-dot></i>)}
-          </div>
-          <svg class="cta__camp" viewBox="0 0 42 26" focusable="false">
-            <g data-cta-tent>
-              <path d="M4,24 L11,14 L18,24 Z" fill="#F2F0EB" />
-              <path d="M11,14 L13.5,24 L18,24 Z" fill="#C9C5BC" />
-            </g>
-            <line x1="22" y1="24" x2="22" y2="4" stroke="#F2F0EB" stroke-width="1.6" stroke-linecap="round" data-cta-pole />
-            <path d="M23,4 L38,9 L23,14 Z" fill="#F8D541" data-cta-pennant />
-          </svg>
-        </div>
-      </div>
-
+    <div class="cta__side" data-cta-side>
       <ul class="cta__contact" role="list">
         {contacts.map((c) => (
           <li data-cta-card>
@@ -148,13 +52,13 @@ const ringText = 'ALTITUDE · NÉPAL · KANCHENJUNGA · PRINTEMPS 2027 · JEUNES
           </li>
         ))}
       </ul>
-      <p class="cta__sign" data-cta-fade>Hacene Debbah, directeur et fondateur · Quai du Seujet 14, 1201 Genève</p>
+      <p class="cta__sign" data-cta-sign>Hacene Debbah, directeur et fondateur · Quai du Seujet 14, 1201 Genève</p>
     </div>
   </div>
 </section>
 
 <script>
-  import { reducedMotion, prepareIcon, popDrawIcon } from '../../scripts/altitude-motion';
+  import { reducedMotion, prepareIcon, popDrawIcon, seenStart } from '../../scripts/altitude-motion';
 
   const initCta = async () => {
     const root = document.querySelector<HTMLElement>('[data-cta]');
@@ -163,57 +67,42 @@ const ringText = 'ALTITUDE · NÉPAL · KANCHENJUNGA · PRINTEMPS 2027 · JEUNES
     gsap.registerPlugin(ScrollTrigger);
 
     const q = (sel: string) => Array.from(root.querySelectorAll<HTMLElement>(sel));
-    const fades = q('[data-cta-fade]');
-    const line = q('[data-cta-line]');
-    const letters = q('[data-cta-letter]');
-    const ring = q('[data-cta-ring]');
-    const disc = q('[data-cta-disc]');
-    const sun = q('[data-cta-sun]');
-    const layers = q('[data-cta-layer]');
-    const dots = q('[data-cta-dot]');
-    const tent = q('[data-cta-tent]');
-    const pole = q('[data-cta-pole]');
-    const pennant = q('[data-cta-pennant]');
-    const cards = q('[data-cta-card]');
-    const icons = q('[data-cta-icon]');
+    const main = root.querySelector<HTMLElement>('[data-cta-main]');
+    const side = root.querySelector<HTMLElement>('[data-cta-side]');
 
-    // États de départ posés par le JS seulement : sans JS ou en mouvement réduit, tout reste visible.
-    gsap.set(fades, { opacity: 0, y: 24 });
-    gsap.set(line, { yPercent: 110 });
-    gsap.set(letters, { yPercent: 125, rotate: 14, transformOrigin: '0% 100%' });
-    gsap.set(ring, { opacity: 0, scale: 0.8, rotate: -140 });
-    gsap.set(disc, { scale: 0.3, rotate: -18, opacity: 0 });
-    gsap.set(sun, { yPercent: 40, opacity: 0 });
-    gsap.set(layers, { yPercent: (i: number, el: HTMLElement) => Number(el.dataset.rise ?? 80) });
-    gsap.set(dots, { scale: 0 });
-    gsap.set(tent, { scale: 0, transformOrigin: '50% 100%' });
-    gsap.set(pole, { scaleY: 0, transformOrigin: '50% 100%' });
-    gsap.set(pennant, { scaleX: 0, transformOrigin: '0% 50%' });
-    gsap.set(cards, { opacity: 0, x: 48 });
-    const strokes = icons.map((icon) => prepareIcon(gsap, icon));
+    // ---------- Titre : la ligne monte, puis les lettres d'ALTITUDE rebondissent l'une après l'autre ----------
+    if (main) {
+      const fades = q('[data-cta-fade]');
+      const line = q('[data-cta-line]');
+      const letters = q('[data-cta-letter]');
+      // États de départ posés par le JS seulement : sans JS ou en mouvement réduit, tout reste visible.
+      gsap.set(fades, { opacity: 0, y: 24 });
+      gsap.set(line, { yPercent: 110 });
+      gsap.set(letters, { yPercent: 125, rotate: 14, transformOrigin: '0% 100%' });
 
-    const camp = 1.25 + dots.length * 0.05;
-    const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } })
-      .to(fades[0], { opacity: 1, y: 0, duration: 0.6 }, 0)
-      .to(line, { yPercent: 0, duration: 0.9, ease: 'expo.out' }, 0.05)
-      // Les lettres d'ALTITUDE rebondissent l'une après l'autre.
-      .to(letters, { yPercent: 0, rotate: 0, duration: 0.95, ease: 'back.out(2.2)', stagger: 0.055 }, 0.2)
-      .to(fades[1], { opacity: 1, y: 0, duration: 0.8 }, 0.6)
-      // L'écusson : le disque surgit, l'anneau tourne en place, puis le paysage se monte.
-      .to(ring, { opacity: 1, scale: 1, rotate: 0, duration: 1.6, ease: 'expo.out' }, 0.2)
-      .to(disc, { scale: 1, rotate: 0, opacity: 1, duration: 0.95, ease: 'back.out(2.2)' }, 0.25)
-      .to(sun, { yPercent: 0, opacity: 1, duration: 1.2, ease: 'expo.out' }, 0.5)
-      .to(layers, { yPercent: 0, duration: 1.1, ease: 'power4.out', stagger: 0.1 }, 0.55)
-      .to(dots, { scale: 1, duration: 0.45, ease: 'back.out(4)', stagger: 0.05 }, 1.25)
-      .to(tent, { scale: 1, duration: 0.6, ease: 'back.out(3)' }, camp)
-      .to(pole, { scaleY: 1, duration: 0.45, ease: 'back.out(2.4)' }, camp + 0.15)
-      .to(pennant, { scaleX: 1, duration: 1.1, ease: 'elastic.out(1.1, 0.4)' }, camp + 0.38)
-      // Les cartes de contact glissent en rebond, leur icône se dessine.
-      .to(cards, { opacity: 1, x: 0, duration: 0.8, ease: 'back.out(1.6)', stagger: 0.12 }, 0.6)
-      .to(fades[2], { opacity: 1, y: 0, duration: 0.7 }, 1.3);
-    icons.forEach((icon, i) => tl.add(popDrawIcon(gsap, icon, strokes[i]), 0.85 + i * 0.12));
+      const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } })
+        .to(fades[0], { opacity: 1, y: 0, duration: 0.6 }, 0)
+        .to(line, { yPercent: 0, duration: 0.9, ease: 'expo.out' }, 0.05)
+        .to(letters, { yPercent: 0, rotate: 0, duration: 0.95, ease: 'back.out(2.2)', stagger: 0.055 }, 0.2)
+        .to(fades[1], { opacity: 1, y: 0, duration: 0.8 }, 0.6);
+      ScrollTrigger.create({ trigger: main, start: seenStart(main), once: true, onEnter: () => tl.play() });
+    }
 
-    ScrollTrigger.create({ trigger: root, start: 'top 72%', once: true, onEnter: () => tl.play() });
+    // ---------- Contacts : les cartes glissent en rebond, leur icône se dessine ----------
+    if (side) {
+      const cards = q('[data-cta-card]');
+      const icons = q('[data-cta-icon]');
+      const sign = q('[data-cta-sign]');
+      gsap.set(cards, { opacity: 0, x: 48 });
+      gsap.set(sign, { opacity: 0, y: 16 });
+      const strokes = icons.map((icon) => prepareIcon(gsap, icon));
+
+      const tl = gsap.timeline({ paused: true })
+        .to(cards, { opacity: 1, x: 0, duration: 0.8, ease: 'back.out(1.6)', stagger: 0.12 }, 0)
+        .to(sign, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, 0.5);
+      icons.forEach((icon, i) => tl.add(popDrawIcon(gsap, icon, strokes[i]), 0.25 + i * 0.12));
+      ScrollTrigger.create({ trigger: side, start: seenStart(side), once: true, onEnter: () => tl.play() });
+    }
   };
 
   if (document.readyState === 'complete') initCta();
@@ -230,15 +119,16 @@ const ringText = 'ALTITUDE · NÉPAL · KANCHENJUNGA · PRINTEMPS 2027 · JEUNES
     color: var(--color-primary);
   }
 
+  // Titre à gauche, contacts à droite, calés sur la même ligne de pied.
   .cta__grid {
     display: grid;
     grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    gap: 64px 80px;
-    align-items: center;
+    gap: 48px 80px;
+    align-items: end;
 
     @media (max-width: 1024px) {
       grid-template-columns: 1fr;
-      row-gap: 32px;
+      row-gap: 40px;
     }
   }
 
@@ -283,13 +173,14 @@ const ringText = 'ALTITUDE · NÉPAL · KANCHENJUNGA · PRINTEMPS 2027 · JEUNES
     letter-spacing: -0.01em;
   }
 
+  // ALTITUDE en grand, mais sous le mot géant du pied de page qui clôt la page.
   .cta__word {
     display: flex;
     overflow: hidden;
     // place pour le rebond des lettres sans les rogner
     padding: 0.1em 0 0.02em;
     margin: -0.06em 0 0 -0.02em;
-    font-size: clamp(64px, 19vw, 150px);
+    font-size: clamp(64px, 15vw, 124px);
     line-height: 0.82;
     letter-spacing: -0.02em;
   }
@@ -307,89 +198,12 @@ const ringText = 'ALTITUDE · NÉPAL · KANCHENJUNGA · PRINTEMPS 2027 · JEUNES
     color: rgba(17, 17, 17, 0.86);
   }
 
-  // ---------- Colonne contact ----------
+  // ---------- Contacts ----------
   .cta__side {
     display: grid;
     gap: 16px;
-    justify-items: start;
-
-    // Une colonne : l'écusson passe en tête, au-dessus du titre (ses frères restent dans l'ordre).
-    @media (max-width: 1024px) { display: contents; }
   }
 
-  // Écusson : disque sombre, texte circulaire en pointillés, paysage du programme.
-  .cta__badge {
-    position: relative;
-    width: clamp(176px, 20vw, 272px);
-    aspect-ratio: 1;
-    margin-bottom: 16px;
-
-    @media (max-width: 1024px) {
-      order: -1;
-      width: clamp(168px, 24vw, 216px);
-      margin: 0;
-    }
-  }
-
-  .cta__ring {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-  }
-
-  .cta__ring-text {
-    font-family: var(--font-headline);
-    font-weight: 700;
-    font-size: 14px;
-    letter-spacing: 0.04em;
-    fill: var(--color-primary);
-  }
-
-  .cta__disc {
-    position: absolute;
-    inset: 7.15%;
-    overflow: hidden;
-    border-radius: 50%;
-    background: #111;
-    box-shadow: 0 24px 50px rgba(17, 17, 17, 0.28);
-    isolation: isolate;
-  }
-
-  .cta__layer {
-    position: absolute;
-    inset: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-
-  .cta__trail {
-    position: absolute;
-    inset: 0;
-  }
-
-  .cta__dot {
-    position: absolute;
-    width: 2.6%;
-    aspect-ratio: 1;
-    margin: -1.3% 0 0 -1.3%;
-    border-radius: 50%;
-    background: #F8D541;
-  }
-
-  .cta__camp {
-    position: absolute;
-    left: 26%;
-    top: 69%;
-    width: 21%;
-    height: auto;
-    aspect-ratio: 42 / 26;
-    overflow: visible;
-  }
-
-  // ---------- Cartes de contact ----------
   .cta__contact {
     list-style: none;
     display: grid;
