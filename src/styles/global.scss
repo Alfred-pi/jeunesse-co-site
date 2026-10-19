@@ -127,6 +127,13 @@ h1, h2, h3 {
   hyphens: auto;
 }
 
+// Pas de césure dans les grands titres : sur Mac (Safari, Chrome), « hyphens: auto » coupait
+// les titres en plein mot (« L'accompagne-ment »). Les petits titres de cartes (h3) la gardent.
+h1, h2 {
+  hyphens: manual;
+  -webkit-hyphens: manual;
+}
+
 h1 {
   font-size: var(--fs-xl);
   letter-spacing: -0.02em;

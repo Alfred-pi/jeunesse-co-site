@@ -140,6 +140,9 @@ const base = import.meta.env.BASE_URL;
     }
 
     &__content {
+      // Le titre se dimensionne sur la largeur de cette colonne (unités cqi).
+      container-type: inline-size;
+
       @media (max-width: 768px) {
         text-align: center;
         display: flex;
@@ -183,6 +186,14 @@ const base = import.meta.env.BASE_URL;
     &__title {
       font-family: var(--font-headline);
       font-size: var(--fs-xl);
+      // Deux lignes nettes, « L'accompagnement » puis « éducatif sur mesure. », quelle que soit
+      // la largeur : la ligne la plus longue occupe ~94 % de la colonne (8,55 em pour 100 px).
+      // Navigateurs sans unités de conteneur : la taille du site ci-dessus s'applique.
+      font-size: min(80px, 11cqi);
+      // Jamais de mot coupé par un tiret (« L'accompagne-ment »).
+      hyphens: manual;
+      -webkit-hyphens: manual;
+      overflow-wrap: normal;
       line-height: 1.15;
       letter-spacing: -0.025em;
       margin-bottom: 24px;
