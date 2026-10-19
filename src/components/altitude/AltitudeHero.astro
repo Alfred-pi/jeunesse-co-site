@@ -1,0 +1,609 @@
+---
+// Hero du programme ALTITUDE : paysage himalayen dans le style du logo
+// (facettes plates, calottes de neige, soleil et arc jaunes, sentier en pointillés).
+// Le sentier s'arrête au camp de base : les jeunes ne gravissent aucun sommet.
+
+// Repère du dessin : 1440 × 480, sol à y = 492 (légèrement sous le cadre).
+const W = 1440;
+const H = 480;
+const BASE = 492;
+
+type Peak = { x: number; y: number; lw: number; rw: number; snow?: number };
+
+const pt = (x: number, y: number) => `${x.toFixed(1)},${y.toFixed(1)}`;
+
+// Point situé à la fraction t entre le sommet et un point du pied, u allant du pied gauche (0) au pied droit (1).
+const onFace = (p: Peak, u: number, t: number) => {
+  const footX = p.x - p.lw + u * (p.lw + p.rw);
+  return pt(p.x + t * (footX - p.x), p.y + t * (BASE - p.y));
+};
+
+const shapes = (p: Peak) => {
+  const ridgeU = (p.lw + p.rw * 0.16) / (p.lw + p.rw);
+  const body = `M${pt(p.x, p.y)} L${pt(p.x - p.lw, BASE)} L${pt(p.x + p.rw, BASE)} Z`;
+  const shade = `M${pt(p.x, p.y)} L${pt(p.x + p.rw * 0.16, BASE)} L${pt(p.x + p.rw, BASE)} Z`;
+  if (!p.snow) return { body, shade };
+  const t = p.snow;
+  const snow = `M${pt(p.x, p.y)} L${onFace(p, 0, t)} L${onFace(p, 0.18, t * 0.66)} L${onFace(p, 0.34, t * 1.04)} L${onFace(p, ridgeU - 0.06, t * 0.62)} L${onFace(p, 0.72, t * 0.98)} L${onFace(p, 0.88, t * 0.68)} L${onFace(p, 1, t * 0.92)} Z`;
+  const snowShade = `M${pt(p.x, p.y)} L${onFace(p, ridgeU, t * 0.7)} L${onFace(p, 0.72, t * 0.98)} L${onFace(p, 0.88, t * 0.68)} L${onFace(p, 1, t * 0.92)} Z`;
+  return { body, shade, snow, snowShade };
+};
+
+// Couches, de la plus lointaine à la plus proche. Le tiers gauche reste bas pour laisser respirer le texte.
+const layers = [
+  {
+    name: 'far',
+    speed: 110,
+    fill: '#3F3D38',
+    shade: '#33322E',
+    snowOpacity: 0.42,
+    peaks: [
+      { x: 70, y: 338, lw: 150, rw: 140 },
+      { x: 250, y: 318, lw: 150, rw: 150 },
+      { x: 450, y: 312, lw: 170, rw: 160 },
+      { x: 640, y: 248, lw: 170, rw: 150, snow: 0.3 },
+      { x: 790, y: 272, lw: 140, rw: 150, snow: 0.28 },
+      { x: 1180, y: 236, lw: 150, rw: 130, snow: 0.3 },
+      { x: 1300, y: 196, lw: 160, rw: 170, snow: 0.34 },
+      { x: 1430, y: 250, lw: 140, rw: 160, snow: 0.3 },
+    ] as Peak[],
+  },
+  {
+    name: 'main',
+    speed: 60,
+    fill: '#4A4842',
+    shade: '#2A2925',
+    snowOpacity: 1,
+    peaks: [
+      { x: 1180, y: 232, lw: 150, rw: 170, snow: 0.32 },
+      { x: 1010, y: 150, lw: 330, rw: 300, snow: 0.36 },
+      { x: 1318, y: 282, lw: 150, rw: 170, snow: 0.26 },
+    ] as Peak[],
+  },
+  {
+    name: 'mid',
+    speed: 35,
+    fill: '#2F2D27',
+    shade: '#242320',
+    snowOpacity: 1,
+    peaks: [
+      { x: 150, y: 402, lw: 210, rw: 190 },
+      { x: 390, y: 384, lw: 190, rw: 210 },
+      { x: 640, y: 392, lw: 180, rw: 170 },
+      { x: 1250, y: 356, lw: 200, rw: 210 },
+      { x: 1440, y: 382, lw: 160, rw: 160 },
+    ] as Peak[],
+  },
+  {
+    name: 'near',
+    speed: 0,
+    fill: '#1B1B1A',
+    shade: '#151514',
+    snowOpacity: 1,
+    peaks: [
+      { x: 10, y: 438, lw: 230, rw: 230 },
+      { x: 270, y: 456, lw: 210, rw: 220 },
+      { x: 530, y: 444, lw: 220, rw: 200 },
+      { x: 790, y: 454, lw: 210, rw: 230 },
+      { x: 1070, y: 438, lw: 250, rw: 220 },
+      { x: 1350, y: 448, lw: 220, rw: 230 },
+    ] as Peak[],
+  },
+].map((layer) => ({ ...layer, shapes: layer.peaks.map(shapes) }));
+
+const SUN = { x: 1010, y: 196, r: 98, arc: 140 };
+const CAMP = { x: 902, y: 304 };
+
+// Sentier : des contreforts en bas à gauche jusqu'au camp de base, avec deux lacets.
+const trail = `M330,492 C362,474 392,462 430,458 S508,452 548,440 S620,414 664,404 S736,392 770,378 S836,366 812,350 S842,332 872,326 S896,314 ${CAMP.x},${CAMP.y}`;
+
+const letters = 'ALTITUDE'.split('');
+---
+
+<section class="hero" data-hero>
+  <script is:inline>
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('hero-intro');
+      setTimeout(function () { document.documentElement.classList.remove('hero-intro'); }, 4000);
+    }
+  </script>
+
+  <div class="hero__land" aria-hidden="true">
+    <div class="hero__art" data-hero-art>
+      <svg class="hero__svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMax slice" focusable="false">
+        <defs>
+          <radialGradient id="heroSunGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#F8D541" stop-opacity="0.22" />
+            <stop offset="100%" stop-color="#F8D541" stop-opacity="0" />
+          </radialGradient>
+          <mask id="heroTrailMask" maskUnits="userSpaceOnUse" x="0" y="0" width={W} height={BASE}>
+            <path d={trail} pathLength="1" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round" stroke-dasharray="1 1" stroke-dashoffset="0" data-hero-trail-mask />
+          </mask>
+        </defs>
+
+        <g data-para="140">
+          <g data-hero-sun>
+            <circle cx={SUN.x} cy={SUN.y} r={SUN.r * 2.6} fill="url(#heroSunGlow)" />
+            <circle cx={SUN.x} cy={SUN.y} r={SUN.r} fill="#F8D541" />
+          </g>
+          <circle cx={SUN.x} cy={SUN.y} r={SUN.arc} fill="none" stroke="#F8D541" stroke-width="3" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="0" transform={`rotate(140 ${SUN.x} ${SUN.y})`} data-hero-arc />
+        </g>
+
+        {layers.map((layer) => (
+          <g data-para={layer.speed}>
+            <g class={`hero__layer hero__layer--${layer.name}`} data-hero-layer>
+              {layer.shapes.map((s) => (
+                <g>
+                  <path d={s.body} fill={layer.fill} />
+                  <path d={s.shade} fill={layer.shade} />
+                  {s.snow && (
+                    <g opacity={layer.snowOpacity} data-hero-snow>
+                      <path d={s.snow} fill="#F2F0EB" />
+                      <path d={s.snowShade} fill="#C9C5BC" />
+                    </g>
+                  )}
+                </g>
+              ))}
+            </g>
+          </g>
+        ))}
+
+        <g data-para="60">
+          <path d={trail} fill="none" stroke="#F8D541" stroke-width="5" stroke-linecap="round" stroke-dasharray="0 13" mask="url(#heroTrailMask)" />
+          <g class="hero__camp" data-hero-camp>
+            <path d={`M${CAMP.x - 22},${CAMP.y + 1} L${CAMP.x - 11},${CAMP.y - 16} L${CAMP.x},${CAMP.y + 1} Z`} fill="#F2F0EB" />
+            <path d={`M${CAMP.x - 11},${CAMP.y - 16} L${CAMP.x - 7},${CAMP.y + 1} L${CAMP.x},${CAMP.y + 1} Z`} fill="#C9C5BC" />
+            <line x1={CAMP.x + 8} y1={CAMP.y + 1} x2={CAMP.x + 8} y2={CAMP.y - 34} stroke="#F2F0EB" stroke-width="2.5" stroke-linecap="round" />
+            <path d={`M${CAMP.x + 9},${CAMP.y - 34} L${CAMP.x + 32},${CAMP.y - 27} L${CAMP.x + 9},${CAMP.y - 20} Z`} fill="#F8D541" />
+          </g>
+        </g>
+      </svg>
+
+      <div class="hero__tags" data-hero-tags>
+        <span class="hero__tag hero__tag--summit" style={`left:${((SUN.x + SUN.arc + 14) / W) * 100}%;top:${((SUN.y - 70) / H) * 100}%`}>
+          <strong>Kanchenjunga</strong> 8’586&nbsp;m
+        </span>
+        <span class="hero__tag hero__tag--camp" style={`right:${(1 - (CAMP.x - 34) / W) * 100}%;top:${((CAMP.y - 30) / H) * 100}%`}>
+          <strong>Camp de base</strong> 5’475&nbsp;m
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="container hero__content" data-hero-content>
+    <span class="hero__pill" data-hero-fade>Nouveau programme de remobilisation</span>
+
+    <div class="hero__lockup">
+      <h1 class="hero__title" aria-label="ALTITUDE">
+        <span class="hero__word" aria-hidden="true">
+          {letters.map((l) => <span class="hero__letter" data-hero-letter>{l}</span>)}
+        </span>
+      </h1>
+      <p class="hero__rule">
+        <span class="hero__rule-line hero__rule-line--left" data-hero-line></span>
+        <span class="hero__rule-text" data-hero-ruletext>Avant · Pendant · Après</span>
+        <span class="hero__rule-line hero__rule-line--right" data-hero-line></span>
+      </p>
+    </div>
+
+    <p class="hero__claim" data-hero-fade>Construire un projet, le marcher, <span>le faire tenir.</span></p>
+    <p class="hero__lead" data-hero-fade>Cinq jeunes, plusieurs mois de préparation à Genève, soixante jours au Népal, six mois d’accompagnement au retour.</p>
+    <ul class="hero__meta" aria-label="En un coup d’œil" data-hero-fade>
+      <li>Népal</li>
+      <li>Kanchenjunga</li>
+      <li>Printemps 2027</li>
+    </ul>
+    <div class="hero__actions" data-hero-fade>
+      <a href="#orienter" class="hero__btn hero__btn--accent">
+        Orienter un jeune
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+      </a>
+      <a href="#en-bref" class="hero__btn hero__btn--ghost">Découvrir le programme</a>
+    </div>
+  </div>
+</section>
+
+<script>
+  const run = () => {
+    const hero = document.querySelector<HTMLElement>('[data-hero]');
+    const root = document.documentElement;
+    if (!hero) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      root.classList.remove('hero-intro');
+      return;
+    }
+
+    Promise.all([import('gsap'), import('gsap/ScrollTrigger')])
+      .then(([{ gsap }, { ScrollTrigger }]) => {
+        gsap.registerPlugin(ScrollTrigger);
+
+        const q = (sel: string) => Array.from(hero.querySelectorAll<Element>(sel));
+        const sun = q('[data-hero-sun]');
+        const arc = q('[data-hero-arc]');
+        const layers = q('[data-hero-layer]');
+        const snows = q('[data-hero-snow]');
+        const letters = q('[data-hero-letter]');
+        const lines = q('[data-hero-line]');
+        const ruleText = q('[data-hero-ruletext]');
+        const fades = q('[data-hero-fade]');
+        const trailMask = q('[data-hero-trail-mask]');
+        const camp = q('[data-hero-camp]');
+        const tags = q('.hero__tag');
+
+        // Si le délai de secours a déjà révélé le hero (chargement lent), on saute l'intro.
+        const intro = root.classList.contains('hero-intro');
+
+        // États de départ posés par le JS seulement : sans JS, tout reste visible.
+        if (intro) {
+          gsap.set(sun, { y: 110, opacity: 0 });
+          gsap.set(arc, { strokeDashoffset: 1 });
+          gsap.set(layers, { y: 80, opacity: 0 });
+          gsap.set(snows, { opacity: 0 });
+          gsap.set(letters, { yPercent: 160 });
+          gsap.set(lines, { scaleX: 0 });
+          gsap.set(ruleText, { opacity: 0, y: 8 });
+          gsap.set(fades, { opacity: 0, y: 22 });
+          gsap.set(trailMask, { strokeDashoffset: 1 });
+          gsap.set(camp, { opacity: 0, scale: 0.4, transformOrigin: '50% 100%' });
+          gsap.set(tags, { opacity: 0, y: 8 });
+          root.classList.remove('hero-intro');
+
+          const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+          tl.to(fades[0], { opacity: 1, y: 0, duration: 0.6 }, 0)
+            .to(sun, { y: 0, opacity: 1, duration: 1.6, ease: 'expo.out' }, 0)
+            .to(arc, { strokeDashoffset: 0, duration: 1.4, ease: 'power2.inOut' }, 0.25)
+            .to(layers, { y: 0, opacity: 1, duration: 1.2, stagger: 0.12 }, 0.1)
+            .to(letters, { yPercent: 0, duration: 0.9, stagger: 0.045, ease: 'expo.out' }, 0.15)
+            .to(lines, { scaleX: 1, duration: 0.8, ease: 'expo.out' }, 0.6)
+            .to(ruleText, { opacity: 1, y: 0, duration: 0.6 }, 0.7)
+            .to(snows, { opacity: (i: number, el: Element) => Number(el.getAttribute('opacity') ?? 1), duration: 0.7, stagger: 0.04 }, 0.7)
+            .to(fades.slice(1), { opacity: 1, y: 0, duration: 0.8, stagger: 0.08 }, 0.8)
+            .to(trailMask, { strokeDashoffset: 0, duration: 0.95, ease: 'power2.inOut' }, 0.95)
+            .to(camp, { opacity: 1, scale: 1, duration: 0.5, ease: 'expo.out' }, 1.8)
+            .to(tags, { opacity: 1, y: 0, duration: 0.5, stagger: 0.12 }, 1.75);
+        }
+
+        // Parallaxe : les couches lointaines descendent plus que les proches, le texte remonte.
+        const art = hero.querySelector<HTMLElement>('[data-hero-art]');
+        const scrub = { trigger: hero, start: 'top top', end: 'bottom top', scrub: 0.6 };
+        q('[data-para]').forEach((g) => {
+          const speed = Number(g.getAttribute('data-para'));
+          if (speed) gsap.to(g, { y: speed, ease: 'none', scrollTrigger: scrub });
+        });
+        const tagGroup = hero.querySelector('[data-hero-tags]');
+        if (tagGroup && art) {
+          gsap.to(tagGroup, { y: () => 60 * (art.clientWidth / 1440), ease: 'none', scrollTrigger: { ...scrub, invalidateOnRefresh: true } });
+        }
+        gsap.to(hero.querySelector('[data-hero-content]'), { y: -90, ease: 'none', scrollTrigger: scrub });
+      })
+      .catch(() => root.classList.remove('hero-intro'));
+  };
+
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', run, { once: true });
+</script>
+
+<style lang="scss">
+  $ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  .hero {
+    // Hauteur du paysage : un tiers de la largeur sur grand écran, plafonnée.
+    --land-h: min(33.333vw, 640px);
+    position: relative;
+    overflow: hidden;
+    min-height: min(100svh, 1000px);
+    padding: 150px 0 calc(var(--land-h) * 0.44);
+    background: #111111;
+    color: #F2F0EB;
+
+    @media (max-width: 1024px) {
+      padding-top: 132px;
+    }
+
+    @media (max-width: 640px) {
+      --land-h: 320px;
+      padding: 120px 0 calc(var(--land-h) - 24px);
+    }
+  }
+
+  // Masquage avant l'intro (classe posée par le script inline, retirée par le JS ou après 4 s).
+  :global(html.hero-intro) .hero [data-hero-fade],
+  :global(html.hero-intro) .hero [data-hero-letter],
+  :global(html.hero-intro) .hero [data-hero-line],
+  :global(html.hero-intro) .hero [data-hero-ruletext],
+  :global(html.hero-intro) .hero [data-hero-layer],
+  :global(html.hero-intro) .hero [data-hero-sun],
+  :global(html.hero-intro) .hero [data-hero-camp],
+  :global(html.hero-intro) .hero .hero__tag {
+    opacity: 0;
+  }
+
+  // ---------- Paysage ----------
+  .hero__land {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--land-h);
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .hero__art {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: max(100%, 960px);
+    aspect-ratio: 3 / 1;
+    transform: translateX(-50%);
+
+    // Sur mobile, on cadre le Kanchenjunga et le camp de base.
+    @media (max-width: 640px) {
+      width: 960px;
+      transform: translateX(calc(-50% - 150px));
+    }
+  }
+
+  .hero__svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .hero__layer,
+  .hero__camp {
+    transform-box: fill-box;
+  }
+
+  .hero__tags {
+    position: absolute;
+    inset: 0;
+  }
+
+  // Pastille sombre : le libellé reste lisible sur la neige comme sur la roche.
+  .hero__tag {
+    position: absolute;
+    white-space: nowrap;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 7px 12px 6px;
+    border-radius: 12px;
+    line-height: 1.2;
+    background: rgba(17, 17, 17, 0.78);
+    border: 1px solid rgba(248, 213, 65, 0.35);
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: rgba(242, 240, 235, 0.72);
+    font-variant-numeric: tabular-nums;
+
+    strong {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 16px;
+      color: #F2F0EB;
+    }
+
+    @media (max-width: 640px) {
+      font-size: 14px;
+
+      strong { font-size: 15px; }
+    }
+  }
+
+  // Sur mobile, le libellé du sommet passe au-dessus de l'épaule droite de l'arc pour rester dans l'écran.
+  .hero__tag--summit {
+    @media (max-width: 640px) {
+      left: auto !important;
+      right: 16%;
+      top: 7% !important;
+    }
+  }
+
+  .hero__tag--camp {
+    text-align: right;
+
+    strong { color: #F8D541; }
+  }
+
+  // ---------- Texte ----------
+  .hero__content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero__pill {
+    display: inline-block;
+    padding: 8px 16px;
+    border: 1px solid var(--color-accent);
+    border-radius: 100px;
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    color: var(--color-accent);
+    background: rgba(255, 223, 92, 0.08);
+    margin-bottom: 28px;
+
+    @media (max-width: 640px) { margin-bottom: 20px; }
+
+    @media (max-width: 420px) {
+      font-size: 11px;
+      letter-spacing: 0.06em;
+    }
+  }
+
+  .hero__lockup {
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+    max-width: 100%;
+    margin-bottom: 32px;
+
+    @media (max-width: 640px) { margin-bottom: 24px; }
+  }
+
+  .hero__title {
+    margin: 0;
+    font-family: var(--font-headline);
+    font-weight: 700;
+    font-size: clamp(64px, 13vw, 200px);
+    line-height: 0.8;
+    letter-spacing: -0.02em;
+    color: #F2F0EB;
+
+    // Sur mobile, le mot occupe toute la largeur utile.
+    @media (max-width: 640px) {
+      font-size: min(21vw, 132px);
+    }
+  }
+
+  .hero__word {
+    display: inline-flex;
+    overflow: hidden;
+    // Laisse la place aux empattements du haut et du bas pendant la montée des lettres.
+    padding: 0.08em 0 0.02em;
+    margin: -0.08em 0 -0.02em;
+  }
+
+  .hero__letter {
+    display: inline-block;
+    will-change: transform;
+  }
+
+  .hero__rule {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 14px 0 0;
+    color: #F8D541;
+  }
+
+  .hero__rule-line {
+    flex: 1 1 auto;
+    height: 3px;
+    background: #F8D541;
+
+    &--left { transform-origin: right center; }
+    &--right { transform-origin: left center; }
+  }
+
+  .hero__rule-text {
+    flex: 0 0 auto;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: clamp(11px, 1.15vw, 16px);
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: #F8D541;
+    // compense l'espacement de la dernière lettre
+    margin-right: -0.32em;
+
+    @media (max-width: 640px) {
+      letter-spacing: 0.2em;
+      margin-right: -0.2em;
+    }
+  }
+
+  .hero__claim {
+    font-family: var(--font-headline);
+    font-weight: 700;
+    font-size: clamp(24px, 2.5vw, 36px);
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    color: #F2F0EB;
+    margin-bottom: 16px;
+
+    span {
+      display: block;
+      color: #F8D541;
+    }
+  }
+
+  .hero__lead {
+    font-size: var(--fs-md);
+    line-height: 1.5;
+    color: rgba(242, 240, 235, 0.74);
+    max-width: 32em;
+    margin-bottom: 24px;
+  }
+
+  .hero__meta {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    margin: 0 0 36px;
+    padding: 0;
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(242, 240, 235, 0.9);
+
+    li {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+
+      &::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #F8D541;
+      }
+    }
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .hero__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    padding: 16px 32px;
+    border-radius: 100px;
+    font-size: var(--fs-base);
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.4s $ease, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.4s $ease;
+
+    svg { transition: transform 0.4s $ease; }
+
+    &:hover {
+      transform: translateY(-2px);
+
+      svg { transform: translateX(4px); }
+    }
+
+    &--accent {
+      background: var(--color-accent);
+      color: var(--color-primary);
+      box-shadow: 0 8px 30px rgba(255, 223, 92, 0.22);
+
+      &:hover { box-shadow: 0 14px 40px rgba(255, 223, 92, 0.32); }
+    }
+
+    &--ghost {
+      color: #F2F0EB;
+      border: 1px solid rgba(242, 240, 235, 0.3);
+      background: rgba(17, 17, 17, 0.35);
+
+      &:hover { border-color: var(--color-accent); color: var(--color-accent); }
+    }
+
+    @media (max-width: 400px) {
+      padding: 14px 24px;
+    }
+  }
+</style>

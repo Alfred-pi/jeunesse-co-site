@@ -1,0 +1,672 @@
+---
+// Frise des six mois d'accompagnement après le retour (dossier ALTITUDE, p. 10 et 18).
+// Positions en mois depuis le retour (0 à 6). Repères indicatifs.
+const MONTHS = 6;
+const ticks = ['Retour', '1 mois', '2 mois', '3 mois', '4 mois', '5 mois', '6 mois'];
+
+const events = [
+  { t: 0.15, tv: 0, tier: 'high', when: 'Semaine 1', title: 'Semaine du retour', text: 'Bilan individuel, remise de la lettre écrite avant le départ.' },
+  { t: 0.9, tier: 'low', when: 'Semaines suivantes', title: 'Entrée dans le projet', text: 'Stage, apprentissage ou école, préparé avant le départ.' },
+  { t: 5, tv: 4.4, tier: 'high', side: 'right', when: 'Au cours des six mois', title: 'Restitution publique', text: 'Les jeunes présentent leur film aux familles, aux partenaires et aux autorités.' },
+];
+
+const meetings = [1, 2, 3, 4, 5, 6];
+
+// Version verticale : notes qui accompagnent les jalons, pour lire la frise sans légende.
+const notes = [
+  { t: 3, text: 'Rapport à 3 mois, puis suivi adapté à la situation' },
+  { t: 6, text: 'Rapport à 6 mois' },
+];
+const reports = [
+  { t: 1, label: 'Rapport de séjour' },
+  { t: 3, label: 'Rapport à 3 mois' },
+  { t: 6, label: 'Rapport à 6 mois' },
+];
+
+const legend = [
+  { key: 'weekly', label: 'Suivi individuel hebdomadaire, les trois premiers mois' },
+  { key: 'adapted', label: 'Suivi adapté à la situation ensuite' },
+  { key: 'meeting', label: 'Rencontre mensuelle des cinq jeunes' },
+  { key: 'school', label: 'Présence auprès de l’école ou de l’employeur' },
+  { key: 'report', label: 'Rapport à l’autorité : séjour, puis évolution à 3 et 6 mois' },
+];
+---
+
+<figure class="after" data-after>
+  <!-- Version horizontale (écrans larges) -->
+  <div class="after__h" data-orient="x">
+    <div class="after__row after__row--events">
+      <div class="after__label"></div>
+      <div class="after__track">
+        {events.map((e) => (
+          <div class:list={['after__event', `is-${e.tier}`, { 'is-right': e.side === 'right' }]} style={`--t:${e.t}`}>
+            <span class="after__stem" data-a="stem" aria-hidden="true"></span>
+            <div data-a="fade">
+              <p class="after__when">{e.when}</p>
+              <h4>{e.title}</h4>
+              <p class="after__text">{e.text}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="after__row after__row--axis" aria-hidden="true">
+      <div class="after__label"></div>
+      <div class="after__track">
+        <span class="after__axis" data-a="axis"></span>
+        {ticks.map((label, i) => (
+          <span class:list={['after__tick', { 'is-first': i === 0, 'is-last': i === MONTHS }]} style={`--t:${i}`} data-a="fade">
+            <span>{label}</span>
+          </span>
+        ))}
+        {events.map((e) => <span class="after__pin" style={`--t:${e.t}`} data-a="pop"></span>)}
+      </div>
+    </div>
+
+    <div class="after__row after__lane">
+      <div class="after__label" data-a="fade">
+        <strong>Suivi individuel</strong>
+        <span>Chaque semaine, puis selon la situation</span>
+      </div>
+      <div class="after__track">
+        <span class="after__bar after__bar--weekly" style="--from:0;--to:3" data-a="bar"><span data-a="late">Hebdomadaire</span></span>
+        <span class="after__bar after__bar--adapted" style="--from:3;--to:6" data-a="bar"><span data-a="late">Adapté à la situation</span></span>
+      </div>
+    </div>
+
+    <div class="after__row after__lane">
+      <div class="after__label" data-a="fade">
+        <strong>Le groupe</strong>
+        <span>Rencontre mensuelle des cinq jeunes</span>
+      </div>
+      <div class="after__track" aria-hidden="true">
+        <span class="after__guide" data-a="line"></span>
+        {meetings.map((m) => <span class="after__dot" style={`--t:${m}`} data-a="pop"></span>)}
+      </div>
+    </div>
+
+    <div class="after__row after__lane">
+      <div class="after__label" data-a="fade">
+        <strong>École ou employeur</strong>
+        <span>Rencontres tripartites, médiation</span>
+      </div>
+      <div class="after__track" aria-hidden="true">
+        <span class="after__school" data-a="line"></span>
+      </div>
+    </div>
+
+    <div class="after__row after__lane">
+      <div class="after__label" data-a="fade">
+        <strong>Autorité mandante</strong>
+        <span>Rapport de séjour, puis rapports d’évolution</span>
+      </div>
+      <div class="after__track">
+        {reports.map((r) => (
+          <span class:list={['after__report', { 'is-last': r.t === MONTHS }]} style={`--t:${r.t}`}>
+            <i data-a="pop" aria-hidden="true"></i>
+            <span data-a="late">{r.label}</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <!-- Version verticale (mobile) -->
+  <div class="after__v" data-orient="y">
+    <ul class="after__legend">
+      {legend.map((l) => (
+        <li data-a="fade"><span class={`after__swatch after__swatch--${l.key}`} aria-hidden="true"></span>{l.label}</li>
+      ))}
+    </ul>
+
+    <div class="after__vchart">
+      <span class="after__vaxis" data-a="axis" aria-hidden="true"></span>
+      {ticks.map((label, i) => (
+        <span class="after__vtick" style={`--t:${i}`} data-a="fade" aria-hidden="true">{label}</span>
+      ))}
+      <span class="after__vbar after__vbar--weekly" style="--from:0;--to:3" data-a="bar" aria-hidden="true"></span>
+      <span class="after__vbar after__vbar--adapted" style="--from:3;--to:6" data-a="bar" aria-hidden="true"></span>
+      <span class="after__vguide" data-a="line" aria-hidden="true"></span>
+      {meetings.map((m) => <span class="after__vdot" style={`--t:${m}`} data-a="pop" aria-hidden="true"></span>)}
+      <span class="after__vschool" data-a="line" aria-hidden="true"></span>
+      {reports.map((r) => <span class="after__vreport" style={`--t:${r.t}`} data-a="pop" aria-hidden="true"></span>)}
+      {events.map((e) => <span class="after__vpin" style={`--t:${e.tv ?? e.t}`} data-a="pop" aria-hidden="true"></span>)}
+      {notes.map((n) => <p class="after__vnote" style={`--t:${n.t}`} data-a="fade">{n.text}</p>)}
+      {events.map((e) => (
+        <div class="after__vevent" style={`--t:${e.tv ?? e.t}`} data-a="fade">
+          <p class="after__when">{e.when}</p>
+          <h4>{e.title}</h4>
+          <p class="after__text">{e.text}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</figure>
+
+<script>
+  const initAfter = () => {
+    const fig = document.querySelector<HTMLElement>('[data-after]');
+    if (!fig || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    import('gsap').then(({ gsap }) => {
+      import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
+        gsap.registerPlugin(ScrollTrigger);
+
+        // N'anime que la version affichée (horizontale ou verticale).
+        const root = [...fig.querySelectorAll<HTMLElement>('[data-orient]')].find((el) => el.offsetParent !== null);
+        if (!root) return;
+        const vertical = root.dataset.orient === 'y';
+        const q = (a: string) => [...root.querySelectorAll(`[data-a="${a}"]`)];
+        const along = vertical ? 'scaleY' : 'scaleX';
+        const origin = vertical ? 'top center' : 'left center';
+
+        // Certaines familles n'existent que dans une orientation : on ignore les listes vides.
+        const steps: [string, gsap.TweenVars, gsap.TweenVars, number][] = [
+          ['axis', { [along]: 0, transformOrigin: origin }, { [along]: 1, duration: 1.3, ease: 'power2.inOut' }, 0],
+          ['fade', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.08 }, 0.15],
+          ['bar', { [along]: 0, transformOrigin: origin }, { [along]: 1, duration: 1, stagger: 0.75, ease: 'power2.inOut' }, 0.6],
+          ['line', { [along]: 0, transformOrigin: origin }, { [along]: 1, duration: 1.6, stagger: 0.2, ease: 'power2.inOut' }, 0.8],
+          ['stem', { scaleY: 0, transformOrigin: 'bottom center' }, { scaleY: 1, duration: 0.7, stagger: 0.25 }, 0.9],
+          ['pop', { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, stagger: 0.1 }, 1.1],
+          ['late', { opacity: 0 }, { opacity: 1, duration: 0.6, stagger: 0.12 }, 2.2],
+        ];
+
+        const tl = gsap.timeline({ scrollTrigger: { trigger: fig, start: 'top 75%', once: true }, defaults: { ease: 'power3.out' } });
+        for (const [key, from, to, at] of steps) {
+          const els = q(key);
+          if (!els.length) continue;
+          gsap.set(els, from);
+          tl.to(els, to, at);
+        }
+      });
+    });
+  };
+  if (document.readyState === 'complete') initAfter();
+  else window.addEventListener('load', initAfter, { once: true });
+</script>
+
+<style lang="scss">
+  $ink: #111;
+  $hatch: repeating-linear-gradient(-45deg, rgba(255, 223, 92, 0.85) 0 6px, rgba(255, 223, 92, 0.3) 6px 12px);
+
+  .after {
+    margin: 0;
+    color: var(--color-text);
+
+    h4 {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: var(--fs-md);
+      line-height: 1.15;
+      margin: 0 0 6px;
+      color: var(--color-text);
+    }
+  }
+
+  .after__when {
+    font-size: 13px !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-muted) !important;
+    margin: 0 0 6px !important;
+  }
+
+  .after__text {
+    font-size: var(--fs-base) !important;
+    line-height: 1.45 !important;
+    color: var(--color-text-muted) !important;
+    margin: 0 !important;
+  }
+
+  // ---------- Horizontal ----------
+  .after__h {
+    --label-w: 240px;
+    --gap: 32px;
+
+    @media (max-width: 1100px) {
+      --label-w: 180px;
+    }
+
+    @media (max-width: 899px) {
+      display: none;
+    }
+  }
+
+  .after__row {
+    display: grid;
+    grid-template-columns: var(--label-w) minmax(0, 1fr);
+    column-gap: var(--gap);
+  }
+
+  .after__track {
+    position: relative;
+    margin-right: 16px;
+  }
+
+  .after__row--events .after__track {
+    height: 300px;
+  }
+
+  .after__event {
+    --lift: 16px;
+    position: absolute;
+    bottom: var(--lift);
+    left: calc(var(--t) / 6 * 100%);
+    width: 270px;
+    padding-left: 18px;
+
+    &.is-high { --lift: 172px; }
+
+    &.is-right {
+      left: auto;
+      right: calc(100% - var(--t) / 6 * 100%);
+      padding-left: 0;
+      padding-right: 18px;
+
+      p, h4 { text-align: right !important; }
+
+      .after__stem { left: auto; right: -1px; }
+    }
+  }
+
+  .after__stem {
+    position: absolute;
+    left: -1px;
+    top: 4px;
+    bottom: calc(-1 * var(--lift));
+    width: 2px;
+    background: $ink;
+  }
+
+  .after__row--axis .after__track {
+    height: 64px;
+  }
+
+  .after__axis {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 3px;
+    margin-top: -1.5px;
+    background: $ink;
+    border-radius: 2px;
+  }
+
+  .after__tick {
+    position: absolute;
+    top: 0;
+    left: calc(var(--t) / 6 * 100%);
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -1px;
+      top: 0;
+      width: 2px;
+      height: 12px;
+      background: $ink;
+    }
+
+    span {
+      position: absolute;
+      top: 20px;
+      left: 0;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      font-size: var(--fs-base);
+      font-weight: 600;
+      color: var(--color-text);
+    }
+
+    &.is-first span { transform: none; }
+    &.is-last span { transform: translateX(-100%); }
+  }
+
+  .after__pin {
+    position: absolute;
+    top: 0;
+    left: calc(var(--t) / 6 * 100%);
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    border: 3px solid $ink;
+  }
+
+  .after__lane {
+    border-top: 1px solid var(--color-border);
+
+    .after__label,
+    .after__track {
+      min-height: 76px;
+    }
+  }
+
+  .after__label {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    padding: 12px 0;
+
+    strong {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: clamp(17px, 1.35vw, 20px);
+      line-height: 1.2;
+    }
+
+    span {
+      font-size: 14px;
+      line-height: 1.35;
+      color: var(--color-text-muted);
+    }
+  }
+
+  .after__bar {
+    position: absolute;
+    top: 50%;
+    height: 44px;
+    margin-top: -22px;
+    left: calc(var(--from) / 6 * 100%);
+    width: calc((var(--to) - var(--from)) / 6 * 100%);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    font-size: 15px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+
+    &--weekly {
+      background: var(--color-accent);
+      border-radius: 12px 0 0 12px;
+      color: $ink;
+    }
+
+    &--adapted {
+      background: $hatch;
+      border-radius: 0 12px 12px 0;
+      color: $ink;
+      border-left: 3px solid var(--color-bg);
+
+      span {
+        background: var(--color-bg);
+        padding: 4px 10px;
+        border-radius: 100px;
+      }
+    }
+  }
+
+  .after__guide {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 0;
+    border-top: 2px dotted #B8B0A3;
+  }
+
+  .after__dot {
+    position: absolute;
+    top: 50%;
+    left: calc(var(--t) / 6 * 100%);
+    width: 18px;
+    height: 18px;
+    margin: -9px 0 0 -9px;
+    border-radius: 50%;
+    background: $ink;
+    box-shadow: 0 0 0 4px var(--color-bg), 0 0 0 6px var(--color-accent);
+  }
+
+  .after__school {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 6px;
+    margin-top: -3px;
+    background: $ink;
+    border-radius: 3px;
+  }
+
+  .after__report {
+    position: absolute;
+    top: 50%;
+    left: calc(var(--t) / 6 * 100%);
+
+    i {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: -9px;
+      top: -9px;
+
+      &::before {
+        content: '';
+        position: absolute;
+        inset: 2px;
+        background: $ink;
+        transform: rotate(45deg);
+        border-radius: 2px;
+      }
+    }
+
+    span {
+      position: absolute;
+      left: 18px;
+      top: -11px;
+      white-space: nowrap;
+      font-size: 15px;
+      font-weight: 600;
+
+      @media (max-width: 1100px) { font-size: 14px; }
+    }
+
+    &.is-last span {
+      left: auto;
+      right: 18px;
+    }
+  }
+
+  // ---------- Vertical (mobile) ----------
+  .after__v {
+    display: none;
+
+    @media (max-width: 899px) {
+      display: block;
+    }
+  }
+
+  .after__legend {
+    list-style: none;
+    display: grid;
+    gap: 12px;
+    margin: 0 0 40px;
+    padding: 0;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+  }
+
+  .after__swatch {
+    flex: 0 0 auto;
+    position: relative;
+    width: 26px;
+    height: 18px;
+
+    &--weekly { background: var(--color-accent); border-radius: 5px; }
+    &--adapted { background: $hatch; border-radius: 5px; }
+    &--school::before { content: ''; position: absolute; left: 0; right: 0; top: 6px; height: 6px; border-radius: 3px; background: $ink; }
+
+    &--meeting::before {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 1px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: $ink;
+      box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-accent);
+    }
+
+    &--report::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 3px;
+      width: 12px;
+      height: 12px;
+      background: $ink;
+      transform: rotate(45deg);
+      border-radius: 2px;
+    }
+  }
+
+  .after__vchart {
+    --axis: 62px;
+    position: relative;
+    height: 900px;
+    margin: 24px 0 48px;
+  }
+
+  .after__vaxis {
+    position: absolute;
+    left: var(--axis);
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    margin-left: -1.5px;
+    background: $ink;
+    border-radius: 2px;
+  }
+
+  .after__vtick {
+    position: absolute;
+    left: 0;
+    width: calc(var(--axis) - 14px);
+    top: calc(var(--t) / 6 * 100%);
+    margin-top: -11px;
+    text-align: right;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 22px;
+    white-space: nowrap;
+
+    &::after {
+      content: '';
+      position: absolute;
+      right: -14px;
+      top: 10px;
+      width: 12px;
+      height: 2px;
+      background: $ink;
+    }
+  }
+
+  .after__vbar {
+    position: absolute;
+    left: calc(var(--axis) + 12px);
+    width: 14px;
+    top: calc(var(--from) / 6 * 100%);
+    height: calc((var(--to) - var(--from)) / 6 * 100%);
+
+    &--weekly { background: var(--color-accent); border-radius: 7px 7px 0 0; }
+    &--adapted { background: $hatch; border-radius: 0 0 7px 7px; border-top: 3px solid var(--color-bg); }
+  }
+
+  .after__vguide {
+    position: absolute;
+    left: calc(var(--axis) + 40px);
+    top: 0;
+    bottom: 0;
+    width: 0;
+    border-left: 2px dotted #B8B0A3;
+  }
+
+  .after__vdot {
+    position: absolute;
+    left: calc(var(--axis) + 41px);
+    top: calc(var(--t) / 6 * 100%);
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border-radius: 50%;
+    background: $ink;
+    box-shadow: 0 0 0 3px var(--color-bg), 0 0 0 5px var(--color-accent);
+  }
+
+  .after__vschool {
+    position: absolute;
+    left: calc(var(--axis) + 60px);
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    background: $ink;
+    border-radius: 3px;
+  }
+
+  .after__vreport {
+    position: absolute;
+    left: var(--axis);
+    top: calc(var(--t) / 6 * 100%);
+    width: 18px;
+    height: 18px;
+    margin: -9px 0 0 -9px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      background: $ink;
+      transform: rotate(45deg);
+      border-radius: 2px;
+      box-shadow: 0 0 0 3px var(--color-bg);
+    }
+  }
+
+  .after__vpin {
+    position: absolute;
+    left: calc(var(--axis) + 84px);
+    top: calc(var(--t) / 6 * 100%);
+    width: 18px;
+    height: 18px;
+    margin: -9px 0 0 -9px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    border: 3px solid $ink;
+  }
+
+  .after__vnote {
+    position: absolute;
+    left: calc(var(--axis) + 100px);
+    right: 0;
+    top: calc(var(--t) / 6 * 100%);
+    margin: -11px 0 0 !important;
+    font-size: 15px !important;
+    line-height: 1.45 !important;
+    font-weight: 600;
+    color: var(--color-text) !important;
+  }
+
+  .after__vevent {
+    position: absolute;
+    left: calc(var(--axis) + 100px);
+    right: 0;
+    top: calc(var(--t) / 6 * 100%);
+    margin-top: -10px;
+
+    h4 { font-size: 19px; }
+    .after__text { font-size: 15px !important; }
+  }
+</style>

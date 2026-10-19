@@ -1,6 +1,10 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import AltitudeHero from '../components/altitude/AltitudeHero.astro';
+import AltitudeCurve from '../components/altitude/AltitudeCurve.astro';
 import AltitudeProfile from '../components/altitude/AltitudeProfile.astro';
+import AltitudeAfter from '../components/altitude/AltitudeAfter.astro';
+import AltitudeEvidence from '../components/altitude/AltitudeEvidence.astro';
 import { Image } from 'astro:assets';
 import altitudeLogo from '../assets/altitude/altitude-logo.png';
 import ziadPhoto from '../assets/altitude/ziad-maalem-himalaya.jpg';
@@ -13,45 +17,48 @@ import ogAltitude from '../assets/altitude/og-altitude.jpg';
 const base = import.meta.env.BASE_URL;
 
 // Contenu tiré du dossier « ALTITUDE, programme de remobilisation » (Jeunesse&Co, octobre 2026).
+
+// Icônes au trait (24×24). pathLength="1" permet de les dessiner à l'entrée dans l'écran.
+const ico = (body: string) => body.replace(/<(path|circle|rect|line|polyline)\b/g, '<$1 pathLength="1"');
+const icons = {
+  mountain: ico('<path d="m3 20 6.5-11 3.5 6 2.5-4L21 20z"/><path d="m7.6 12.2 1.9-1.2 1.6 1.4"/>'),
+  map: ico('<path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5"/><path d="M15 6.5V20"/>'),
+  briefcase: ico('<rect x="2.5" y="7" width="19" height="13" rx="2"/><path d="M8.5 7V5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v2"/><path d="M2.5 13h19"/>'),
+  firstaid: ico('<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8"/><path d="M8 12h8"/>'),
+  sunrise: ico('<path d="M12 3v6"/><path d="m9 6 3-3 3 3"/><path d="M4.9 11.9 6.3 13.3"/><path d="M19.1 11.9 17.7 13.3"/><path d="M2 18h20"/><path d="M16 18a4 4 0 0 0-8 0"/>'),
+  route: ico('<circle cx="6" cy="19" r="2.5"/><path d="M8.5 19H17a3.5 3.5 0 0 0 0-7H7a3.5 3.5 0 0 1 0-7h8.5"/><circle cx="18" cy="5" r="2.5"/>'),
+  camera: ico('<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3.5"/>'),
+  fire: ico('<path d="M12 3c.5 3 4 4.5 4 9a4 4 0 0 1-8 0c0-2 1-3 2-4 0 1.5.8 2.5 2 2.5 0-3-1-5 0-7.5z"/><path d="M5 21h14"/>'),
+  stethoscope: ico('<path d="M5 3H4a1 1 0 0 0-1 1v5a5 5 0 0 0 10 0V4a1 1 0 0 0-1-1h-1"/><path d="M8 14v1a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/>'),
+  stairs: ico('<path d="M3 20h4v-4h4v-4h4V8h4V4h2"/>'),
+  pulse: ico('<path d="M2 12h4l3-8 4 16 3-8h6"/>'),
+  shield: ico('<path d="M12 21s8-3.8 8-10V5l-8-3-8 3v6c0 6.2 8 10 8 10z"/><path d="m8.5 11.5 2.5 2.5 4.5-4.5"/>'),
+  signal: ico('<path d="M5 19a10 10 0 0 1 0-14"/><path d="M8.5 15.5a5 5 0 0 1 0-7"/><circle cx="12" cy="12" r="1.5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/>'),
+  rules: ico('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/>'),
+};
+
 const facts = [
-  { n: '5', unit: 'jeunes', text: 'de 15 à 18 ans par cohorte, admis sur entretien.' },
-  { n: '40 h', unit: 'par semaine', text: 'de préparation à Genève, jusqu’au départ.' },
-  { n: '60', unit: 'jours', text: 'au Népal, dans la région du Kanchenjunga, au printemps 2027.' },
-  { n: '3', unit: 'adultes', text: 'de Jeunesse&Co : un éducateur et un intervenant multimédia en continu, le directeur sur les deux dernières semaines.' },
-  { n: '1', unit: 'projet', text: 'post-séjour défini avant le départ : stage, apprentissage ou école.' },
-  { n: '6', unit: 'mois', text: 'd’accompagnement au minimum après le retour.' },
+  { n: 5, unit: 'jeunes', text: 'de 15 à 18 ans, admis sur entretien' },
+  { n: 40, unit: 'heures', text: 'par semaine de préparation à Genève' },
+  { n: 60, unit: 'jours', text: 'au Népal, au printemps 2027' },
+  { n: 3, unit: 'adultes', text: 'de Jeunesse&Co, du premier au dernier jour' },
+  { n: 1, unit: 'projet', text: 'défini avant le départ : stage, apprentissage ou école' },
+  { n: 6, unit: 'mois', text: 'd’accompagnement au minimum après le retour' },
 ];
 
-const notThis = [
-  { title: 'Une punition ou une mise à l’écart.' },
-  { title: 'Une récompense ou des vacances.' },
-  { title: 'Un exploit sportif.', text: 'Les jeunes ne gravissent aucun sommet : le camp de base est un objectif symbolique, jamais une obligation.' },
-  { title: 'Une réponse clé en main.', text: 'C’est un outil au service d’un projet que le jeune porte.' },
-];
+const notThis = ['Une punition', 'Des vacances', 'Un exploit sportif', 'Une réponse clé en main'];
 
 const temps = [
-  {
-    n: '01', name: 'Avant', verb: 'Se préparer', when: 'Jusqu’au départ · 40 h/sem.',
-    items: ['Préparation physique', 'Construction du séjour', 'Projet post-séjour', 'Culture, santé, sécurité'],
-    goal: 'Un groupe soudé, une condition physique validée, un projet post-séjour concret.',
-  },
-  {
-    n: '02', name: 'Pendant', verb: 'Marcher', when: '60 jours au Népal',
-    items: ['Trek progressif', 'Vie au camp de base', 'Vie de groupe', 'Carnet et film'],
-    goal: 'Des expériences de réussite répétées, reconnues par le groupe et par les adultes.',
-  },
-  {
-    n: '03', name: 'Après', verb: 'Concrétiser', when: '6 mois minimum',
-    items: ['Entrée dans le projet', 'Suivi individuel', 'Liens école / employeur', 'Restitution publique'],
-    goal: 'Un jeune inscrit dans une formation ou une activité, et soutenu dans les moments de fragilité.',
-  },
+  { n: '01', name: 'Avant', verb: 'Se préparer', when: 'Jusqu’au départ · 40 h/sem.', items: ['Préparation physique', 'Construction du séjour', 'Projet post-séjour', 'Culture, santé, sécurité'] },
+  { n: '02', name: 'Pendant', verb: 'Marcher', when: '60 jours au Népal', items: ['Trek progressif', 'Vie au camp de base', 'Vie de groupe', 'Carnet et film'] },
+  { n: '03', name: 'Après', verb: 'Concrétiser', when: '6 mois minimum', items: ['Entrée dans le projet', 'Suivi individuel', 'Liens école / employeur', 'Restitution publique'] },
 ];
 
 const chantiers = [
-  { title: 'Préparation physique', text: 'Endurance, renforcement, randonnées de difficulté croissante au Salève, dans le Jura puis dans les Préalpes. Elle se conclut par une sortie test de plusieurs jours en cabane, en altitude, avec le sac complet.' },
-  { title: 'Construction collective du séjour', text: 'Avec l’agence partenaire, les jeunes travaillent l’itinéraire, établissent le budget, choisissent et entretiennent le matériel, organisent la logistique et écrivent les règles de vie du groupe.' },
-  { title: 'Projet post-séjour', text: 'Bilan de compétences, recherche de places, stages d’observation, candidatures, entretiens. Objectif : une place confirmée ou des démarches avancées, en stage longue durée, en apprentissage ou en école.' },
-  { title: 'Culture, santé et sécurité', text: 'Découverte du Népal, de sa langue et de ses usages. Premiers secours, altitude, hygiène, gestion de l’effort. Initiation à la prise de vue et au récit avec l’intervenant multimédia.' },
+  { icon: icons.mountain, title: 'Préparation physique', text: 'Salève, Jura puis Préalpes, jusqu’à une sortie test de plusieurs jours en cabane, sac complet.' },
+  { icon: icons.map, title: 'Construire le séjour', text: 'Itinéraire, budget, matériel, logistique et règles de vie : les jeunes le préparent eux-mêmes.' },
+  { icon: icons.briefcase, title: 'Projet post-séjour', text: 'Stages d’observation, candidatures, entretiens : une place confirmée avant le départ.' },
+  { icon: icons.firstaid, title: 'Culture, santé, sécurité', text: 'Le Népal et ses usages, premiers secours, altitude, gestion de l’effort, prise de vue.' },
 ];
 
 const week = [
@@ -63,51 +70,29 @@ const week = [
 ];
 
 const departure = [
-  'Assiduité régulière sur toute la durée de la préparation.',
-  'Capacité physique validée lors de la sortie test en montagne.',
-  'Projet post-séjour défini et engagé, avec une date d’entrée ou des démarches avancées.',
-  'Aptitude médicale confirmée, vaccinations à jour.',
-  'Respect du cadre et des règles de vie élaborées par le groupe.',
-  'Documents en ordre : passeport, visa, autorisations de l’autorité compétente si une mesure est en cours.',
+  'Assiduité régulière sur toute la préparation',
+  'Capacité physique validée lors de la sortie test',
+  'Projet post-séjour défini et engagé',
+  'Aptitude médicale confirmée, vaccinations à jour',
+  'Respect du cadre et des règles de vie du groupe',
+  'Documents en ordre : passeport, visa, autorisations',
 ];
 
-const campLife = [
-  { title: 'Un rythme quotidien tenu.', text: 'Lever, tâches collectives, cuisine avec l’éducateur, courtes randonnées d’entretien autour du camp, temps de repos.' },
-  { title: 'Le projet post-séjour.', text: 'Un temps individuel chaque semaine sur la suite. Le séjour sert à éprouver le projet, pas à l’oublier.' },
-  { title: 'Le film.', text: 'Ateliers de prise de vue, d’interview et de montage avec Issa Dieng.' },
-  { title: 'La rencontre.', text: 'Sherpas, cuisiniers, porteurs, cérémonie de la puja : une autre culture du travail et de l’effort.' },
-  { title: 'La santé avant tout.', text: 'Contrôle quotidien de la saturation en oxygène. Un jeune qui présente des signes d’intolérance redescend, accompagné.' },
-];
+const nepal = ['L’altitude impose la progressivité', 'Un dépaysement complet, dans un cadre sûr', 'La sobriété, loin des écrans', 'La rencontre d’une autre culture de l’effort'];
 
 const trekDay = [
-  { when: 'Réveil', text: 'Rangement, sac prêt, petit-déjeuner. Briefing du jour animé par un jeune avec le guide.' },
-  { when: 'Marche', text: 'Cinq à sept heures, pauses régulières. Le rythme est celui du plus lent.' },
-  { when: 'Après-midi', text: 'Repos, lessive, carnet de bord, temps de tournage ou de montage.' },
-  { when: 'Soir', text: 'Repas, puis cercle du soir : ce qui a été difficile, ce que j’ai réussi, ce que j’ai vu chez les autres.' },
+  { icon: icons.sunrise, when: 'Réveil', text: 'Sac prêt, briefing du jour animé par un jeune avec le guide.' },
+  { icon: icons.route, when: 'Marche', text: 'Cinq à sept heures. Le rythme est celui du plus lent.' },
+  { icon: icons.camera, when: 'Après-midi', text: 'Repos, carnet de bord, tournage et montage.' },
+  { icon: icons.fire, when: 'Soir', text: 'Cercle du soir : ce qui a été difficile, ce que j’ai réussi.' },
 ];
 
 const roles = [
-  { name: 'Guide du jour', text: 'Lit l’étape avec le guide népalais.' },
-  { name: 'Intendant', text: 'Eau, en-cas, matériel.' },
-  { name: 'Trésorier', text: 'Tient les dépenses dans les lodges.' },
-  { name: 'Reporter', text: 'Images et carnet de bord.' },
-  { name: 'Veilleur', text: 'Personne ne reste derrière.' },
-];
-
-const after = [
-  { title: 'Semaine du retour', text: 'Temps de récupération encadré, bilan individuel, remise de la lettre écrite avant le départ.' },
-  { title: 'Entrée dans le projet', text: 'Le stage, l’apprentissage ou l’école préparé avant le départ commence dès que possible, idéalement dans les semaines qui suivent le retour.' },
-  { title: 'Suivi individuel', text: 'Rencontre hebdomadaire les trois premiers mois, puis adaptée à la situation.' },
-  { title: 'Présence auprès de l’école ou de l’employeur', text: 'Rencontres tripartites, médiation en cas de difficulté, soutien dans les démarches administratives.' },
-  { title: 'Le groupe reste une ressource', text: 'Rencontres mensuelles des cinq jeunes.' },
-  { title: 'Restitution publique', text: 'Les jeunes présentent leur film aux familles, aux partenaires et aux autorités. Ils racontent eux-mêmes leur parcours.' },
-];
-
-const filmPoints = [
-  { title: 'Voir d’où l’on vient.', text: 'Dans les moments de doute, revoir les images des premières semaines montre le chemin parcouru mieux que n’importe quel discours.' },
-  { title: 'Mettre des mots.', text: 'Les interviews filmées obligent à formuler ce que l’on vit, ce que l’on ressent, ce que l’on veut.' },
-  { title: 'Être reconnu.', text: 'La restitution publique place le jeune en position d’auteur de son histoire, devant sa famille et le réseau.' },
-  { title: 'Un appui pour la suite.', text: 'Un extrait peut accompagner une candidature ou un entretien, si le jeune le souhaite.' },
+  { name: 'Guide du jour', text: 'Lit l’étape avec le guide népalais' },
+  { name: 'Intendant', text: 'Eau, en-cas, matériel' },
+  { name: 'Trésorier', text: 'Les dépenses dans les lodges' },
+  { name: 'Reporter', text: 'Images et carnet de bord' },
+  { name: 'Veilleur', text: 'Personne ne reste derrière' },
 ];
 
 const ascents = ['Everest', 'Pic Lénine', 'Lobuche East', 'Kilimandjaro', 'Cervin', 'Mont Blanc'];
@@ -121,78 +106,38 @@ const summits = [
 ];
 
 const shifts = [
-  { title: 'Géographique', text: 'Sortir de son territoire.' },
-  { title: 'De rôle', text: 'De jeune « suivi » à jeune acteur.' },
-  { title: 'De méthode', text: 'Du discours vers l’expérience.' },
-];
-
-const nepal = [
-  { title: 'L’altitude impose la progressivité.', text: 'On ne peut pas monter vite. Le corps fixe le rythme, et ce rythme n’est imposé par aucun adulte.' },
-  { title: 'Un dépaysement complet, dans un cadre sûr.', text: 'Langue, culture, alimentation : les repères habituels tombent. Le jeune doit observer, demander, s’adapter.' },
-  { title: 'La sobriété.', text: 'Lodges simples puis vie sous tente, réseau limité. La relation aux écrans et à la consommation se transforme d’elle-même.' },
-  { title: 'La rencontre.', text: 'Guides, porteurs, familles qui tiennent les lodges : des personnes de son âge qui travaillent dur et accueillent avec générosité.' },
-];
-
-const studies = [
-  { figure: '96 études', title: 'Éducation par l’aventure, méta-analyse', source: 'Hattie, Marsh, Neill & Richards, 1997, Review of Educational Research', url: 'https://eric.ed.gov/?id=EJ548328', text: 'Effets positifs sur le concept de soi, le sentiment de contrôle sur sa vie et le leadership. Plus importants lorsque le programme est plus long, ils se maintiennent au suivi.' },
-  { figure: '11 études', title: 'Thérapie par la nature et délinquance juvénile', source: 'Beck & Wong, 2022, Criminal Justice and Behavior', url: 'https://journals.sagepub.com/doi/10.1177/00938548221078002', text: 'Effets importants et significatifs sur les comportements délinquants, rapportés par les jeunes et par leurs proches.' },
-  { figure: '76 %', title: 'Marches éducatives de l’association Seuil', source: 'Évaluation Pro-Éthique, cohortes 2015-2016', url: 'https://oip.org/analyse/marcher-pour-se-remettre-sur-les-rails/', text: 'Parmi les jeunes qui ont marché plus de 60 jours, 76 % présentent une évolution positive un à deux ans après.' },
-  { figure: '14 sur 25', title: 'Séjours de rupture et cheminement des adolescents', source: 'Moreau, 2014, étude pour l’ONPE', url: 'https://onpe.france-enfance-protegee.fr/wp-content/uploads/2024/01/aot2012.moreau_synthese.pdf', text: 'Situations aboutissant à une insertion scolaire ou professionnelle. Le retour et la continuité du suivi sont déterminants.' },
-];
-
-const conditions = [
-  { c: 'L’adhésion du jeune', r: 'Entretien d’admission, démarche active du jeune, contrat d’engagement.' },
-  { c: 'La durée et l’intensité', r: 'Plusieurs mois à 40 h par semaine, puis 60 jours au Népal.' },
-  { c: 'Une relation de confiance avec un adulte fiable', r: 'Les mêmes adultes du premier jour de préparation à la fin de l’accompagnement.' },
-  { c: 'La continuité au retour', r: 'Projet post-séjour engagé avant le départ, six mois d’accompagnement au minimum.' },
+  { title: 'Géographique', text: 'Sortir de son territoire' },
+  { title: 'De rôle', text: 'De jeune « suivi » à jeune acteur' },
+  { title: 'De méthode', text: 'Du discours vers l’expérience' },
 ];
 
 const safety = [
-  {
-    title: 'Santé et altitude',
-    items: [
-      'Bilan médical à l’admission et consultation de médecine des voyages.',
-      'Progression inspirée des recommandations de la Wilderness Medical Society : au-dessus de 3’000 m, environ 400 m de gain moyen entre deux nuits, deux journées d’acclimatation.',
-      'Contrôle quotidien des signes du mal aigu des montagnes et de la saturation en oxygène. En cas de symptômes : arrêt ou descente, sans discussion.',
-      'Équipe et jeunes formés aux premiers secours pendant la préparation.',
-    ],
-  },
-  {
-    title: 'Le cadre de vie',
-    items: [
-      'Règles connues, co-construites et signées avant le départ.',
-      'Alcool et stupéfiants interdits pendant toute la durée du séjour.',
-      'En cas de mise en danger grave de soi ou d’autrui : retour anticipé accompagné, prévu au contrat et au budget. L’autorité et les représentants légaux sont informés sans délai.',
-    ],
-  },
-  {
-    title: 'Assurances et liaison',
-    items: [
-      'Assurance voyage couvrant rapatriement et secours héliporté jusqu’à 5’500 m.',
-      'Communicateur satellite et téléphone local, point de situation hebdomadaire avec la direction.',
-      'La direction de Jeunesse&Co, joignable jour et nuit depuis Genève pendant tout le séjour.',
-      'Passeports, visas et permis de zone réglementée gérés en amont.',
-    ],
-  },
+  { icon: icons.stethoscope, title: 'Bilan médical', text: 'À l’admission, avec consultation de médecine des voyages.' },
+  { icon: icons.stairs, title: 'Progression par paliers', text: 'Au-dessus de 3’000\u00a0m, environ 400\u00a0m de gain entre deux nuits, deux journées d’acclimatation.' },
+  { icon: icons.pulse, title: 'Contrôle quotidien', text: 'Saturation en oxygène et signes du mal des montagnes. Symptômes : descente, sans discussion.' },
+  { icon: icons.shield, title: 'Assurance', text: 'Rapatriement et secours héliporté jusqu’à 5’500\u00a0m.' },
+  { icon: icons.signal, title: 'Liaison permanente', text: 'Communicateur satellite. La direction joignable jour et nuit depuis Genève.' },
+  { icon: icons.rules, title: 'Un cadre signé', text: 'Règles co-construites. Alcool et stupéfiants interdits pendant tout le séjour.' },
 ];
 
 const admission = [
   { title: 'Orientation', text: 'Par l’autorité judiciaire, un service (SPMi, Hospice général, DIP…), la famille ou le réseau.' },
-  { title: 'Rencontre de présentation', text: 'Le programme est présenté au jeune et à ses proches, sans rien cacher de ses exigences.' },
-  { title: 'Temps de réflexion', text: 'C’est au jeune de reprendre contact s’il souhaite poursuivre.' },
-  { title: 'Entretien d’admission', text: 'Avec l’éducateur référent et la direction. Le jeune explique avec ses mots pourquoi il veut s’engager.' },
-  { title: 'Bilan médical', text: 'Aptitude à l’effort prolongé et à l’altitude, validée par un médecin.' },
-  { title: 'Contrat d’engagement', text: 'Signé par le jeune, ses représentants légaux et Jeunesse&Co. L’autorité mandante en reçoit copie.' },
+  { title: 'Rencontre', text: 'Le programme est présenté au jeune et à ses proches, sans rien cacher de ses exigences.' },
+  { title: 'Réflexion', text: 'C’est au jeune de reprendre contact s’il souhaite poursuivre.' },
+  { title: 'Entretien', text: 'Le jeune explique avec ses mots pourquoi il veut s’engager.' },
+  { title: 'Bilan médical', text: 'Aptitude à l’effort prolongé et à l’altitude.' },
+  { title: 'Contrat', text: 'Signé par le jeune, ses représentants légaux et Jeunesse&Co.' },
 ];
 
 const calendar = [
-  { when: 'Automne – hiver 2026', text: 'Présentation aux mandants, orientations, rencontres et entretiens d’admission.' },
-  { when: 'Jusqu’au départ', text: 'Préparation intensive à 40 h par semaine. Sortie test en montagne. Bilan de départ.' },
-  { when: 'Printemps 2027', text: 'Séjour de 60 jours au Népal, région du Kanchenjunga.' },
-  { when: 'Retour + 6 mois', text: 'Entrée dans le projet, accompagnement individuel et collectif, restitution publique.' },
+  { when: 'Automne – hiver 2026', text: 'Présentations, orientations, entretiens d’admission' },
+  { when: 'Jusqu’au départ', text: 'Préparation à 40 h par semaine, sortie test, bilan de départ' },
+  { when: 'Printemps 2027', text: '60 jours au Népal, région du Kanchenjunga' },
+  { when: 'Retour + 6 mois', text: 'Entrée dans le projet, suivi, restitution publique' },
 ];
 
 const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>`;
+const svgIcon = (body: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
 ---
 
 <Layout
@@ -200,130 +145,86 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
   description="ALTITUDE, programme de remobilisation de Jeunesse&Co : plusieurs mois de préparation à Genève, 60 jours au Népal au pied du Kanchenjunga, six mois d’accompagnement au retour."
   ogImage={ogAltitude}
 >
-  <!-- HERO -->
-  <section class="alt-hero">
-    <div class="container alt-hero__grid">
-      <h1 class="alt-hero__logo reveal">
-        <Image src={altitudeLogo} alt="ALTITUDE, avant, pendant, après" widths={[560, 1137]} sizes="(max-width: 1024px) 88vw, 560px" loading="eager" fetchpriority="high" />
-      </h1>
-      <div class="alt-hero__text reveal">
-        <span class="alt-pill">Nouveau programme de remobilisation</span>
-        <p class="alt-hero__claim"><span>Construire un projet,</span> <span>le marcher,</span> <span>le faire tenir.</span></p>
-        <p class="alt-hero__lead">Pour cinq jeunes de 15 à 18 ans : plusieurs mois de préparation à Genève, soixante jours au Népal au pied du Kanchenjunga, puis six mois d’accompagnement au retour.</p>
-        <ul class="alt-hero__meta" aria-label="En un coup d’œil">
-          <li>Népal</li>
-          <li>Kanchenjunga, 8’586&nbsp;m</li>
-          <li>Printemps 2027</li>
-        </ul>
-        <div class="alt-hero__actions">
-          <a href="#orienter" class="alt-btn alt-btn--accent">
-            Orienter un jeune
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-          <a href="#en-bref" class="alt-btn alt-btn--ghost">Le programme en bref</a>
-        </div>
-      </div>
-    </div>
-  </section>
+  <AltitudeHero />
 
   <!-- EN BREF -->
   <section class="alt-brief" id="en-bref">
-    <div class="container alt-split">
-      <div class="alt-split__head reveal">
-        <h2>Le programme <span class="alt-mark">en bref</span></h2>
-        <p class="alt-lead">ALTITUDE est un programme intensif de remobilisation construit autour d’un projet collectif : un séjour de 60 jours au Népal, préparé pendant plusieurs mois à Genève et prolongé par un accompagnement au retour.</p>
-        <p>Il s’adresse à des jeunes qui s’engagent volontairement et entièrement. Tout le parcours est filmé : chaque jeune repart avec la vidéo de son propre chemin.</p>
+    <div class="container alt-brief__grid">
+      <figure class="alt-brief__logo reveal">
+        <Image src={altitudeLogo} alt="Logo du programme ALTITUDE : un sentier en pointillés monte vers un sommet sous le soleil" widths={[480, 960]} sizes="(max-width: 1024px) 80vw, 440px" />
+        <figcaption>Construire un projet, le marcher, le faire tenir.</figcaption>
+      </figure>
+      <div>
+        <div class="alt-head reveal">
+          <span class="alt-kicker">En bref</span>
+          <h2>Un projet collectif, <span class="alt-mark">pas une parenthèse</span></h2>
+          <p class="alt-lead">Un programme intensif de remobilisation : plusieurs mois de préparation à Genève, un séjour de 60 jours au Népal, puis un accompagnement au retour. Tout le parcours est filmé : chaque jeune repart avec la vidéo de son propre chemin.</p>
+        </div>
+        <dl class="alt-facts" data-stagger>
+          {facts.map((f) => (
+            <div class="alt-facts__item">
+              <dt><span class="alt-facts__n" data-count={f.n}>{f.n}</span><span class="alt-facts__unit">{f.unit}</span></dt>
+              <dd>{f.text}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
-      <dl class="alt-facts">
-        {facts.map((f) => (
-          <div class="alt-facts__row reveal">
-            <dt><span class="alt-facts__n">{f.n}</span> <span class="alt-facts__unit">{f.unit}</span></dt>
-            <dd>{f.text}</dd>
-          </div>
-        ))}
-      </dl>
     </div>
   </section>
 
   <!-- POSITION -->
-  <section class="alt-position">
+  <section class="alt-position alt-dark">
     <div class="container">
-      <div class="alt-position__grid">
-        <div class="reveal">
+      <div class="alt-head alt-head--split reveal">
+        <div>
           <span class="alt-kicker">Notre position</span>
           <h2>Ni rupture, <span class="alt-mark">ni parenthèse</span></h2>
-          <p class="alt-lead">Les séjours dits « de rupture » ont montré leur intérêt. Ils ont aussi montré leur limite principale : ce qui se passe au retour.</p>
-          <p>Le jeune vit une expérience forte, puis rentre dans le même quartier, retrouve les mêmes pairs et les mêmes habitudes, sans place qui l’attend. Les acquis s’effritent en quelques semaines. Le séjour devient un souvenir, pas un point d’appui.</p>
-          <p>Nous ne cherchons pas à couper le jeune de son environnement, de sa famille ou de son réseau. Nous cherchons à l’aider à en sortir un temps pour y revenir autrement, avec une place à prendre.</p>
         </div>
-
-        <figure class="alt-curve reveal">
-          <div class="alt-curve__plot" aria-hidden="true">
-            <span class="alt-curve__axis">Mobilisation du jeune</span>
-            <svg viewBox="0 0 300 160" preserveAspectRatio="none">
-              <line x1="100" y1="0" x2="100" y2="160" class="alt-curve__sep" vector-effect="non-scaling-stroke" />
-              <line x1="200" y1="0" x2="200" y2="160" class="alt-curve__sep" vector-effect="non-scaling-stroke" />
-              <path d="M0,146 L96,145 C118,144 126,44 150,40 C174,36 182,124 206,138 L300,142" class="alt-curve__classic" vector-effect="non-scaling-stroke" />
-              <path d="M0,146 C40,142 70,118 100,96 C125,70 135,34 160,30 C186,26 194,60 210,62 C238,62 268,44 300,34" class="alt-curve__altitude" vector-effect="non-scaling-stroke" />
-            </svg>
-            <div class="alt-curve__phases"><span>Avant</span><span>Pendant</span><span>Après</span></div>
-          </div>
-          <figcaption>
-            <ul class="alt-curve__legend">
-              <li class="is-altitude">Programme ALTITUDE</li>
-              <li class="is-classic">Séjour « de rupture » classique</li>
-            </ul>
-            <p>Schéma illustratif de l’intention du programme. Il ne représente pas des données mesurées.</p>
-          </figcaption>
-        </figure>
+        <p class="alt-lead">Les séjours « de rupture » ont montré leur intérêt et leur limite : ce qui se passe au retour. Avec ALTITUDE, le séjour est le milieu d’un parcours qui commence avant et se poursuit après.</p>
       </div>
 
-      <div class="alt-not reveal">
-        <h3>Ce que le programme <span>n’est pas</span></h3>
-        <ul>
-          {notThis.map((n) => (
-            <li>
-              <span class="alt-not__x" aria-hidden="true"></span>
-              <p><strong>{n.title}</strong>{n.text && <> {n.text}</>}</p>
-            </li>
-          ))}
+      <AltitudeCurve />
+
+      <div class="alt-not">
+        <p class="alt-not__title reveal">Ce que le programme n’est pas</p>
+        <ul data-strike>
+          {notThis.map((n) => <li><span>{n}</span><i aria-hidden="true"></i></li>)}
         </ul>
+        <p class="alt-not__note reveal">Les jeunes ne gravissent aucun sommet : le camp de base est un objectif symbolique, jamais une obligation.</p>
       </div>
     </div>
   </section>
 
   <!-- TROIS TEMPS -->
-  <section class="alt-temps alt-dark">
+  <section class="alt-temps">
     <div class="container">
-      <div class="alt-section-head reveal">
+      <div class="alt-head alt-head--center reveal">
         <span class="alt-kicker">Architecture</span>
         <h2>Un programme en <span class="alt-mark">trois temps</span></h2>
-        <p class="alt-lead">Les trois temps forment un tout. Aucun n’a de sens sans les deux autres.</p>
+        <p class="alt-lead">Les adultes qui préparent le jeune sont ceux qui partent avec lui et ceux qui l’accompagnent au retour. Il n’y a pas de passage de relais.</p>
       </div>
 
-      <ol class="alt-temps__rope">
-        {temps.map((t, i) => (
-          <li class:list={['alt-temps__step reveal', { 'is-peak': i === 1 }]}>
-            <span class="alt-temps__node" aria-hidden="true">{t.n}</span>
-            <p class="alt-temps__when">{t.when}</p>
-            <h3><span>{t.name}</span> {t.verb}</h3>
-            <ul>
-              {t.items.map((it) => <li>{it}</li>)}
-            </ul>
-            <p class="alt-temps__goal">{t.goal}</p>
-          </li>
-        ))}
-      </ol>
+      <div class="alt-temps__rope">
+        <span class="alt-temps__line" aria-hidden="true" data-grow-line></span>
+        <ol>
+          {temps.map((t, i) => (
+            <li class:list={['alt-temps__step', { 'is-peak': i === 1 }]} data-stagger>
+              <span class="alt-temps__node" aria-hidden="true">{t.n}</span>
+              <p class="alt-temps__when">{t.when}</p>
+              <h3><span>{t.name}</span> {t.verb}</h3>
+              <ul>{t.items.map((it) => <li>{it}</li>)}</ul>
+            </li>
+          ))}
+        </ol>
+      </div>
 
-      <p class="alt-temps__thread reveal">Le fil rouge est le même du début à la fin : le jeune agit, observe les effets de son action et ajuste. L’éducateur et l’intervenant multimédia qui le suivent pendant la préparation sont ceux qui partent avec lui et ceux qui l’accompagnent au retour. <strong>Il n’y a pas de passage de relais.</strong></p>
-
-      <div class="alt-why reveal">
-        <h3 class="alt-why__title">Pourquoi « ALTITUDE »</h3>
-        <p class="alt-why__steps">
+      <div class="alt-why">
+        <p class="alt-why__title reveal">Pourquoi « ALTITUDE »</p>
+        <p class="alt-why__steps" data-stagger>
           <span>En montagne, on ne gagne pas de l’altitude d’un coup.</span>
           <span>On monte par paliers, on s’arrête pour s’acclimater, on repart.</span>
           <span>Le programme suit la même logique : préparer, progresser, consolider.</span>
-          <span>Et une fois gagnée, <em>l’altitude se garde</em> : c’est tout l’objet de l’après.</span>
+          <span>Une fois gagnée, <em>l’altitude se garde</em> : c’est tout l’objet de l’après.</span>
         </p>
       </div>
     </div>
@@ -332,47 +233,44 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
   <!-- TEMPS 1 : AVANT -->
   <section class="alt-avant">
     <div class="container">
-      <div class="alt-section-head alt-section-head--left reveal">
-        <span class="alt-kicker">Temps 1 · Avant</span>
-        <h2>La préparation, <span class="alt-mark">40 h par semaine</span></h2>
+      <div class="alt-head alt-head--split reveal">
+        <div>
+          <span class="alt-kicker">Temps 1 · Avant</span>
+          <h2>La préparation, <span class="alt-mark">40 h par semaine</span></h2>
+        </div>
         <p class="alt-lead">Jusqu’au départ, les cinq jeunes sont engagés à plein temps. La préparation n’est pas une salle d’attente : c’est déjà le programme.</p>
       </div>
 
-      <ol class="alt-chantiers">
-        {chantiers.map((c, i) => (
-          <li class="reveal">
-            <span class="alt-chantiers__n">0{i + 1}</span>
+      <ul class="alt-tiles" data-stagger>
+        {chantiers.map((c) => (
+          <li>
+            <span class="alt-tiles__icon" data-draw set:html={svgIcon(c.icon)} />
             <h3>{c.title}</h3>
             <p>{c.text}</p>
           </li>
         ))}
-      </ol>
+      </ul>
 
-      <figure class="alt-week reveal">
-        <figcaption><strong>Une semaine type de 40 heures</strong> <span>Répartition indicative</span></figcaption>
-        <div class="alt-week__bar" role="img" aria-label="Environ 12 heures de préparation physique, 12 heures de projet post-séjour, 8 heures de construction du séjour, 4 heures de culture, santé et sécurité, 4 heures de bilans et d’entretiens individuels.">
-          {week.map((w, i) => (
-            <span class={`alt-week__seg alt-week__seg--${i + 1}`} style={`flex-grow:${w.h}`}>{w.h} h</span>
-          ))}
-        </div>
-        <ul class="alt-week__legend" aria-hidden="true">
-          {week.map((w, i) => (
-            <li><span class={`alt-week__dot alt-week__seg--${i + 1}`}></span>{w.label}</li>
-          ))}
-        </ul>
-      </figure>
+      <div class="alt-avant__bottom">
+        <figure class="alt-week reveal">
+          <figcaption>Une semaine type, 40 heures</figcaption>
+          <div class="alt-week__bar" data-grow role="img" aria-label="Environ 12 heures de préparation physique, 12 heures de projet post-séjour, 8 heures de construction du séjour, 4 heures de culture, santé et sécurité, 4 heures de bilans et d’entretiens.">
+            {week.map((w, i) => (
+              <span class={`alt-week__seg alt-week__seg--${i + 1}`} style={`flex-grow:${w.h}`}><b>{w.h}</b> h</span>
+            ))}
+          </div>
+          <ul class="alt-week__legend" aria-hidden="true">
+            {week.map((w, i) => <li><span class={`alt-week__dot alt-week__seg--${i + 1}`}></span>{w.label}</li>)}
+          </ul>
+        </figure>
 
-      <div class="alt-departure reveal">
-        <div class="alt-departure__head">
+        <div class="alt-departure reveal">
           <h3>Le départ <span class="alt-mark">se gagne</span></h3>
-          <p>L’admission ouvre la préparation, elle ne garantit pas le départ. Un bilan réunit le jeune, ses représentants légaux et l’équipe pour vérifier six conditions.</p>
-          <p class="alt-departure__note">Si une condition n’est pas remplie, le départ est reporté ou le jeune poursuit un accompagnement adapté au sein de Jeunesse&Co. Le projet post-séjour, lui, reste actif.</p>
+          <p>L’admission ouvre la préparation, elle ne garantit pas le départ. Un bilan vérifie six conditions, avec le jeune et ses représentants légaux.</p>
+          <ul class="alt-checks" data-stagger>
+            {departure.map((d) => <li><span class="alt-checks__icon" set:html={check} />{d}</li>)}
+          </ul>
         </div>
-        <ul class="alt-checks">
-          {departure.map((d) => (
-            <li><span class="alt-checks__icon" set:html={check} />{d}</li>
-          ))}
-        </ul>
       </div>
     </div>
   </section>
@@ -380,43 +278,40 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
   <!-- TEMPS 2 : PENDANT -->
   <section class="alt-pendant alt-dark" id="sejour">
     <div class="container">
-      <div class="alt-section-head alt-section-head--left reveal">
-        <span class="alt-kicker">Temps 2 · Pendant</span>
-        <h2>Deux mois <span class="alt-mark">au Népal</span></h2>
-        <p class="alt-lead">Soixante jours dans l’Himalaya, au pied du Kanchenjunga (8’586&nbsp;m), troisième sommet du monde. Un cadre qui ne repose pas sur l’autorité des adultes, mais sur la réalité : pour avancer, il faut marcher ; pour se reposer, il faut être arrivé.</p>
+      <div class="alt-head alt-head--split reveal">
+        <div>
+          <span class="alt-kicker">Temps 2 · Pendant</span>
+          <h2>Deux mois <span class="alt-mark">au Népal</span></h2>
+        </div>
+        <p class="alt-lead">Soixante jours au pied du Kanchenjunga, troisième sommet du monde. Pour avancer, il faut marcher ; pour se reposer, il faut être arrivé. Expédition organisée par l’agence népalaise Dream Peak Adventure.</p>
       </div>
+
+      <ul class="alt-chips" data-stagger aria-label="Pourquoi le Népal">
+        {nepal.map((n) => <li>{n}</li>)}
+      </ul>
 
       <AltitudeProfile />
 
-      <p class="alt-pendant__frame reveal">Le séjour s’inscrit dans une expédition organisée par l’agence népalaise <strong>Dream Peak Adventure</strong> et guidée par son cofondateur, Krishna Kumar Magar. Les jeunes vont jusqu’au camp de base, à 5’475&nbsp;m. <strong>Aucune ascension au-delà n’est prévue pour eux.</strong></p>
-
-      <div class="alt-camp">
-        <div class="alt-camp__life reveal">
-          <h3>Six semaines au camp de base</h3>
-          <p class="alt-camp__intro">Le camp de base est un village de tentes. Chaque jour compte : eau, repas, rangement, entretien du matériel. Les jeunes y vivent l’expédition de l’intérieur, avec ses règles, ses attentes et sa discipline.</p>
-          <ul>
-            {campLife.map((c) => <li><strong>{c.title}</strong> {c.text}</li>)}
-          </ul>
-        </div>
-        <div class="alt-camp__day reveal">
-          <h3>Une journée de trek</h3>
-          <ol class="alt-day">
-            {trekDay.map((d) => (
-              <li><span class="alt-day__when">{d.when}</span><p>{d.text}</p></li>
-            ))}
-          </ol>
-        </div>
+      <div class="alt-day">
+        <h3 class="reveal">Une journée de trek</h3>
+        <ol data-stagger>
+          {trekDay.map((d) => (
+            <li>
+              <span class="alt-day__icon" data-draw set:html={svgIcon(d.icon)} />
+              <strong>{d.when}</strong>
+              <p>{d.text}</p>
+            </li>
+          ))}
+        </ol>
       </div>
 
-      <div class="alt-roles reveal">
-        <div class="alt-roles__head">
+      <div class="alt-roles">
+        <div class="alt-roles__head reveal">
           <h3>Des rôles tournants</h3>
           <p>Chaque jour, chaque jeune tient un rôle utile au groupe. Les rôles changent pour que chacun les exerce tous.</p>
         </div>
-        <ul class="alt-roles__list">
-          {roles.map((r) => (
-            <li><strong>{r.name}</strong><span>{r.text}</span></li>
-          ))}
+        <ul class="alt-roles__list" data-stagger>
+          {roles.map((r, i) => <li><span class="alt-roles__n">0{i + 1}</span><strong>{r.name}</strong><span>{r.text}</span></li>)}
         </ul>
       </div>
 
@@ -426,81 +321,52 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
 
   <!-- TEMPS 3 : APRÈS -->
   <section class="alt-apres">
-    <div class="container alt-apres__grid">
-      <div class="alt-apres__intro reveal">
-        <span class="alt-kicker">Temps 3 · Après</span>
-        <h2>Concrétiser <span class="alt-mark">et faire tenir</span></h2>
-        <p class="alt-lead">Le retour est le moment le plus fragile. C’est aussi celui que la plupart des séjours laissent de côté. Pour ALTITUDE, c’est là que tout se joue.</p>
-        <p>Au retour, le jeune retrouve son environnement : le quartier, les pairs, les habitudes, parfois les conflits. L’énergie du séjour retombe. Ce creux est prévisible. Il a été anticipé pendant la préparation : chaque jeune a identifié ses situations à risque et ses personnes ressources.</p>
-        <blockquote class="alt-quote">La cordée ne se défait pas à l’aéroport.</blockquote>
+    <div class="container">
+      <div class="alt-head alt-head--split reveal">
+        <div>
+          <span class="alt-kicker">Temps 3 · Après</span>
+          <h2>Concrétiser <span class="alt-mark">et faire tenir</span></h2>
+        </div>
+        <p class="alt-lead">Le retour est le moment le plus fragile, celui que la plupart des séjours laissent de côté. Pour ALTITUDE, c’est là que tout se joue : chaque jeune a préparé la suite avant de partir.</p>
       </div>
-      <div class="reveal">
-        <h3 class="alt-apres__title">L’accompagnement, six mois au minimum</h3>
-        <ol class="alt-rail">
-          {after.map((a) => (
-            <li><h4>{a.title}</h4><p>{a.text}</p></li>
-          ))}
-        </ol>
-      </div>
-    </div>
-  </section>
 
-  <!-- FILM -->
-  <section class="alt-film alt-dark">
-    <div class="container alt-film__grid">
-      <div class="alt-film__intro reveal">
-        <span class="alt-kicker">Documenter</span>
-        <h2>Un film pour <span class="alt-mark">garder la trace</span></h2>
-        <p class="alt-lead">Issa Dieng, vidéaste et intervenant de Jeunesse&Co, accompagne le groupe du premier jour de la préparation jusqu’à la restitution. Il filme le processus, pas l’exploit.</p>
-        <p>Les jeunes ne sont pas seulement filmés : ils filment, interviewent, choisissent les images et participent au montage. Chaque jeune repart avec la vidéo de son propre parcours, et le groupe avec un film commun.</p>
-        <p class="alt-film__rights">Droit à l’image : consentement écrit du jeune et de ses représentants légaux avant tout tournage. Le jeune valide le montage qui le concerne et peut retirer son accord à tout moment. Aucune diffusion hors du cercle défini sans accord exprès.</p>
-      </div>
-      <div class="alt-film__points reveal">
-        <h3>Un outil éducatif, pas seulement un souvenir</h3>
-        <ul>
-          {filmPoints.map((f) => <li><strong>{f.title}</strong> {f.text}</li>)}
-        </ul>
-      </div>
+      <AltitudeAfter />
+
+      <blockquote class="alt-quote reveal">La cordée ne se défait pas <span>à l’aéroport.</span></blockquote>
     </div>
   </section>
 
   <!-- ÉQUIPE -->
   <section class="alt-team" id="equipe">
     <div class="container">
-      <div class="alt-section-head alt-section-head--left reveal">
+      <div class="alt-head reveal">
         <span class="alt-kicker">L’équipe sur le terrain</span>
         <h2>Les adultes qui partent <span class="alt-mark">sont ceux qui restent</span></h2>
-        <p class="alt-lead">Trois personnes accompagnent les jeunes au Népal, du premier au dernier jour. Ziad et Krishna ont un point commun : tous deux ont découvert la montagne vers 15 ans, l’âge des jeunes à qui s’adresse ALTITUDE.</p>
       </div>
 
       <article class="alt-ziad">
         <figure class="alt-ziad__photo reveal">
           <Image src={ziadPhoto} alt="Ziad Maalem, sac au dos, souriant, devant les sommets enneigés de l’Himalaya" widths={[400, 576]} sizes="(max-width: 768px) 90vw, 440px" />
         </figure>
-        <div class="alt-ziad__body reveal">
+        <div class="alt-ziad__body" data-stagger>
           <p class="alt-ziad__role">Éducateur référent du programme</p>
           <h3>Ziad Maalem</h3>
           <p class="alt-ziad__job">Éducateur social, alpiniste et cuisinier</p>
-
-          <p>Entre 15 et 18 ans, Ziad a vécu en foyer. C’est là qu’un éducateur l’a emmené pour la première fois en montagne. Ce qu’il y a trouvé dépassait le sport : un endroit où relever des défis, apprendre à persévérer et découvrir qu’il en était capable. Il y a aussi rencontré un adulte qui posait un cadre, encourageait sans imposer et lui faisait confiance. Cette rencontre a changé la direction de sa vie et l’a conduit à devenir éducateur, pour transmettre à son tour ce qu’il avait reçu.</p>
-
-          <blockquote class="alt-ziad__quote">« La montagne m’a permis de découvrir mes capacités et d’envisager mon avenir autrement. Aujourd’hui, je m’appuie sur cette expérience pour aider les jeunes à découvrir les leurs, à gagner en autonomie et à construire leur propre chemin. »</blockquote>
-
-          <p>Il est l’éducateur référent des cinq jeunes, de la préparation à Genève jusqu’au suivi au retour. Sur le terrain, son expérience de l’altitude sert directement la sécurité du groupe. Cuisinier, il associe les jeunes aux repas et à la vie du camp.</p>
-
-          <div class="alt-ziad__summits">
-            <p>Ses ascensions</p>
-            <ul>{ascents.map((a) => <li>{a}</li>)}</ul>
-          </div>
+          <p>Entre 15 et 18 ans, Ziad a vécu en foyer. C’est là qu’un éducateur l’a emmené pour la première fois en montagne. Il y a trouvé un endroit où relever des défis, et un adulte qui posait un cadre et lui faisait confiance. Cette rencontre l’a conduit à devenir éducateur, pour transmettre à son tour ce qu’il avait reçu.</p>
+          <blockquote class="alt-ziad__quote">« La montagne m’a permis de découvrir mes capacités et d’envisager mon avenir autrement. »</blockquote>
+          <p>Il accompagne les cinq jeunes de la préparation à Genève jusqu’au suivi au retour. Sur le terrain, son expérience de l’altitude sert la sécurité du groupe ; cuisinier, il associe les jeunes aux repas et à la vie du camp.</p>
+          <ul class="alt-ziad__summits" aria-label="Ses ascensions">{ascents.map((a) => <li>{a}</li>)}</ul>
         </div>
       </article>
 
       <div class="alt-summits">
-        <ul>
+        <ul data-stagger>
           {summits.map((p) => (
-            <li class="reveal">
+            <li>
               <figure>
-                <Image src={p.src} alt={p.caption} widths={[360, 720]} sizes="(max-width: 768px) 45vw, 300px" style={`object-position:${p.position}`} />
+                <div class="alt-summits__frame">
+                  <Image src={p.src} alt={p.caption} widths={[360, 720]} sizes="(max-width: 768px) 45vw, 300px" style={`object-position:${p.position}`} />
+                </div>
                 <figcaption><strong>{p.place}</strong> {p.height}</figcaption>
               </figure>
             </li>
@@ -509,143 +375,111 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
         <p class="alt-summits__credit">Photos : Ziad Maalem, page « Objectif Everest ».</p>
       </div>
 
-      <ul class="alt-crew">
-        <li class="reveal">
+      <ul class="alt-crew" data-stagger>
+        <li>
           <img src={`${base}assets/intervenants/issa_dieng.jpeg`} alt="" width="96" height="96" loading="lazy" class="alt-crew__avatar alt-crew__avatar--issa" />
           <div>
             <h3>Issa Dieng</h3>
-            <p class="alt-crew__role">Vidéaste et photographe, fondateur de Pacific Images</p>
-            <p>Il suit le groupe de la préparation à la restitution et renforce l’encadrement pendant tout le séjour. Il ne filme pas des exploits : il filme un chemin.</p>
+            <p class="alt-crew__role">Vidéaste, fondateur de Pacific Images</p>
+            <p>Il filme le processus, pas l’exploit. Les jeunes filment, interviewent et montent avec lui : chacun repart avec le film de son parcours, présenté en public au retour.</p>
           </div>
         </li>
-        <li class="reveal">
+        <li>
           <Image src={krishnaPhoto} alt="" width={96} height={96} densities={[1, 2]} class="alt-crew__avatar" />
           <div>
             <h3>Krishna Kumar Magar</h3>
-            <p class="alt-crew__role">Guide du séjour, cofondateur de Dream Peak Adventure</p>
-            <p>Né dans le Solukhumbu, il découvre le trekking à 15 ans. Accompagnateur international en montagne certifié UIMLA, il parle couramment français : les jeunes échangent directement avec lui.</p>
+            <p class="alt-crew__role">Guide, cofondateur de Dream Peak Adventure</p>
+            <p>Accompagnateur international en montagne certifié UIMLA. Il parle français : les jeunes échangent directement avec lui.</p>
           </div>
         </li>
-        <li class="reveal">
+        <li>
           <span class="alt-crew__avatar alt-crew__avatar--initials" aria-hidden="true">HD</span>
           <div>
             <h3>Hacene Debbah</h3>
             <p class="alt-crew__role">Directeur et fondateur de Jeunesse&Co</p>
-            <p>Présent sur place pendant les deux dernières semaines du séjour et pour le retour. Toute l’équipe redescend et rentre en Suisse avec le groupe.</p>
+            <p>Sur place les deux dernières semaines et pour le retour. Toute l’équipe rentre en Suisse avec le groupe.</p>
           </div>
         </li>
       </ul>
     </div>
   </section>
 
-  <!-- FONDEMENTS -->
+  <!-- FONDEMENTS + RECHERCHE -->
   <section class="alt-roots alt-dark">
     <div class="container">
-      <div class="alt-section-head alt-section-head--left reveal">
-        <span class="alt-kicker">Fondements éducatifs</span>
-        <h2>Agir plutôt <span class="alt-mark">que discourir</span></h2>
-        <p class="alt-lead">Les jeunes que nous accompagnons cumulent souvent les difficultés : déscolarisation, conflits familiaux, perte de repères, défiance envers les institutions, faible estime de soi. ALTITUDE vise un triple déplacement.</p>
+      <div class="alt-head alt-head--split reveal">
+        <div>
+          <span class="alt-kicker">Fondements</span>
+          <h2>Agir plutôt <span class="alt-mark">que discourir</span></h2>
+        </div>
+        <ol class="alt-shifts" data-stagger aria-label="Un triple déplacement">
+          {shifts.map((s) => <li><strong>{s.title}</strong><span>{s.text}</span></li>)}
+        </ol>
       </div>
-
-      <ol class="alt-shifts reveal">
-        {shifts.map((s) => <li><strong>{s.title}</strong><span>{s.text}</span></li>)}
-      </ol>
 
       <blockquote class="alt-bigquote reveal">
         <p>« Il ne s’agit pas de transformer le jeune, mais de lui permettre de faire l’expérience, concrète et répétée, <span>qu’il est capable d’agir autrement.</span> »</p>
       </blockquote>
 
-      <div class="alt-nepal reveal">
-        <h3>Pourquoi le Népal</h3>
-        <ul>
-          {nepal.map((n) => <li><strong>{n.title}</strong> {n.text}</li>)}
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <!-- RECHERCHE -->
-  <section class="alt-research">
-    <div class="container">
-      <div class="alt-section-head alt-section-head--left reveal">
-        <span class="alt-kicker">Ce que dit la recherche</span>
-        <h2>Des effets <span class="alt-mark">documentés</span></h2>
-        <p class="alt-lead">Les programmes éducatifs fondés sur l’aventure et la marche sont évalués depuis plus de trente ans. Leurs résultats sont encourageants, à certaines conditions.</p>
-      </div>
-
-      <ul class="alt-studies">
-        {studies.map((s) => (
-          <li class="reveal">
-            <span class="alt-studies__figure">{s.figure}</span>
-            <div>
-              <h3>{s.title}</h3>
-              <p>{s.text}</p>
-              <a href={s.url} target="_blank" rel="noopener">{s.source}<span class="sr-only"> (nouvel onglet)</span></a>
-            </div>
-          </li>
-        ))}
-      </ul>
-
-      <div class="alt-conditions reveal">
-        <h3>Quatre conditions de réussite, quatre réponses</h3>
-        <table>
-          <thead>
-            <tr><th scope="col">Condition de réussite</th><th scope="col">Réponse d’ALTITUDE</th></tr>
-          </thead>
-          <tbody>
-            {conditions.map((c) => <tr><th scope="row">{c.c}</th><td>{c.r}</td></tr>)}
-          </tbody>
-        </table>
-      </div>
+      <h3 class="alt-roots__sub reveal">Ce que dit la recherche</h3>
+      <AltitudeEvidence />
     </div>
   </section>
 
   <!-- SÉCURITÉ -->
   <section class="alt-safety">
     <div class="container">
-      <div class="alt-section-head alt-section-head--left reveal">
-        <span class="alt-kicker">Cadre et sécurité</span>
-        <h2>La santé passe <span class="alt-mark">avant l’objectif</span></h2>
+      <div class="alt-head alt-head--split reveal">
+        <div>
+          <span class="alt-kicker">Cadre et sécurité</span>
+          <h2>La santé passe <span class="alt-mark">avant l’objectif</span></h2>
+        </div>
         <p class="alt-lead">Les jeunes ne sont jamais sans encadrement adulte. L’équipe de Jeunesse&Co et le personnel de l’agence se relaient auprès d’eux pendant tout le séjour.</p>
       </div>
-      <div class="alt-safety__grid">
+      <ul class="alt-safety__grid" data-stagger>
         {safety.map((s) => (
-          <div class="alt-safety__col reveal">
+          <li>
+            <span class="alt-safety__icon" data-draw set:html={svgIcon(s.icon)} />
             <h3>{s.title}</h3>
-            <ul>{s.items.map((it) => <li>{it}</li>)}</ul>
-          </div>
+            <p>{s.text}</p>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   </section>
 
   <!-- ADMISSION + CALENDRIER -->
   <section class="alt-admission alt-dark">
     <div class="container">
-      <div class="alt-section-head alt-section-head--left reveal">
-        <span class="alt-kicker">Admission</span>
-        <h2>Un engagement <span class="alt-mark">choisi</span></h2>
-        <p class="alt-lead">Une décision judiciaire peut ouvrir la porte du programme. Elle ne peut pas remplacer l’adhésion du jeune. C’est pourquoi l’admission repose sur un entretien et sur une démarche active du jeune, avec ses représentants légaux associés à chaque étape.</p>
+      <div class="alt-head alt-head--split reveal">
+        <div>
+          <span class="alt-kicker">Admission</span>
+          <h2>Un engagement <span class="alt-mark">choisi</span></h2>
+        </div>
+        <p class="alt-lead">Une décision judiciaire peut ouvrir la porte du programme. Elle ne peut pas remplacer l’adhésion du jeune.</p>
       </div>
 
-      <ol class="alt-steps">
-        {admission.map((a, i) => (
-          <li class="reveal">
-            <span class="alt-steps__n">{i + 1}</span>
-            <h3>{a.title}</h3>
-            <p>{a.text}</p>
-          </li>
-        ))}
-      </ol>
-
-      <div class="alt-calendar reveal">
-        <h3>Calendrier</h3>
+      <div class="alt-steps">
+        <span class="alt-steps__line" aria-hidden="true" data-grow-line></span>
         <ol>
-          {calendar.map((c) => (
-            <li><span class="alt-calendar__when">{c.when}</span><p>{c.text}</p></li>
+          {admission.map((a, i) => (
+            <li data-stagger>
+              <span class="alt-steps__n">{i + 1}</span>
+              <h3>{a.title}</h3>
+              <p>{a.text}</p>
+            </li>
           ))}
         </ol>
-        <p class="alt-calendar__note">Les dates précises seront communiquées dès la constitution du groupe et la validation de l’itinéraire.</p>
+      </div>
+
+      <div class="alt-calendar">
+        <h3 class="reveal">Calendrier</h3>
+        <ol data-stagger>
+          {calendar.map((c, i) => (
+            <li class:list={{ 'is-now': i === 2 }}><span class="alt-calendar__when">{c.when}</span><p>{c.text}</p></li>
+          ))}
+        </ol>
+        <p class="alt-calendar__note reveal">Les dates précises seront communiquées dès la constitution du groupe.</p>
       </div>
     </div>
   </section>
@@ -655,10 +489,9 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
     <div class="container alt-cta__grid">
       <div class="reveal">
         <h2>Orienter un jeune vers ALTITUDE</h2>
-        <p class="alt-cta__lead">Autorités, services, familles : la direction de Jeunesse&Co est votre interlocutrice pour toute question, pour une rencontre ou pour présenter le programme à un jeune et à sa famille.</p>
-        <p class="alt-cta__ambition">Notre ambition est simple : qu’à la fin du programme, chaque jeune soit engagé dans une formation ou une activité, et qu’il sache, pour l’avoir vécu, qu’il est capable de tenir.</p>
+        <p class="alt-cta__lead">Autorités, services, familles : la direction de Jeunesse&Co répond à vos questions, vous rencontre et présente le programme au jeune et à sa famille.</p>
       </div>
-      <div class="alt-cta__contact reveal">
+      <div class="alt-cta__contact" data-stagger>
         <a class="alt-cta__link" href="mailto:info@jeunesseandco.ch?subject=Programme%20ALTITUDE">
           <span>Écrire</span>
           info@jeunesseandco.ch
@@ -667,43 +500,93 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
           <span>Appeler</span>
           +41 (0)22 731 19 47
         </a>
-        <p class="alt-cta__sign">Hacene Debbah, directeur et fondateur<br />Jeunesse&Co · Quai du Seujet 14 · 1201 Genève</p>
+        <p class="alt-cta__sign">Hacene Debbah, directeur et fondateur · Quai du Seujet 14, 1201 Genève</p>
       </div>
     </div>
   </section>
 </Layout>
 
+<script>
+  // Animations d'entrée communes à la page (les visuels ont leurs propres scripts).
+  // Les états cachés ne sont posés qu'ici : sans JS ou avec reduced-motion, tout reste visible.
+  const initMotion = async () => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const { gsap } = await import('gsap');
+    const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+    gsap.registerPlugin(ScrollTrigger);
+
+    const onEnter = (el: Element, play: () => void, start = 'top 82%') =>
+      ScrollTrigger.create({ trigger: el, start, once: true, onEnter: play });
+
+    document.querySelectorAll<HTMLElement>('[data-stagger]').forEach((group) => {
+      const items = Array.from(group.children);
+      gsap.set(items, { opacity: 0, y: 32 });
+      onEnter(group, () => gsap.to(items, { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out', stagger: 0.09 }));
+    });
+
+    document.querySelectorAll<HTMLElement>('[data-draw]').forEach((el) => {
+      const strokes = el.querySelectorAll('[pathLength]');
+      gsap.set(strokes, { strokeDasharray: 1, strokeDashoffset: 1 });
+      onEnter(el, () => gsap.to(strokes, { strokeDashoffset: 0, duration: 1.3, ease: 'power2.inOut', stagger: 0.12, delay: 0.25 }));
+    });
+
+    document.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
+      const end = Number(el.dataset.count);
+      const counter = { v: 0 };
+      el.textContent = '0';
+      onEnter(el, () => gsap.to(counter, {
+        v: end, duration: 1.6, ease: 'power2.out', delay: 0.2,
+        onUpdate: () => { el.textContent = String(Math.round(counter.v)); },
+      }));
+    });
+
+    document.querySelectorAll<HTMLElement>('[data-grow]').forEach((bar) => {
+      const segs = Array.from(bar.children);
+      gsap.set(segs, { scaleX: 0, transformOrigin: 'left center' });
+      onEnter(bar, () => gsap.to(segs, { scaleX: 1, duration: 0.9, ease: 'expo.out', stagger: 0.12 }));
+    });
+
+    // Fil qui relie les étapes : horizontal sur grand écran, vertical sur mobile.
+    document.querySelectorAll<HTMLElement>('[data-grow-line]').forEach((line) => {
+      const vertical = line.offsetHeight > line.offsetWidth;
+      gsap.set(line, vertical ? { scaleY: 0, transformOrigin: 'center top' } : { scaleX: 0, transformOrigin: 'left center' });
+      onEnter(line.parentElement!, () => gsap.to(line, { scaleX: 1, scaleY: 1, duration: 1.8, ease: 'power2.inOut' }), 'top 75%');
+    });
+
+    document.querySelectorAll<HTMLElement>('[data-strike]').forEach((list) => {
+      const words = list.querySelectorAll('span');
+      const lines = list.querySelectorAll('i');
+      gsap.set(words, { opacity: 0, y: 24 });
+      gsap.set(lines, { scaleX: 0, transformOrigin: 'left center' });
+      onEnter(list, () => gsap.timeline()
+        .to(words, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', stagger: 0.12 })
+        .to(lines, { scaleX: 1, duration: 0.5, ease: 'power2.inOut', stagger: 0.16 }, '-=0.2'));
+    });
+  };
+
+  if (document.readyState === 'complete') initMotion();
+  else window.addEventListener('load', initMotion, { once: true });
+</script>
+
 <style lang="scss">
   $ease: cubic-bezier(0.16, 1, 0.3, 1);
 
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-  }
-
   section {
-    padding: 128px 0;
+    padding: 136px 0;
 
-    @media (max-width: 768px) {
-      padding: 80px 0;
-    }
+    @media (max-width: 768px) { padding: 88px 0; }
   }
 
   .alt-dark {
     background: var(--color-primary);
     color: var(--color-white);
 
-    h2, h3, h4 { color: var(--color-white); }
-    p { color: rgba(255, 255, 255, 0.75); }
-    strong { color: var(--color-white); }
-    .alt-lead { color: rgba(255, 255, 255, 0.88); }
+    h2, h3, h4 { color: #F2F0EB; }
+    p { color: rgba(242, 240, 235, 0.72); }
+    .alt-lead { color: rgba(242, 240, 235, 0.88); }
   }
 
-  // ---------- Shared typography ----------
+  // ---------- Typographie commune ----------
   .alt-kicker {
     display: inline-flex;
     align-items: center;
@@ -725,7 +608,7 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
     .alt-dark & { color: var(--color-accent); }
   }
 
-  // Surlignage au feutre : un dégradé plutôt qu'un pseudo-élément, pour suivre le texte sur plusieurs lignes.
+  // Surlignage au feutre : un dégradé qui suit le texte sur plusieurs lignes.
   .alt-mark {
     color: inherit !important;
     padding: 0 0.06em;
@@ -744,234 +627,114 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
     font-size: var(--fs-md);
     line-height: 1.5;
     color: var(--color-text);
-    margin-bottom: 1em;
+    max-width: 36em;
   }
 
-  .alt-section-head {
-    max-width: 760px;
-    margin: 0 auto 72px;
-    text-align: center;
+  .alt-head {
+    margin-bottom: 72px;
+    max-width: 780px;
 
-    p { text-align: center; }
+    h2 { margin-bottom: 0.4em; }
 
-    &--left {
-      margin-left: 0;
-      text-align: left;
+    &--split {
+      max-width: none;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 32px 80px;
+      align-items: end;
 
-      p { text-align: left; }
+      h2 { margin-bottom: 0; }
+
+      @media (max-width: 1024px) { grid-template-columns: 1fr; }
     }
 
-    @media (max-width: 768px) {
-      margin-bottom: 48px;
-    }
-  }
+    &--center {
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
 
-  .alt-pill {
-    display: inline-block;
-    padding: 8px 16px;
-    border: 1px solid var(--color-accent);
-    border-radius: 100px;
-    font-size: var(--fs-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 700;
-    color: var(--color-accent);
-    background: rgba(255, 223, 92, 0.08);
-    margin-bottom: 32px;
-  }
-
-  .alt-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 56px;
-    padding: 16px 32px;
-    border-radius: 100px;
-    font-size: var(--fs-base);
-    font-weight: 700;
-    transition: transform 0.4s $ease, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.4s $ease;
-
-    svg { transition: transform 0.4s $ease; }
-
-    &:hover {
-      transform: translateY(-2px);
-
-      svg { transform: translateX(4px); }
+      p { text-align: center; margin: 0 auto; }
     }
 
-    &--accent {
-      background: var(--color-accent);
-      color: var(--color-primary);
-      box-shadow: 0 8px 30px rgba(255, 223, 92, 0.22);
-
-      &:hover { box-shadow: 0 14px 40px rgba(255, 223, 92, 0.32); }
-    }
-
-    &--ghost {
-      color: var(--color-white);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-
-      &:hover { border-color: var(--color-accent); color: var(--color-accent); }
-    }
-  }
-
-  // ---------- Hero ----------
-  .alt-hero {
-    background: var(--color-primary);
-    color: var(--color-white);
-    padding: 184px 0 128px;
-    position: relative;
-    overflow: hidden;
-
-    @media (max-width: 768px) {
-      padding: 128px 0 80px;
-    }
-  }
-
-  .alt-hero__grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-    gap: 80px;
-    align-items: center;
-
-    @media (max-width: 1024px) {
-      grid-template-columns: 1fr;
-      gap: 48px;
-    }
-  }
-
-  .alt-hero__logo {
-    margin: 0;
-
-    :global(img) {
-      display: block;
-      width: 100%;
-      max-width: 600px;
-      height: auto;
-    }
-
-    @media (max-width: 1024px) {
-      :global(img) { max-width: 480px; margin: 0 auto; }
-    }
-  }
-
-  .alt-hero__claim {
-    font-family: var(--font-headline);
-    font-weight: 700;
-    font-size: clamp(34px, 4.4vw, 60px);
-    line-height: 1.02;
-    letter-spacing: -0.02em;
-    color: var(--color-white);
-    margin-bottom: 28px;
-
-    span { display: block; }
-    span:last-child { color: var(--color-accent); }
-  }
-
-  .alt-hero__lead {
-    font-size: var(--fs-md);
-    line-height: 1.5;
-    color: rgba(255, 255, 255, 0.78);
-    max-width: 34em;
-    margin-bottom: 32px;
-  }
-
-  .alt-hero__meta {
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 24px;
-    margin-bottom: 40px;
-    font-size: var(--fs-xs);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: rgba(255, 255, 255, 0.9);
-
-    li {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-
-      &::before {
-        content: '';
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: var(--color-accent);
-      }
-    }
-  }
-
-  .alt-hero__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
+    @media (max-width: 768px) { margin-bottom: 48px; }
   }
 
   // ---------- En bref ----------
-  .alt-brief {
-    background: var(--color-bg);
-  }
+  .alt-brief { background: var(--color-bg); }
 
-  .alt-split {
+  .alt-brief__grid {
     display: grid;
     grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
     gap: 96px;
     align-items: start;
 
-    @media (max-width: 1024px) {
-      grid-template-columns: 1fr;
-      gap: 48px;
-    }
+    @media (max-width: 1024px) { grid-template-columns: 1fr; gap: 56px; }
   }
 
-  .alt-split__head {
+  .alt-brief__logo {
     position: sticky;
-    top: 140px;
+    top: 120px;
+    margin: 0;
+    padding: 48px 40px 36px;
+    border-radius: 32px;
+    background: var(--color-primary);
+    text-align: center;
 
-    @media (max-width: 1024px) { position: static; }
+    :global(img) {
+      display: block;
+      width: 100%;
+      max-width: 420px;
+      height: auto;
+      margin: 0 auto;
+    }
+
+    figcaption {
+      margin-top: 24px;
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: rgba(242, 240, 235, 0.85);
+    }
+
+    @media (max-width: 1024px) { position: static; max-width: 520px; }
+    @media (max-width: 560px) { padding: 32px 24px 28px; border-radius: 24px; }
   }
 
   .alt-facts {
     margin: 0;
-    border-top: 1px solid var(--color-text);
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0 32px;
+
+    @media (max-width: 640px) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 20px; }
   }
 
-  .alt-facts__row {
-    display: grid;
-    grid-template-columns: minmax(180px, 2fr) 3fr;
-    gap: 32px;
-    align-items: baseline;
-    padding: 28px 0;
-    border-bottom: 1px solid var(--color-border);
-
-    @media (max-width: 560px) {
-      grid-template-columns: 1fr;
-      gap: 4px;
-      padding: 22px 0;
-    }
+  .alt-facts__item {
+    padding: 28px 0 32px;
+    border-top: 2px solid var(--color-text);
 
     dt {
       display: flex;
       align-items: baseline;
-      gap: 12px;
+      gap: 10px;
+      margin-bottom: 10px;
     }
 
     dd {
       margin: 0;
       font-size: var(--fs-base);
-      line-height: 1.55;
-      color: var(--color-text);
+      line-height: 1.45;
+      color: var(--color-text-muted);
     }
   }
 
   .alt-facts__n {
     font-family: var(--font-headline);
     font-weight: 700;
-    font-size: var(--fs-lg);
-    line-height: 1;
-    letter-spacing: -0.02em;
+    font-size: clamp(48px, 6vw, 88px);
+    line-height: 0.9;
+    letter-spacing: -0.03em;
     font-variant-numeric: tabular-nums;
   }
 
@@ -980,231 +743,108 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: var(--color-text-muted);
   }
 
   // ---------- Position ----------
-  .alt-position {
-    background: var(--color-surface);
-  }
-
-  .alt-position__grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 96px;
-    align-items: center;
-
-    > div { max-width: 600px; }
-
-    @media (max-width: 1024px) {
-      grid-template-columns: 1fr;
-      gap: 56px;
-    }
-  }
-
-  .alt-curve {
-    margin: 0;
-    background: var(--color-primary);
-    border-radius: 28px;
-    padding: 40px 40px 32px;
-    color: var(--color-white);
-
-    @media (max-width: 560px) {
-      padding: 28px 20px 24px;
-      border-radius: 20px;
-    }
-
-    figcaption p {
-      font-size: var(--fs-xs);
-      color: rgba(255, 255, 255, 0.5);
-      margin-top: 12px;
-    }
-  }
-
-  .alt-curve__plot {
-    position: relative;
-    height: clamp(200px, 22vw, 280px);
-    padding-left: 28px;
-    margin-bottom: 48px;
-
-    svg {
-      width: 100%;
-      height: 100%;
-      overflow: visible;
-    }
-  }
-
-  .alt-curve__axis {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translate(-50%, -50%) rotate(-90deg) translateY(10px);
-    transform-origin: center;
-    white-space: nowrap;
-    font-size: var(--fs-xs);
-    color: rgba(255, 255, 255, 0.45);
-    letter-spacing: 0.04em;
-    margin-left: 4px;
-  }
-
-  .alt-curve__sep { stroke: rgba(255, 255, 255, 0.1); stroke-width: 1; }
-  .alt-curve__classic { fill: none; stroke: rgba(255, 255, 255, 0.45); stroke-width: 2; stroke-dasharray: 6 6; }
-  .alt-curve__altitude { fill: none; stroke: var(--color-accent); stroke-width: 3; stroke-linecap: round; }
-
-  .alt-curve__phases {
-    position: absolute;
-    left: 28px;
-    right: 0;
-    bottom: -32px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    text-align: center;
-    font-size: var(--fs-xs);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: rgba(255, 255, 255, 0.6);
-  }
-
-  .alt-curve__legend {
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 24px;
-    font-size: var(--fs-xs);
-    color: rgba(255, 255, 255, 0.85);
-
-    li {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-
-      &::before {
-        content: '';
-        width: 24px;
-        height: 0;
-        border-top: 3px solid var(--color-accent);
-      }
-
-      &.is-classic::before { border-top: 2px dashed rgba(255, 255, 255, 0.55); }
-    }
-  }
-
   .alt-not {
-    margin-top: 112px;
-    padding-top: 48px;
-    border-top: 1px solid var(--color-border);
-    display: grid;
-    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
-    gap: 48px;
+    margin-top: 104px;
+    text-align: center;
 
-    @media (max-width: 1024px) {
-      grid-template-columns: 1fr;
-      gap: 32px;
-      margin-top: 80px;
-    }
-
-    h3 {
-      font-size: var(--fs-md);
-
-      span { color: var(--color-text-muted); }
-    }
+    @media (max-width: 768px) { margin-top: 72px; }
 
     ul {
       list-style: none;
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 32px 48px;
-
-      @media (max-width: 640px) { grid-template-columns: 1fr; gap: 24px; }
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px 48px;
+      margin: 24px 0 28px;
     }
 
     li {
-      display: flex;
-      gap: 16px;
-      align-items: flex-start;
-    }
+      position: relative;
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: clamp(28px, 4vw, 52px);
+      line-height: 1.15;
+      color: rgba(242, 240, 235, 0.55);
 
-    p {
-      color: var(--color-text-muted);
+      span { display: inline-block; }
 
-      strong {
-        display: block;
-        color: var(--color-text);
-        font-size: var(--fs-base);
-        margin-bottom: 4px;
+      i {
+        position: absolute;
+        left: -4%;
+        right: -4%;
+        top: 52%;
+        height: 4px;
+        border-radius: 4px;
+        background: var(--color-accent);
+        transform: rotate(-3deg);
       }
     }
   }
 
-  .alt-not__x {
-    flex: 0 0 auto;
-    position: relative;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--color-primary);
-    margin-top: -2px;
+  .alt-not__title {
+    text-align: center !important;
+    font-size: var(--fs-xs) !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-accent) !important;
+  }
 
-    &::before,
-    &::after {
-      content: '';
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 12px;
-      height: 2px;
-      background: var(--color-accent);
-      transform: translate(-50%, -50%) rotate(45deg);
-    }
-
-    &::after { transform: translate(-50%, -50%) rotate(-45deg); }
+  .alt-not__note {
+    max-width: 40em;
+    margin: 0 auto;
+    text-align: center !important;
   }
 
   // ---------- Trois temps ----------
-  .alt-temps__rope {
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0;
-    position: relative;
-    counter-reset: none;
+  .alt-temps { background: var(--color-surface); }
 
-    &::before {
-      content: '';
-      position: absolute;
-      top: 28px;
-      left: 0;
-      right: 0;
-      border-top: 2px dashed rgba(255, 223, 92, 0.5);
+  .alt-temps__rope {
+    position: relative;
+
+    ol {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 48px;
+
+      @media (max-width: 900px) { grid-template-columns: 1fr; gap: 0; }
     }
+  }
+
+  .alt-temps__line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 31px;
+    height: 2px;
+    background-image: linear-gradient(90deg, var(--color-text) 50%, transparent 50%);
+    background-size: 12px 2px;
 
     @media (max-width: 900px) {
-      grid-template-columns: 1fr;
-
-      &::before {
-        top: 0;
-        bottom: 0;
-        left: 27px;
-        right: auto;
-        border-top: 0;
-        border-left: 2px dashed rgba(255, 223, 92, 0.5);
-      }
+      left: 31px;
+      right: auto;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      height: auto;
+      background-image: linear-gradient(180deg, var(--color-text) 50%, transparent 50%);
+      background-size: 2px 12px;
     }
   }
 
   .alt-temps__step {
     position: relative;
-    padding: 0 40px 0 0;
 
-    @media (max-width: 900px) {
-      padding: 0 0 48px 80px;
-    }
+    @media (max-width: 900px) { padding: 0 0 48px 96px; }
 
     h3 {
       font-size: var(--fs-lg);
       line-height: 1;
-      margin: 8px 0 24px;
+      margin: 8px 0 20px;
 
       span {
         display: block;
@@ -1212,27 +852,23 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
         font-family: var(--font-body);
         text-transform: uppercase;
         letter-spacing: 0.14em;
-        color: var(--color-accent);
+        color: var(--color-text-muted);
         margin-bottom: 12px;
       }
     }
 
-    ul {
-      list-style: none;
-      margin-bottom: 24px;
+    ul { list-style: none; }
 
-      li {
-        padding: 12px 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        color: rgba(255, 255, 255, 0.85);
-        font-size: var(--fs-base);
-      }
+    ul li {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--color-border);
+      font-size: var(--fs-base);
     }
 
     &.is-peak .alt-temps__node {
       background: var(--color-accent);
+      border-color: var(--color-accent);
       color: var(--color-primary);
-      transform: scale(1.15);
     }
   }
 
@@ -1241,60 +877,39 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
     z-index: 1;
     display: grid;
     place-items: center;
-    width: 56px;
-    height: 56px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     background: var(--color-primary);
-    border: 2px solid var(--color-accent);
+    border: 2px solid var(--color-primary);
     color: var(--color-accent);
     font-family: var(--font-headline);
     font-weight: 700;
-    font-size: var(--fs-base);
+    font-size: var(--fs-md);
     margin-bottom: 32px;
 
-    @media (max-width: 900px) {
-      position: absolute;
-      left: 0;
-      top: 0;
-      margin: 0;
-    }
+    @media (max-width: 900px) { position: absolute; left: 0; top: 0; margin: 0; }
   }
 
   .alt-temps__when {
-    font-size: var(--fs-xs) !important;
-    color: rgba(255, 255, 255, 0.55) !important;
-    letter-spacing: 0.04em;
-  }
-
-  .alt-temps__goal {
-    font-size: var(--fs-base);
-    color: rgba(255, 255, 255, 0.65) !important;
-  }
-
-  .alt-temps__thread {
-    max-width: 820px;
-    margin: 72px 0 0;
-    font-size: var(--fs-md);
-    line-height: 1.5;
-    color: rgba(255, 255, 255, 0.82) !important;
-
-    strong { color: var(--color-accent) !important; }
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
   }
 
   .alt-why {
-    margin-top: 112px;
-    padding-top: 56px;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    margin-top: 120px;
 
     @media (max-width: 768px) { margin-top: 72px; }
   }
 
   .alt-why__title {
     font-size: var(--fs-xs);
-    font-family: var(--font-body);
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.14em;
-    color: var(--color-accent) !important;
+    color: var(--color-text-muted);
     margin-bottom: 32px;
   }
 
@@ -1309,42 +924,41 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
     font-size: clamp(19px, 1.75vw, 26px);
     line-height: 1.2;
     letter-spacing: -0.01em;
-    color: var(--color-white) !important;
+    color: var(--color-text);
 
     span {
       position: relative;
       display: block;
       padding: 24px 32px 0 0;
-      border-top: 2px solid rgba(255, 223, 92, 0.55);
+      border-top: 3px solid var(--color-text);
 
-      // contremarche : relie le palier au précédent
       & + span::before {
         content: '';
         position: absolute;
-        left: -2px;
-        top: -2px;
-        height: calc(var(--rise) + 2px);
-        border-left: 2px solid rgba(255, 223, 92, 0.55);
+        left: -3px;
+        top: -3px;
+        height: calc(var(--rise) + 3px);
+        border-left: 3px solid var(--color-text);
       }
 
-      &:nth-child(1) { margin-top: calc(var(--rise) * 3); color: rgba(255, 255, 255, 0.5); }
-      &:nth-child(2) { margin-top: calc(var(--rise) * 2); color: rgba(255, 255, 255, 0.65); }
-      &:nth-child(3) { margin-top: var(--rise); color: rgba(255, 255, 255, 0.82); }
+      &:nth-child(1) { margin-top: calc(var(--rise) * 3); color: rgba(26, 26, 26, 0.45); }
+      &:nth-child(2) { margin-top: calc(var(--rise) * 2); color: rgba(26, 26, 26, 0.62); }
+      &:nth-child(3) { margin-top: var(--rise); color: rgba(26, 26, 26, 0.8); }
       &:nth-child(4) { border-top-color: var(--color-accent); }
+      &:nth-child(4)::before { border-left-color: var(--color-accent); }
     }
 
     em {
       font-style: normal;
-      color: var(--color-accent);
+      background-image: linear-gradient(transparent 60%, rgba(255, 223, 92, 0.9) 60%);
     }
 
     @media (max-width: 900px) {
       grid-template-columns: 1fr;
-      gap: 0;
 
       span {
         margin-top: 0 !important;
-        padding: 16px 0 24px 0;
+        padding: 16px 0 24px;
 
         &:nth-child(2) { margin-left: 8%; }
         &:nth-child(3) { margin-left: 16%; }
@@ -1357,126 +971,133 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
   // ---------- Avant ----------
   .alt-avant { background: var(--color-bg); }
 
-  .alt-chantiers {
+  .alt-tiles {
     list-style: none;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 56px 80px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
 
-    @media (max-width: 768px) { grid-template-columns: 1fr; gap: 40px; }
+    @media (max-width: 1024px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    @media (max-width: 560px) { grid-template-columns: 1fr; gap: 16px; }
 
     li {
-      border-top: 2px solid var(--color-text);
-      padding-top: 24px;
+      padding: 32px 28px;
+      border-radius: 24px;
+      background: var(--color-surface);
     }
 
-    h3 { font-size: var(--fs-md); margin-bottom: 12px; }
-    p { color: var(--color-text-muted); max-width: 52ch; }
+    h3 { font-size: var(--fs-md); margin: 24px 0 10px; line-height: 1.15; }
+    p { color: var(--color-text-muted); }
   }
 
-  .alt-chantiers__n {
-    display: block;
-    font-size: var(--fs-xs);
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    color: var(--color-text-muted);
-    margin-bottom: 16px;
+  .alt-tiles__icon {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: var(--color-primary);
+    color: var(--color-accent);
+
+    :global(svg) { width: 34px; height: 34px; }
+  }
+
+  .alt-avant__bottom {
+    margin-top: 96px;
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
+    gap: 80px;
+    align-items: start;
+
+    @media (max-width: 1024px) { grid-template-columns: 1fr; gap: 64px; margin-top: 72px; }
   }
 
   .alt-week {
-    margin: 104px 0 0;
-
-    @media (max-width: 768px) { margin-top: 72px; }
+    margin: 0;
 
     figcaption {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 16px;
-      font-size: var(--fs-base);
-
-      span { color: var(--color-text-muted); font-size: var(--fs-xs); }
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: var(--fs-md);
+      margin-bottom: 20px;
     }
   }
 
   .alt-week__bar {
     display: flex;
-    height: 72px;
-    border-radius: 16px;
-    overflow: hidden;
-    gap: 3px;
-    background: var(--color-bg);
+    height: 96px;
+    gap: 4px;
 
-    @media (max-width: 560px) { height: 56px; border-radius: 12px; }
+    @media (max-width: 560px) { height: 72px; }
   }
 
   .alt-week__seg {
     flex-basis: 0;
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    font-family: var(--font-headline);
-    font-weight: 700;
-    font-size: var(--fs-md);
-    white-space: nowrap;
     min-width: 0;
+    display: flex;
+    align-items: flex-end;
+    padding: 12px 14px;
+    border-radius: 14px;
+    font-size: var(--fs-base);
+    font-weight: 600;
+    white-space: nowrap;
+
+    b {
+      font-family: var(--font-headline);
+      font-size: clamp(22px, 2.6vw, 36px);
+      line-height: 0.9;
+      margin-right: 2px;
+    }
 
     @media (max-width: 560px) {
-      padding: 0 8px;
-      font-size: var(--fs-xs);
+      padding: 8px;
       justify-content: center;
+      font-size: 12px;
+
+      b { font-size: 18px; }
     }
 
     &--1 { background: var(--color-accent); color: var(--color-primary); }
-    &--2 { background: var(--color-primary); color: var(--color-white); }
-    &--3 { background: #4A4740; color: var(--color-white); }
+    &--2 { background: var(--color-primary); color: #F2F0EB; }
+    &--3 { background: #4A4740; color: #F2F0EB; }
     &--4 { background: #B8B0A3; color: var(--color-primary); }
     &--5 { background: #DDD6CA; color: var(--color-primary); }
   }
 
   .alt-week__legend {
     list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px 32px;
-    margin-top: 20px;
-    font-size: var(--fs-xs);
-    color: var(--color-text);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 24px;
+    margin-top: 24px;
+    font-size: var(--fs-base);
 
-    li { display: inline-flex; align-items: center; gap: 10px; }
+    li { display: inline-flex; align-items: center; gap: 12px; }
   }
 
   .alt-week__dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 4px;
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
     padding: 0;
+    border-radius: 4px;
   }
 
   .alt-departure {
-    margin-top: 104px;
-    display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    gap: 80px;
-    padding: 56px;
+    padding: 48px;
     border-radius: 28px;
-    background: var(--color-surface);
+    background: var(--color-primary);
 
-    @media (max-width: 1024px) {
-      grid-template-columns: 1fr;
-      gap: 32px;
-      padding: 40px 28px;
-      margin-top: 72px;
+    @media (max-width: 560px) { padding: 32px 24px; }
+
+    h3 { font-size: var(--fs-lg); color: #F2F0EB; }
+    > p { color: rgba(242, 240, 235, 0.72); margin-bottom: 24px; }
+
+    .alt-mark {
+      color: var(--color-accent) !important;
+      background-image: none;
+      padding: 0;
     }
-
-    h3 { font-size: var(--fs-lg); }
-  }
-
-  .alt-departure__note {
-    margin-top: 16px;
-    font-size: var(--fs-base);
-    color: var(--color-text-muted);
   }
 
   .alt-checks {
@@ -1485,14 +1106,11 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
     li {
       display: flex;
       gap: 16px;
-      align-items: flex-start;
-      padding: 16px 0;
-      border-bottom: 1px solid var(--color-border);
+      align-items: center;
+      padding: 14px 0;
+      border-top: 1px solid rgba(242, 240, 235, 0.12);
       font-size: var(--fs-base);
-      line-height: 1.5;
-
-      &:first-child { padding-top: 0; }
-      &:last-child { border-bottom: 0; }
+      color: #F2F0EB;
     }
   }
 
@@ -1500,96 +1118,73 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
     flex: 0 0 auto;
     display: grid;
     place-items: center;
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: var(--color-accent);
     color: var(--color-primary);
   }
 
   // ---------- Pendant ----------
-  .alt-pendant__frame {
-    max-width: 820px;
-    margin: 72px 0 0;
-    font-size: var(--fs-md);
-    line-height: 1.5;
-  }
-
-  .alt-camp {
-    margin-top: 104px;
-    display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    gap: 96px;
-
-    @media (max-width: 1024px) {
-      grid-template-columns: 1fr;
-      gap: 64px;
-      margin-top: 80px;
-    }
-
-    h3 { font-size: var(--fs-lg); }
-  }
-
-  .alt-camp__intro { margin-bottom: 24px; }
-
-  .alt-camp__life ul {
+  .alt-chips {
     list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: -24px 0 72px;
 
     li {
-      padding: 16px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      color: rgba(255, 255, 255, 0.72);
+      padding: 12px 20px;
+      border-radius: 100px;
+      border: 1px solid rgba(255, 223, 92, 0.45);
+      color: #F2F0EB;
       font-size: var(--fs-base);
-      line-height: 1.55;
+      font-weight: 500;
     }
   }
 
   .alt-day {
-    list-style: none;
-    position: relative;
-    padding-left: 28px;
+    margin-top: 120px;
 
-    &::before {
-      content: '';
-      position: absolute;
-      left: 5px;
-      top: 8px;
-      bottom: 8px;
-      border-left: 2px solid rgba(255, 223, 92, 0.35);
+    @media (max-width: 768px) { margin-top: 80px; }
+
+    > h3 { font-size: var(--fs-lg); margin-bottom: 40px; }
+
+    ol {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 40px;
+
+      @media (max-width: 1024px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      @media (max-width: 480px) { grid-template-columns: 1fr; gap: 32px; }
     }
 
-    li {
-      position: relative;
-      padding-bottom: 28px;
-
-      &:last-child { padding-bottom: 0; }
-
-      &::before {
-        content: '';
-        position: absolute;
-        left: -28px;
-        top: 6px;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: var(--color-accent);
-      }
+    strong {
+      display: block;
+      margin: 20px 0 8px;
+      font-family: var(--font-headline);
+      font-size: var(--fs-md);
+      color: #F2F0EB;
     }
   }
 
-  .alt-day__when {
-    display: block;
-    font-family: var(--font-headline);
-    font-weight: 700;
-    font-size: var(--fs-md);
-    color: var(--color-white);
-    margin-bottom: 6px;
+  .alt-day__icon {
+    display: grid;
+    place-items: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 223, 92, 0.5);
+    color: var(--color-accent);
+
+    :global(svg) { width: 34px; height: 34px; }
   }
 
   .alt-roles {
-    margin-top: 104px;
+    margin-top: 112px;
 
-    @media (max-width: 768px) { margin-top: 72px; }
+    @media (max-width: 768px) { margin-top: 80px; }
   }
 
   .alt-roles__head {
@@ -1608,29 +1203,19 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
     list-style: none;
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 24px;
-    overflow: hidden;
+    gap: 16px;
 
     @media (max-width: 1024px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     @media (max-width: 480px) { grid-template-columns: 1fr; }
 
     li {
-      padding: 28px 24px;
-      border-right: 1px solid rgba(255, 255, 255, 0.14);
       display: flex;
       flex-direction: column;
       gap: 8px;
-
-      &:last-child { border-right: 0; }
-
-      @media (max-width: 1024px) {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-
-        &:nth-child(2n) { border-right: 0; }
-      }
-
-      @media (max-width: 480px) { border-right: 0; }
+      padding: 28px 24px;
+      border-radius: 24px;
+      background: #1B1B1A;
+      border: 1px solid rgba(242, 240, 235, 0.08);
     }
 
     strong {
@@ -1639,156 +1224,44 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
       color: var(--color-accent);
     }
 
-    span {
-      font-size: var(--fs-base);
-      line-height: 1.5;
-      color: rgba(255, 255, 255, 0.72);
-    }
+    span { font-size: var(--fs-base); line-height: 1.45; color: rgba(242, 240, 235, 0.72); }
+  }
+
+  .alt-roles__n {
+    font-size: var(--fs-xs) !important;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: rgba(242, 240, 235, 0.4) !important;
   }
 
   .alt-letter {
-    margin-top: 96px;
+    margin: 112px auto 0;
+    max-width: 30ch;
     text-align: center !important;
+    text-wrap: balance;
     font-family: var(--font-headline);
     font-weight: 700;
     font-size: var(--fs-lg);
     line-height: 1.15;
-    color: var(--color-white) !important;
-    max-width: 30ch;
-    margin-left: auto;
-    margin-right: auto;
-    text-wrap: balance;
+    color: #F2F0EB !important;
   }
 
   // ---------- Après ----------
   .alt-apres { background: var(--color-bg); }
 
-  .alt-apres__grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 96px;
-    align-items: start;
-
-    @media (max-width: 1024px) { grid-template-columns: 1fr; gap: 56px; }
-  }
-
-  .alt-apres__intro {
-    position: sticky;
-    top: 140px;
-
-    @media (max-width: 1024px) { position: static; }
-  }
-
   .alt-quote {
-    margin-top: 48px;
-    padding: 32px 36px;
-    border-radius: 24px;
-    background: var(--color-accent);
+    margin: 104px auto 0;
+    max-width: 18ch;
+    text-align: center;
+    text-wrap: balance;
     font-family: var(--font-headline);
     font-weight: 700;
-    font-size: var(--fs-md);
-    line-height: 1.2;
-    color: var(--color-primary);
-  }
+    font-size: clamp(36px, 5.4vw, 76px);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    color: var(--color-text);
 
-  .alt-apres__title {
-    font-size: var(--fs-md);
-    margin-bottom: 32px;
-  }
-
-  .alt-rail {
-    list-style: none;
-    counter-reset: rail;
-
-    li {
-      counter-increment: rail;
-      position: relative;
-      padding: 0 0 36px 64px;
-
-      &::before {
-        content: counter(rail, decimal-leading-zero);
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 40px;
-        height: 40px;
-        display: grid;
-        place-items: center;
-        border-radius: 50%;
-        border: 1.5px solid var(--color-text);
-        font-size: var(--fs-xs);
-        font-weight: 700;
-        background: var(--color-bg);
-        z-index: 1;
-      }
-
-      &::after {
-        content: '';
-        position: absolute;
-        left: 20px;
-        top: 40px;
-        bottom: 0;
-        border-left: 1.5px solid var(--color-border);
-      }
-
-      &:last-child {
-        padding-bottom: 0;
-
-        &::after { display: none; }
-      }
-    }
-
-    h4 {
-      font-family: var(--font-headline);
-      font-size: var(--fs-md);
-      margin: 6px 0 8px;
-      line-height: 1.2;
-    }
-
-    p { color: var(--color-text-muted); }
-  }
-
-  // ---------- Film ----------
-  .alt-film__grid {
-    display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    gap: 96px;
-    align-items: start;
-
-    @media (max-width: 1024px) { grid-template-columns: 1fr; gap: 56px; }
-  }
-
-  .alt-film__rights {
-    margin-top: 32px;
-    padding-top: 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
-    font-size: var(--fs-xs);
-    color: rgba(255, 255, 255, 0.55) !important;
-    line-height: 1.6;
-  }
-
-  .alt-film__points {
-    padding: 40px;
-    border-radius: 28px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-
-    @media (max-width: 560px) { padding: 28px 24px; }
-
-    h3 { font-size: var(--fs-md); margin-bottom: 16px; }
-
-    ul { list-style: none; }
-
-    li {
-      padding: 16px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      font-size: var(--fs-base);
-      line-height: 1.55;
-      color: rgba(255, 255, 255, 0.72);
-
-      &:last-child { border-bottom: 0; padding-bottom: 0; }
-
-      strong { color: var(--color-accent); }
-    }
+    span { background-image: linear-gradient(transparent 62%, rgba(255, 223, 92, 0.9) 62%, rgba(255, 223, 92, 0.9) 92%, transparent 92%); }
   }
 
   // ---------- Équipe ----------
@@ -1798,16 +1271,14 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
     display: grid;
     grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
     gap: 80px;
-    align-items: start;
+    align-items: center;
 
     @media (max-width: 1024px) { grid-template-columns: 1fr; gap: 40px; }
   }
 
   .alt-ziad__photo {
     margin: 0;
-    position: sticky;
-    top: 120px;
-    border-radius: 28px;
+    border-radius: 32px;
     overflow: hidden;
     aspect-ratio: 4 / 5;
     background: var(--color-border);
@@ -1820,13 +1291,11 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
       display: block;
     }
 
-    @media (max-width: 1024px) {
-      position: static;
-      max-width: 520px;
-    }
+    @media (max-width: 1024px) { max-width: 520px; }
   }
 
   .alt-ziad__role {
+    justify-self: start;
     display: inline-block;
     padding: 6px 14px;
     border-radius: 100px;
@@ -1836,57 +1305,42 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    margin-bottom: 20px !important;
   }
 
   .alt-ziad__body {
+    display: grid;
+    gap: 20px;
+
     h3 {
       font-size: var(--fs-xl);
       line-height: 0.95;
       letter-spacing: -0.03em;
-      margin-bottom: 12px;
+      margin: 0;
     }
 
-    > p { max-width: 62ch; }
+    > p { max-width: 62ch; margin: 0; }
   }
 
   .alt-ziad__job {
     font-size: var(--fs-md) !important;
     color: var(--color-text-muted) !important;
-    margin-bottom: 32px !important;
   }
 
   .alt-ziad__quote {
-    margin: 32px 0;
-    padding-left: 0;
+    margin: 8px 0;
     font-family: var(--font-headline);
-    font-weight: 500;
+    font-weight: 700;
     font-size: var(--fs-md);
-    line-height: 1.35;
-    color: var(--color-text);
-    max-width: 40ch;
+    line-height: 1.3;
+    max-width: 34ch;
   }
 
   .alt-ziad__summits {
-    margin-top: 40px;
-    padding-top: 24px;
-    border-top: 1px solid var(--color-border);
-
-    p {
-      font-size: var(--fs-xs);
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-text-muted);
-      margin-bottom: 16px;
-    }
-
-    ul {
-      list-style: none;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
 
     li {
       padding: 8px 16px;
@@ -1913,16 +1367,6 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
 
     figure { margin: 0; }
 
-    :global(img) {
-      display: block;
-      width: 100%;
-      height: auto;
-      aspect-ratio: 3 / 4;
-      object-fit: cover;
-      border-radius: 20px;
-      background: var(--color-border);
-    }
-
     figcaption {
       display: flex;
       flex-wrap: wrap;
@@ -1931,7 +1375,6 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
       margin-top: 14px;
       font-size: var(--fs-xs);
       color: var(--color-text-muted);
-      font-variant-numeric: tabular-nums;
 
       strong {
         font-family: var(--font-headline);
@@ -1939,6 +1382,23 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
         color: var(--color-text);
       }
     }
+  }
+
+  .alt-summits__frame {
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--color-border);
+
+    :global(img) {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+      transition: transform 0.8s $ease;
+    }
+
+    &:hover :global(img) { transform: scale(1.05); }
   }
 
   .alt-summits__credit {
@@ -1949,7 +1409,7 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
 
   .alt-crew {
     list-style: none;
-    margin-top: 104px;
+    margin-top: 96px;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 48px;
@@ -2004,268 +1464,123 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
   // ---------- Fondements ----------
   .alt-shifts {
     list-style: none;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    border-top: 1px solid rgba(255, 255, 255, 0.14);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-
-    @media (max-width: 768px) { grid-template-columns: 1fr; }
 
     li {
-      padding: 32px 32px 32px 0;
       display: flex;
-      flex-direction: column;
-      gap: 8px;
-
-      & + li {
-        padding-left: 32px;
-        border-left: 1px solid rgba(255, 255, 255, 0.14);
-
-        @media (max-width: 768px) {
-          padding-left: 0;
-          border-left: 0;
-          border-top: 1px solid rgba(255, 255, 255, 0.14);
-        }
-      }
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 4px 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(242, 240, 235, 0.14);
     }
 
     strong {
       font-family: var(--font-headline);
-      font-size: var(--fs-lg);
-      color: var(--color-accent) !important;
-      line-height: 1;
+      font-size: var(--fs-md);
+      color: var(--color-accent);
+      min-width: 7.5em;
     }
 
-    span { color: rgba(255, 255, 255, 0.75); font-size: var(--fs-base); }
+    span { color: rgba(242, 240, 235, 0.78); font-size: var(--fs-base); }
   }
 
   .alt-bigquote {
-    margin: 120px auto;
-    max-width: 980px;
+    margin: 0 auto 120px;
+    max-width: 1000px;
 
-    @media (max-width: 768px) { margin: 72px 0; }
+    @media (max-width: 768px) { margin-bottom: 80px; }
 
     p {
       font-family: var(--font-headline);
       font-weight: 700;
-      font-size: clamp(28px, 3.6vw, 52px);
-      line-height: 1.1;
+      font-size: clamp(28px, 3.8vw, 56px);
+      line-height: 1.08;
       letter-spacing: -0.02em;
-      color: var(--color-white) !important;
+      color: #F2F0EB !important;
       text-align: center;
-
-      @media (max-width: 768px) { text-align: left; }
+      text-wrap: balance;
 
       span { color: var(--color-accent); }
+
+      @media (max-width: 768px) { text-align: left; }
     }
   }
 
-  .alt-nepal {
-    display: grid;
-    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
-    gap: 48px;
-
-    @media (max-width: 1024px) { grid-template-columns: 1fr; gap: 24px; }
-
-    h3 { font-size: var(--fs-lg); }
-
-    ul {
-      list-style: none;
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 32px 48px;
-
-      @media (max-width: 640px) { grid-template-columns: 1fr; gap: 24px; }
-    }
-
-    li {
-      font-size: var(--fs-base);
-      line-height: 1.55;
-      color: rgba(255, 255, 255, 0.72);
-      padding-top: 16px;
-      border-top: 1px solid rgba(255, 255, 255, 0.14);
-
-      strong { display: block; margin-bottom: 6px; color: var(--color-white); }
-    }
-  }
-
-  // ---------- Recherche ----------
-  .alt-research { background: var(--color-bg); }
-
-  .alt-studies {
-    list-style: none;
-    border-top: 1px solid var(--color-text);
-
-    li {
-      display: grid;
-      grid-template-columns: minmax(180px, 3fr) 9fr;
-      gap: 40px;
-      padding: 36px 0;
-      border-bottom: 1px solid var(--color-border);
-
-      @media (max-width: 640px) { grid-template-columns: 1fr; gap: 12px; padding: 28px 0; }
-    }
-
-    h3 { font-size: var(--fs-md); margin-bottom: 8px; }
-    p { color: var(--color-text-muted); max-width: 64ch; margin-bottom: 12px; }
-
-    a {
-      font-size: var(--fs-xs);
-      font-weight: 600;
-      color: var(--color-text);
-      text-decoration: underline;
-      text-decoration-color: var(--color-accent);
-      text-decoration-thickness: 2px;
-      text-underline-offset: 4px;
-
-      &:hover { text-decoration-color: var(--color-text); }
-    }
-  }
-
-  .alt-studies__figure {
-    font-family: var(--font-headline);
-    font-weight: 700;
-    font-size: var(--fs-lg);
-    line-height: 1;
-    letter-spacing: -0.02em;
-    white-space: nowrap;
-  }
-
-  .alt-conditions {
-    margin-top: 104px;
-
-    @media (max-width: 768px) { margin-top: 72px; }
-
-    h3 { font-size: var(--fs-lg); margin-bottom: 32px; }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: var(--fs-base);
-    }
-
-    thead th {
-      text-align: left;
-      font-size: var(--fs-xs);
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-accent);
-      background: var(--color-primary);
-      padding: 16px 24px;
-      font-weight: 700;
-
-      &:first-child { border-radius: 16px 0 0 0; }
-      &:last-child { border-radius: 0 16px 0 0; }
-    }
-
-    tbody th,
-    tbody td {
-      text-align: left;
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--color-border);
-      vertical-align: top;
-      line-height: 1.5;
-    }
-
-    tbody th {
-      font-weight: 700;
-      width: 38%;
-    }
-
-    tbody td { color: var(--color-text-muted); }
-
-    @media (max-width: 640px) {
-      thead { display: none; }
-
-      tr, tbody th, tbody td { display: block; width: 100%; }
-
-      tbody th { padding: 20px 0 4px; border-bottom: 0; }
-      tbody td { padding: 0 0 20px; }
-    }
+  .alt-roots__sub {
+    font-size: var(--fs-xs) !important;
+    font-family: var(--font-body) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-accent) !important;
+    margin-bottom: 40px;
   }
 
   // ---------- Sécurité ----------
   .alt-safety { background: var(--color-surface); }
 
   .alt-safety__grid {
+    list-style: none;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 56px;
+    gap: 56px 48px;
 
-    @media (max-width: 1024px) { grid-template-columns: 1fr; gap: 48px; }
+    @media (max-width: 1024px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    @media (max-width: 560px) { grid-template-columns: 1fr; gap: 40px; }
+
+    h3 { font-size: var(--fs-md); margin: 20px 0 8px; }
+    p { color: var(--color-text-muted); }
   }
 
-  .alt-safety__col {
-    h3 {
-      font-size: var(--fs-md);
-      padding-bottom: 16px;
-      border-bottom: 2px solid var(--color-text);
-      margin-bottom: 8px;
-    }
+  .alt-safety__icon {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: var(--color-primary);
 
-    ul { list-style: none; }
-
-    li {
-      padding: 14px 0 14px 24px;
-      position: relative;
-      font-size: var(--fs-base);
-      line-height: 1.55;
-      color: var(--color-text);
-      border-bottom: 1px solid var(--color-border);
-
-      &::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 23px;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--color-accent);
-        box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.25);
-      }
-    }
+    :global(svg) { width: 30px; height: 30px; }
   }
 
   // ---------- Admission ----------
   .alt-steps {
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 24px;
     position: relative;
 
-    &::before {
-      content: '';
-      position: absolute;
-      top: 24px;
-      left: 0;
-      right: 0;
-      border-top: 1px solid rgba(255, 223, 92, 0.4);
+    ol {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 24px;
+
+      @media (max-width: 1100px) { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 48px; }
+      @media (max-width: 640px) { grid-template-columns: 1fr; row-gap: 32px; }
     }
 
-    @media (max-width: 1100px) {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      row-gap: 48px;
-
-      &::before { display: none; }
-    }
-
-    @media (max-width: 640px) { grid-template-columns: 1fr; row-gap: 32px; }
-
-    h3 { font-size: var(--fs-base); font-family: var(--font-body); font-weight: 700; line-height: 1.35; margin-bottom: 8px; }
+    h3 { font-size: var(--fs-md); margin-bottom: 8px; line-height: 1.2; }
     p { font-size: var(--fs-base); }
+  }
+
+  .alt-steps__line {
+    position: absolute;
+    top: 27px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(255, 223, 92, 0.5);
+
+    @media (max-width: 1100px) { display: none; }
   }
 
   .alt-steps__n {
     position: relative;
     display: grid;
     place-items: center;
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     background: var(--color-primary);
-    border: 1.5px solid var(--color-accent);
+    border: 2px solid var(--color-accent);
     color: var(--color-accent);
     font-family: var(--font-headline);
     font-weight: 700;
@@ -2276,7 +1591,7 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
   .alt-calendar {
     margin-top: 120px;
     padding-top: 56px;
-    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(242, 240, 235, 0.14);
 
     @media (max-width: 768px) { margin-top: 80px; }
 
@@ -2294,9 +1609,9 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
 
     li {
       padding-top: 20px;
-      border-top: 3px solid rgba(255, 255, 255, 0.2);
+      border-top: 4px solid rgba(242, 240, 235, 0.2);
 
-      &:nth-child(3) { border-top-color: var(--color-accent); }
+      &.is-now { border-top-color: var(--color-accent); }
     }
   }
 
@@ -2305,14 +1620,36 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
     font-family: var(--font-headline);
     font-weight: 700;
     font-size: var(--fs-md);
-    color: var(--color-white);
+    color: #F2F0EB;
     margin-bottom: 8px;
   }
 
   .alt-calendar__note {
     margin-top: 40px;
     font-size: var(--fs-xs);
-    color: rgba(255, 255, 255, 0.5) !important;
+    color: rgba(242, 240, 235, 0.5) !important;
+  }
+
+  // ---------- Mobile : icône à gauche du texte pour raccourcir les listes ----------
+  @media (max-width: 640px) {
+    .alt-steps li,
+    .alt-safety__grid li,
+    .alt-day li,
+    .alt-tiles li {
+      display: grid;
+      grid-template-columns: 56px minmax(0, 1fr);
+      column-gap: 16px;
+      align-items: start;
+
+      > :first-child { grid-row: span 2; }
+    }
+
+    .alt-steps__n { width: 48px; height: 48px; margin: 0; }
+    .alt-steps h3, .alt-safety__grid h3, .alt-tiles h3 { margin: 4px 0 6px; }
+    .alt-day strong { margin: 6px 0 4px; }
+    .alt-day__icon { width: 56px; height: 56px; }
+    .alt-safety__icon, .alt-tiles__icon { width: 56px; height: 56px; }
+    .alt-tiles li { padding: 24px 20px; }
   }
 
   // ---------- CTA ----------
@@ -2345,13 +1682,6 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
     color: var(--color-primary);
   }
 
-  .alt-cta__ambition {
-    margin-top: 24px;
-    font-size: var(--fs-base);
-    color: rgba(17, 17, 17, 0.75);
-    max-width: 52ch;
-  }
-
   .alt-cta__contact {
     display: flex;
     flex-direction: column;
@@ -2365,7 +1695,7 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
     padding: 20px 28px;
     border-radius: 20px;
     background: var(--color-primary);
-    color: var(--color-white);
+    color: #F2F0EB;
     font-family: var(--font-headline);
     font-weight: 700;
     font-size: var(--fs-md);
@@ -2390,6 +1720,5 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
     margin-top: 12px;
     font-size: var(--fs-xs);
     color: rgba(17, 17, 17, 0.75);
-    line-height: 1.6;
   }
 </style>

@@ -1,145 +1,463 @@
 ---
-// Profil d'altitude du séjour : altitude de nuit, jour par jour.
-// Source : annexe 1 du dossier ALTITUDE (itinéraire Dream Peak Adventure).
-const MAX_ALT = 6000;
+// Profil du séjour en paysage de montagne : altitude de nuit, jour par jour,
+// au pied du Kanchenjunga. Source : annexe 1 du dossier ALTITUDE (itinéraire Dream Peak Adventure).
+type Pt = [number, number];
+
+const VB_W = 1200;
+const VB_H = 600;
+const ALT_MAX = 9000;
 const DAYS = 60;
+const X0 = 24;
+const XW = VB_W - 2 * X0;
 
-const nights: [number, number][] = [
-  [1, 1350], [2, 1350], [3, 1350], [4, 1200], [5, 1500], [6, 1900], [7, 2070],
-  [8, 2995], [9, 3870], [10, 3870], [11, 4580], [12, 4580], [13, 5170], [14, 5475],
-  [55, 5475], [56, 4580], [57, 2995], [58, 2070], [59, 1350], [60, 1350],
-];
+const xOf = (d: number) => X0 + ((d - 1) / (DAYS - 1)) * XW;
+const yOf = (a: number) => VB_H - (a / ALT_MAX) * VB_H;
+const px = (d: number) => `${((xOf(d) / VB_W) * 100).toFixed(3)}%`;
+const py = (a: number) => `${((yOf(a) / VB_H) * 100).toFixed(3)}%`;
+const fmt = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '’');
 
-const W = 600;
-const H = 300;
-const sx = (day: number) => ((day - 1) / (DAYS - 1)) * W;
-const sy = (alt: number) => H - (alt / MAX_ALT) * H;
-const line = nights.map(([d, a], i) => `${i ? 'L' : 'M'}${sx(d).toFixed(2)},${sy(a).toFixed(2)}`).join(' ');
-const area = `${line} L${W},${H} L0,${H} Z`;
+// Altitude de nuit de chaque jour (J1 à J60) et lieu correspondant.
+const days: { a: number; place: string }[] = [];
+const fill = (from: number, to: number, a: number, place: string) => {
+  for (let d = from; d <= to; d++) days[d] = { a, place };
+};
+fill(1, 3, 1350, 'Katmandou');
+fill(4, 4, 1200, 'Ilam');
+fill(5, 5, 1500, 'Jorpul');
+fill(6, 6, 1900, 'Khebang');
+fill(7, 7, 2070, 'Yamphudin');
+fill(8, 8, 2995, 'Tortong');
+fill(9, 10, 3870, 'Tseram');
+fill(11, 12, 4580, 'Ramche');
+fill(13, 13, 5170, 'Camp glaciaire');
+fill(14, 55, 5475, 'Camp de base');
+fill(56, 56, 4580, 'Ramche');
+fill(57, 57, 2995, 'Tortong');
+fill(58, 58, 2070, 'Yamphudin');
+fill(59, 59, 1350, 'Katmandou');
+fill(60, 60, 1350, 'Vol retour');
 
-const pctX = (day: number) => `${(((day - 1) / (DAYS - 1)) * 100).toFixed(3)}%`;
-const pctY = (alt: number) => `${((1 - alt / MAX_ALT) * 100).toFixed(3)}%`;
+const trailPts: Pt[] = [];
+for (let d = 1; d <= DAYS; d++) trailPts.push([xOf(d), yOf(days[d].a)]);
+const toD = (pts: Pt[]) => pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+const trailD = toD(trailPts);
+const groundD = `M0,${yOf(1350).toFixed(1)} L${trailD.slice(1)} L${VB_W},${yOf(1350).toFixed(1)} L${VB_W},${VB_H} L0,${VB_H} Z`;
 
-const grid = [1000, 2000, 3000, 4000, 5000];
-const ticks = [1, 10, 20, 30, 40, 50, 60];
+// Montagnes en facettes, façon logo : chaque sommet est un triangle (face éclairée, face d'ombre)
+// posé sur la ligne de base ; les triangles se recouvrent pour former la chaîne.
+const toPts = (pts: Pt[]) => pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+
+type Peak = [number, number, number, number?]; // x, altitude, pente gauche, pente droite (dx par dy)
+
+function peaks(list: Peak[], snowAlt: number, capK: number) {
+  return list.map(([x, a, sl, sr = sl]) => {
+    const p: Pt = [x, yOf(a)];
+    const h = VB_H - p[1];
+    const lf: Pt = [x - h * sl, VB_H];
+    const rf: Pt = [x + h * sr, VB_H];
+    const split: Pt = [x + h * sr * 0.18, VB_H];
+    let cap: string | null = null;
+    if (a > snowAlt) {
+      const depth = Math.min(yOf(snowAlt) - p[1], capK * h);
+      const L: Pt = [x - depth * sl, p[1] + depth];
+      const R: Pt = [x + depth * sr, p[1] + depth];
+      const n = Math.max(4, Math.round((R[0] - L[0]) / 18));
+      const zig: Pt[] = [];
+      for (let j = 1; j < n; j++) {
+        const t = j / n;
+        zig.push([L[0] + (R[0] - L[0]) * t, L[1] + depth * (j % 2 ? 0.34 : -0.05)]);
+      }
+      cap = toPts([p, L, ...zig, R]);
+    }
+    return { light: toPts([lf, p, split]), shadow: toPts([p, rf, split]), cap };
+  });
+}
+
+const far = peaks(
+  [[70, 5900, 0.95], [240, 6600, 0.9], [400, 7100, 0.85], [540, 6700, 0.9], [720, 6400, 0.9], [860, 6900, 0.85], [1000, 7400, 0.85], [1140, 6800, 0.9], [1240, 6200, 0.9]],
+  5600, 0.13,
+);
+// Massif du Kanchenjunga : épaule ouest (Yalung Kang) puis sommet principal à 8’586 m.
+const mid = peaks(
+  [[300, 5600, 0.8], [470, 7200, 0.75], [630, 8350, 0.62, 0.7], [880, 7300, 0.72], [1050, 6700, 0.78], [1190, 6100, 0.8], [700, 8586, 0.6, 0.7]],
+  6000, 0.15,
+);
+const summit = { x: 700, a: 8586 };
+// Collines de premier plan, sous le plateau : du relief au sol, sans toucher au sentier.
+const hills = peaks(
+  [[340, 2300, 1.6], [470, 1700, 1.7], [600, 2800, 1.5], [800, 2400, 1.6], [990, 2100, 1.6], [700, 1500, 1.8]],
+  99999, 0,
+);
 
 const stops = [
-  { day: 1, alt: 1350, name: 'Katmandou', place: 'right' },
-  { day: 8, alt: 2995, name: 'Tortong', place: 'left' },
-  { day: 9, alt: 3870, name: 'Tseram', place: 'left', minor: true },
-  { day: 11, alt: 4580, name: 'Ramche', place: 'left' },
+  { day: 1, name: 'Katmandou', alt: '1’350 m', place: 'below-left', tier: 'key' },
+  { day: 8, name: 'Tortong', alt: '2’995 m', place: 'left', tier: 'minor' },
+  { day: 9, name: 'Tseram', alt: '3’870 m', place: 'left', tier: 'minor' },
+  { day: 11, name: 'Ramche', alt: '4’580 m', place: 'left', tier: 'mid' },
+  { day: 14, name: '', alt: '', place: 'none', tier: 'key' },
+  { day: 60, name: 'Vol retour', alt: 'Katmandou, J60', place: 'below-right', tier: 'key' },
+];
+const tents = [18, 23, 28, 33, 38, 43, 48, 52];
+const rulerTicks = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000];
+const xTicks = [
+  { d: 1, label: 'J1' },
+  { d: 14, label: 'J14' },
+  { d: 55, label: 'J55', minor: true },
+  { d: 60, label: 'J60' },
 ];
 
 const phases = [
-  { n: 1, from: 1, to: 3, title: 'Katmandou', days: 'J1 à J3', text: 'Accueil, récupération, contrôle du matériel, briefing de sécurité, découverte de la ville.' },
-  { n: 2, from: 4, to: 8, title: 'Approche', days: 'J4 à J8', text: 'Vol vers Bhadrapur, route vers Ilam, premières journées de marche par Khebang et Yamphudin jusqu’à Tortong.' },
-  { n: 3, from: 9, to: 14, title: 'Montée par paliers', days: 'J9 à J14', text: 'Tseram, Ramche, randonnée vers Oktang face au Kanchenjunga, camp glaciaire, puis le camp de base. Deux jours d’acclimatation en route.' },
-  { n: 4, from: 15, to: 55, title: 'Vie au camp de base', days: 'J15 à J55', text: 'Environ six semaines à 5’475 m, au cœur d’une expédition himalayenne.' },
-  { n: 5, from: 56, to: 60, title: 'Retour', days: 'J56 à J60', text: 'Redescente par Ramche, Tortong et Yamphudin, transfert vers Katmandou, vol retour.' },
+  { n: 1, from: 1, to: 3, title: 'Katmandou', days: 'J1 à J3', text: 'Accueil, contrôle du matériel, briefing de sécurité.' },
+  { n: 2, from: 4, to: 8, title: 'Approche', days: 'J4 à J8', text: 'Vol vers Bhadrapur, puis premières marches jusqu’à Tortong.' },
+  { n: 3, from: 9, to: 14, title: 'Montée par paliers', days: 'J9 à J14', text: 'Tseram, Ramche, face au Kanchenjunga, avec deux jours d’acclimatation.' },
+  { n: 4, from: 15, to: 55, title: 'Camp de base', days: 'J15 à J55', text: 'Six semaines à 5’475 m, au cœur d’une expédition himalayenne.' },
+  { n: 5, from: 56, to: 60, title: 'Retour', days: 'J56 à J60', text: 'Redescente, transfert vers Katmandou, vol retour.' },
 ];
-const fmt = (n: number) => n.toLocaleString('fr-CH').replace(/ |\s|'/g, '’');
+const segLeft = (from: number) => ((xOf(from - 0.5) / VB_W) * 100).toFixed(3);
+const segWidth = (from: number, to: number) => (((xOf(to + 0.5) - xOf(from - 0.5)) / VB_W) * 100).toFixed(3);
+
+const walkData = {
+  days: days.slice(1).map((d) => d.a),
+  places: days.slice(1).map((d) => d.place),
+  vbW: VB_W,
+  vbH: VB_H,
+  altMax: ALT_MAX,
+  x0: X0,
+  xw: XW,
+};
 ---
 
-<figure class="profile" data-profile>
-  <figcaption class="sr-only">
-    Altitude de nuit du séjour, jour par jour : trois nuits à Katmandou (1’350 m), approche jusqu’à Tortong (2’995 m) au jour 8,
-    montée par Tseram (3’870 m) et Ramche (4’580 m), arrivée au camp de base (5’475 m) au jour 14, vie au camp de base du jour 15 au jour 55,
+<figure class="pf" data-pf>
+  <figcaption class="pf-sr">
+    Profil du séjour, altitude de nuit jour par jour, sur fond du massif du Kanchenjunga (8’586 m, non gravi).
+    Trois nuits à Katmandou (1’350 m), approche jusqu’à Tortong (2’995 m) au jour 8, montée par Tseram (3’870 m)
+    et Ramche (4’580 m), arrivée au camp de base (5’475 m) au jour 14, vie au camp de base du jour 15 au jour 55,
     puis redescente jusqu’à Katmandou et vol retour au jour 60.
   </figcaption>
 
-  <div class="profile__frame" aria-hidden="true">
-   <div class="profile__inner">
-    <div class="profile__grid">
-      {grid.map((alt) => (
-        <div class="profile__gridline" style={`top:${pctY(alt)}`}>
-          <span>{fmt(alt)} m</span>
-        </div>
-      ))}
-    </div>
-
-    {phases.slice(1).map((p) => (
-      <div class="profile__phase-sep" style={`left:${pctX(p.from - 0.5)}`}></div>
-    ))}
-    {phases.map((p) => (
-      <span class="profile__phase-num" style={`left:${pctX((p.from + p.to) / 2)}`}>{p.n}</span>
-    ))}
-
-    <div class="profile__plot" data-profile-plot>
-      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" class="profile__svg">
-        <defs>
-          <linearGradient id="profileFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#FFDF5C" stop-opacity="0.32" />
-            <stop offset="100%" stop-color="#FFDF5C" stop-opacity="0" />
-          </linearGradient>
-        </defs>
-        <path d={area} fill="url(#profileFill)" />
-        <path d={line} fill="none" stroke="#FFDF5C" stroke-width="2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
-      </svg>
-
-      {stops.map((s) => (
-        <span class:list={['profile__stop', `profile__stop--${s.place}`, { 'profile__stop--minor': s.minor }]} style={`left:${pctX(s.day)};top:${pctY(s.alt)}`}>
-          <span class="profile__label"><strong>{s.name}</strong> {fmt(s.alt)} m</span>
-        </span>
-      ))}
-
-      <div class="profile__base" style={`left:${pctX(15)};right:${(100 - ((55 - 1) / (DAYS - 1)) * 100).toFixed(3)}%;top:${pctY(5475)}`}>
-        <span class="profile__base-label">
-          <strong>Camp de base · 5’475 m</strong>
-          <span>J15 à J55, environ six semaines</span>
-        </span>
-      </div>
-
-      <span class="profile__stop profile__stop--end" style={`left:${pctX(60)};top:${pctY(1350)}`}>
-        <span class="profile__label"><strong>Vol retour</strong> J60</span>
-      </span>
-    </div>
-
-    <div class="profile__ticks">
-      {ticks.map((d) => <span style={`left:${pctX(d)}`}>J{d}</span>)}
-    </div>
-   </div>
+  <div class="pf__hud" aria-hidden="true" data-pf-hud>
+    <span class="pf__hud-day" data-pf-day>60 jours</span>
+    <span class="pf__hud-sep">·</span>
+    <span class="pf__hud-alt" data-pf-alt>jusqu’à 5’475 m</span>
+    <span class="pf__hud-sep">·</span>
+    <span class="pf__hud-place" data-pf-place>au pied du Kanchenjunga</span>
   </div>
 
-  <ol class="profile__phases">
+  <div class="pf__stage" aria-hidden="true">
+    <div class="pf__plot" data-pf-plot>
+      <div class="pf__land">
+        <div class="pf__sun" data-pf-sun></div>
+
+        <svg class="pf__layer" data-pf-layer viewBox={`0 0 ${VB_W} ${VB_H}`} preserveAspectRatio="none">
+          <defs>
+            {far.map((p, i) => (
+              <clipPath id={`pf-far-sh-${i}`}><polygon points={p.shadow} /></clipPath>
+            ))}
+          </defs>
+          {far.map((p) => (
+            <g>
+              <polygon points={p.light} fill="#2F2D27" />
+              <polygon points={p.shadow} fill="#242320" />
+            </g>
+          ))}
+          <g data-pf-snow>
+            {far.map((p, i) => p.cap && (
+              <g>
+                <polygon points={p.cap} fill="#F2F0EB" fill-opacity="0.32" />
+                <polygon points={p.cap} fill="#A4A4A2" fill-opacity="0.34" clip-path={`url(#pf-far-sh-${i})`} />
+              </g>
+            ))}
+          </g>
+        </svg>
+
+        <svg class="pf__layer" data-pf-layer viewBox={`0 0 ${VB_W} ${VB_H}`} preserveAspectRatio="none">
+          <defs>
+            {mid.map((p, i) => (
+              <clipPath id={`pf-mid-sh-${i}`}><polygon points={p.shadow} /></clipPath>
+            ))}
+          </defs>
+          {mid.map((p) => (
+            <g>
+              <polygon points={p.light} fill="#52514E" />
+              <polygon points={p.shadow} fill="#3B3934" />
+            </g>
+          ))}
+          <g data-pf-snow>
+            {mid.map((p, i) => p.cap && (
+              <g>
+                <polygon points={p.cap} fill="#F2F0EB" />
+                <polygon points={p.cap} fill="#A4A4A2" clip-path={`url(#pf-mid-sh-${i})`} />
+              </g>
+            ))}
+          </g>
+        </svg>
+
+        <svg class="pf__layer pf__layer--ground" data-pf-layer viewBox={`0 0 ${VB_W} ${VB_H}`} preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="pf-ground" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#242320" />
+              <stop offset="45%" stop-color="#1B1B1A" />
+              <stop offset="100%" stop-color="#111111" />
+            </linearGradient>
+          </defs>
+          <path d={groundD} fill="url(#pf-ground)" />
+          {hills.map((p) => (
+            <g>
+              <polygon points={p.light} fill="#1E1D1B" />
+              <polygon points={p.shadow} fill="#161615" />
+            </g>
+          ))}
+          <path d={trailD} fill="none" stroke="#3B3934" stroke-width="1.5" vector-effect="non-scaling-stroke" />
+        </svg>
+      </div>
+
+      <div class="pf__trail" data-pf-trail>
+        <svg viewBox={`0 0 ${VB_W} ${VB_H}`} preserveAspectRatio="none">
+          <path d={trailD} fill="none" stroke="#FFDF5C" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 9" vector-effect="non-scaling-stroke" />
+        </svg>
+      </div>
+
+      <span class="pf__summit" style={`left:${((summit.x / VB_W) * 100).toFixed(3)}%;top:${py(summit.a)}`} data-pf-fade>
+        <span class="pf__summit-label">
+          <strong>Kanchenjunga</strong>
+          <span>8’586 m</span><span class="pf__summit-note">non gravi</span>
+        </span>
+      </span>
+
+      {tents.map((d) => (
+        <span class="pf__tent" style={`left:${px(d)};top:${py(5475)}`} data-pf-tent data-day={d}>
+          <svg viewBox="0 0 26 20"><path d="M13 1 25 19H1Z" fill="#F2F0EB" /><path d="M13 9.5 17.6 19H8.4Z" fill="#FFDF5C" /></svg>
+        </span>
+      ))}
+
+      <div class="pf__base" style={`left:${px(34.5)};top:${py(5475)}`} data-pf-base>
+        <strong>Camp de base · 5’475 m</strong>
+        <span>J15 à J55<span class="pf__base-long">, environ six semaines</span></span>
+      </div>
+
+      {stops.map((s) => (
+        <span class:list={['pf__stop', `pf__stop--${s.place}`, `pf__stop--${s.tier}`]} style={`left:${px(s.day)};top:${py(days[s.day].a)}`} data-pf-stop data-day={s.day}>
+          {s.name && (
+            <span class="pf__label"><strong>{s.name}</strong> <span>{s.alt}</span></span>
+          )}
+        </span>
+      ))}
+
+      <span class="pf__walker" data-pf-walker></span>
+    </div>
+
+    <div class="pf__ruler" data-pf-ruler>
+      {rulerTicks.map((a) => (
+        <span class:list={['pf__tick', { 'pf__tick--label': a % 2000 === 0, 'pf__tick--top': a === 8000 }]} style={`top:${py(a)}`}>
+          {a % 2000 === 0 && <span>{fmt(a)} m</span>}
+        </span>
+      ))}
+      <span class="pf__marker" data-pf-marker></span>
+    </div>
+
+    <div class="pf__axis">
+      <div class="pf__phasebar">
+        {phases.map((p) => (
+          <span class="pf__seg" style={`left:${segLeft(p.from)}%;width:${segWidth(p.from, p.to)}%`}>
+            <span class="pf__seg-fill" data-pf-seg data-from={p.from} data-to={p.to}></span>
+            <span class="pf__seg-n">{p.n}</span>
+          </span>
+        ))}
+      </div>
+      <div class="pf__days">
+        {xTicks.map((t) => (
+          <span class:list={[{ 'pf__day--minor': t.minor }]} style={`left:${px(t.d)}`}>{t.label}</span>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <div class="pf__replay-row">
+    <button type="button" class="pf__replay" data-pf-replay hidden>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+      Revoir le parcours
+    </button>
+  </div>
+
+  <ol class="pf__phases">
     {phases.map((p) => (
-      <li class="profile__phase reveal">
-        <span class="profile__phase-badge" aria-hidden="true">{p.n}</span>
+      <li class="pf__phase reveal">
+        <span class="pf__phase-n" aria-hidden="true">{p.n}</span>
         <div>
-          <p class="profile__phase-days">{p.days}</p>
+          <p class="pf__phase-days">{p.days}</p>
           <h4>{p.title}</h4>
           <p>{p.text}</p>
         </div>
       </li>
     ))}
   </ol>
-  <p class="profile__note">Altitude de nuit, jour par jour. Altitudes et étapes indicatives, ajustées sur place selon la météo et l’état du groupe.</p>
+  <p class="pf__note">Altitude de nuit, jour par jour. Étapes et altitudes indicatives, ajustées sur place selon la météo et l’état du groupe.</p>
 </figure>
 
+<script define:vars={{ walkData }}>
+  window.__pfData = walkData;
+</script>
+
 <script>
+  type WalkData = { days: number[]; places: string[]; vbW: number; vbH: number; altMax: number; x0: number; xw: number };
+
   const init = () => {
-    const profile = document.querySelector<HTMLElement>('[data-profile]');
-    if (!profile) return;
+    const root = document.querySelector<HTMLElement>('[data-pf]');
+    const data = (window as unknown as { __pfData?: WalkData }).__pfData;
+    if (!root || !data) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const $ = <T extends Element = HTMLElement>(s: string) => root.querySelector<T>(s)!;
+    const $$ = <T extends Element = HTMLElement>(s: string) => Array.from(root.querySelectorAll<T>(s));
+
+    const plot = $('[data-pf-plot]');
+    const ruler = $('[data-pf-ruler]');
+    const walker = $('[data-pf-walker]');
+    const marker = $('[data-pf-marker]');
+    const trail = $('[data-pf-trail]');
+    const hud = $('[data-pf-hud]');
+    const hudDay = $('[data-pf-day]');
+    const hudAlt = $('[data-pf-alt]');
+    const hudPlace = $('[data-pf-place]');
+    const replay = $<HTMLButtonElement>('[data-pf-replay]');
+    const layers = $$('[data-pf-layer]');
+    const snow = $$('[data-pf-snow]');
+    const sun = $('[data-pf-sun]');
+    const fades = $$('[data-pf-fade]');
+    const stops = $$('[data-pf-stop]');
+    const tents = $$('[data-pf-tent]');
+    const base = $('[data-pf-base]');
+    const segs = $$('[data-pf-seg]');
+
+    const fmt = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '’');
+    const altAt = (d: number) => {
+      const i = Math.min(Math.floor(d), 60);
+      const j = Math.min(i + 1, 60);
+      const t = d - i;
+      return data.days[i - 1] * (1 - t) + data.days[j - 1] * t;
+    };
+
+    let size = { w: plot.clientWidth, h: plot.clientHeight, rh: ruler.clientHeight };
+    let current = 60;
+
+    const place = (d: number) => {
+      const x = ((data.x0 + ((d - 1) / 59) * data.xw) / data.vbW) * size.w;
+      const y = (1 - altAt(d) / data.altMax) * size.h;
+      walker.style.transform = `translate(${x}px, ${y}px)`;
+      marker.style.transform = `translateY(${(1 - altAt(d) / data.altMax) * size.rh}px)`;
+      const pct = ((data.x0 + ((d - 1) / 59) * data.xw) / data.vbW) * 100;
+      trail.style.clipPath = `inset(-6% ${(100 - pct).toFixed(2)}% -6% -2%)`;
+    };
+
+    const setHud = (d: number) => {
+      const day = Math.min(60, Math.max(1, Math.floor(d + 0.0001)));
+      hudDay.textContent = `J${day}`;
+      hudAlt.textContent = day === 60 ? 'vol retour' : `${fmt(data.days[day - 1])} m`;
+      hudPlace.textContent = day === 60 ? 'Katmandou, Genève' : data.places[day - 1];
+    };
+
+    new ResizeObserver(() => {
+      size = { w: plot.clientWidth, h: plot.clientHeight, rh: ruler.clientHeight };
+      place(current);
+    }).observe(plot);
 
     import('gsap').then(({ gsap }) => {
       import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
         gsap.registerPlugin(ScrollTrigger);
-        const plot = profile.querySelector('[data-profile-plot]');
-        const labels = profile.querySelectorAll('.profile__stop, .profile__base');
-        gsap.set(plot, { clipPath: 'inset(-40% 100% -10% -4%)' });
-        gsap.set(labels, { opacity: 0, y: 8 });
-        gsap.timeline({ scrollTrigger: { trigger: profile, start: 'top 75%', once: true } })
-          .to(plot, { clipPath: 'inset(-40% -4% -10% -4%)', duration: 2.4, ease: 'power3.out', onComplete: () => gsap.set(plot, { clearProps: 'clipPath' }) })
-          .to(labels, { opacity: 1, y: 0, duration: 0.6, stagger: 0.12, ease: 'power3.out' }, 0.5);
+
+        const hideWalk = () => {
+          gsap.set(stops, { opacity: 0, scale: 0.4 });
+          gsap.set(tents, { opacity: 0, y: 10 });
+          gsap.set(base, { opacity: 0, y: 12 });
+          gsap.set(segs, { scaleX: 0 });
+          gsap.set([walker, marker], { opacity: 0 });
+          trail.style.clipPath = 'inset(-6% 100% -6% -2%)';
+        };
+
+        gsap.set(layers, { yPercent: 22, opacity: 0 });
+        gsap.set(snow, { opacity: 0 });
+        gsap.set(sun, { yPercent: 90, opacity: 0 });
+        gsap.set(fades, { opacity: 0 });
+        gsap.set(hud, { opacity: 0, y: 10 });
+        hideWalk();
+
+        const walk = () => {
+          const shown = new Set<Element>();
+          const reveal = (d: number) => {
+            for (const el of stops) {
+              if (!shown.has(el) && d >= Number(el.dataset.day)) {
+                shown.add(el);
+                gsap.to(el, { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(2.2)' });
+              }
+            }
+            for (const el of tents) {
+              if (!shown.has(el) && d >= Number(el.dataset.day)) {
+                shown.add(el);
+                gsap.to(el, { opacity: 1, y: 0, duration: 0.45, ease: 'power3.out' });
+              }
+            }
+            if (!shown.has(base) && d >= 16) {
+              shown.add(base);
+              gsap.to(base, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' });
+            }
+            for (const el of segs) {
+              const from = Number(el.dataset.from) - 0.5;
+              const to = Number(el.dataset.to) + 0.5;
+              el.style.transform = `scaleX(${Math.min(1, Math.max(0, (d - from) / (to - from)))})`;
+            }
+          };
+
+          const state = { d: 1 };
+          const tick = () => {
+            current = state.d;
+            place(state.d);
+            setHud(state.d);
+            reveal(state.d);
+          };
+          return gsap.timeline({ onStart: tick })
+            .to([walker, marker], { opacity: 1, duration: 0.3 })
+            .to(state, { d: 14, duration: 1.8, ease: 'power1.inOut', onUpdate: tick })
+            .to(state, { d: 55, duration: 1.4, ease: 'none', onUpdate: tick })
+            .to(state, { d: 60, duration: 1.0, ease: 'power2.out', onUpdate: tick })
+            .add(() => {
+              replay.setAttribute('aria-disabled', 'false');
+              if (replay.hidden) {
+                replay.hidden = false;
+                gsap.fromTo(replay, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.5 });
+              }
+            });
+        };
+
+        const intro = gsap.timeline({ paused: true })
+          .to(sun, { yPercent: 0, opacity: 1, duration: 1.6, ease: 'expo.out' }, 0)
+          .to(layers, { yPercent: 0, opacity: 1, duration: 1.2, ease: 'expo.out', stagger: 0.16 }, 0.05)
+          .to(snow, { opacity: 1, duration: 0.9, ease: 'power2.out', stagger: 0.12 }, 0.7)
+          .to(fades, { opacity: 1, duration: 0.7 }, 1.1)
+          .to(hud, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 1.0)
+          .add(() => { walk(); }, 1.3);
+
+        ScrollTrigger.create({ trigger: plot, start: 'top 72%', once: true, onEnter: () => intro.play() });
+
+        // aria-disabled plutôt que disabled : le bouton garde le focus clavier pendant la relecture.
+        replay.addEventListener('click', () => {
+          if (replay.getAttribute('aria-disabled') === 'true') return;
+          replay.setAttribute('aria-disabled', 'true');
+          hideWalk();
+          walk();
+        });
       });
     });
   };
+
   if (document.readyState === 'complete') init();
   else window.addEventListener('load', init, { once: true });
 </script>
 
 <style lang="scss">
-  .sr-only {
+  $night: #111111;
+  $snow: #F2F0EB;
+
+  .pf-sr {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -148,85 +466,108 @@ const fmt = (n: number) => n.toLocaleString('fr-CH').replace(/ |\s|'/g, '’')
     white-space: nowrap;
   }
 
-  .profile {
+  .pf {
     margin: 0;
-  }
-
-  .profile__frame {
-    height: clamp(300px, 34vw, 460px);
-    margin: 0 0 56px;
-    padding-left: 72px;
-
-    @media (max-width: 768px) {
-      height: 300px;
-      margin-bottom: 40px;
-      padding-left: 52px;
-    }
-  }
-
-  .profile__inner {
     position: relative;
-    height: 100%;
   }
 
-  .profile__grid,
-  .profile__plot {
-    position: absolute;
-    inset: 40px 0 0 0;
+  // ---------- Compteur ----------
+  .pf__hud {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+    margin-bottom: 24px;
+    font-variant-numeric: tabular-nums;
+    color: $snow;
   }
 
-  .profile__gridline {
-    position: absolute;
-    left: 0;
-    right: 0;
-    border-top: 1px dashed rgba(255, 255, 255, 0.12);
-
-    span {
-      position: absolute;
-      right: calc(100% + 12px);
-      top: -9px;
-      white-space: nowrap;
-      font-size: var(--fs-xs);
-      color: rgba(255, 255, 255, 0.4);
-      font-variant-numeric: tabular-nums;
-    }
-  }
-
-  .profile__phase-sep {
-    position: absolute;
-    top: 40px;
-    bottom: 0;
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  .profile__phase-num {
-    position: absolute;
-    top: 0;
-    transform: translateX(-50%);
-    width: 24px;
-    height: 24px;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 223, 92, 0.6);
-    color: var(--color-accent);
-    font-size: var(--fs-xs);
+  .pf__hud-day {
+    font-family: var(--font-headline);
     font-weight: 700;
+    font-size: clamp(30px, 3.4vw, 48px);
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: $snow;
+    min-width: 2.4ch;
+  }
+
+  .pf__hud-alt {
+    font-family: var(--font-headline);
+    font-weight: 700;
+    font-size: var(--fs-md);
+    color: var(--color-accent);
+  }
+
+  .pf__hud-place {
+    font-size: var(--fs-base);
+    color: rgba(242, 240, 235, 0.75);
+  }
+
+  .pf__hud-sep {
+    color: rgba(242, 240, 235, 0.35);
+  }
+
+  // ---------- Scène ----------
+  .pf__stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 76px;
+    grid-template-rows: auto auto;
 
     @media (max-width: 768px) {
-      display: none;
+      grid-template-columns: minmax(0, 1fr) 68px;
     }
   }
 
-  .profile__svg {
+  .pf__plot {
+    position: relative;
+    aspect-ratio: 2 / 1;
+
+    @media (max-width: 768px) {
+      aspect-ratio: auto;
+      height: 330px;
+    }
+  }
+
+  .pf__land {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .pf__layer,
+  .pf__trail,
+  .pf__trail svg {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
+  }
+
+  .pf__layer {
     overflow: visible;
   }
 
-  .profile__stop {
+  .pf__trail {
+    pointer-events: none;
+
+    svg { overflow: visible; }
+  }
+
+  .pf__sun {
+    position: absolute;
+    left: 46.5%;
+    top: 13%;
+    width: 11.5%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #F8D541;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 80px rgba(248, 213, 65, 0.25);
+  }
+
+  // ---------- Sommet ----------
+  .pf__summit {
     position: absolute;
     width: 0;
     height: 0;
@@ -234,154 +575,442 @@ const fmt = (n: number) => n.toLocaleString('fr-CH').replace(/ |\s|'/g, '’')
     &::before {
       content: '';
       position: absolute;
-      left: -6px;
-      top: -6px;
-      width: 12px;
-      height: 12px;
+      left: -4px;
+      top: -4px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      background: #111;
-      border: 2.5px solid var(--color-accent);
+      background: $night;
+      box-shadow: 0 0 0 2px $snow;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 0;
+      width: 44px;
+      border-top: 1px solid rgba(242, 240, 235, 0.55);
     }
   }
 
-  .profile__label {
+  .pf__summit-label {
     position: absolute;
-    bottom: 12px;
+    left: 62px;
+    top: -14px;
     white-space: nowrap;
-    font-size: var(--fs-xs);
-    color: rgba(255, 255, 255, 0.65);
-    font-variant-numeric: tabular-nums;
+    line-height: 1.25;
+
+    strong {
+      display: block;
+      font-family: var(--font-headline);
+      font-size: var(--fs-md);
+      color: $snow;
+    }
+
+    span {
+      font-size: 15px;
+      color: rgba(242, 240, 235, 0.7);
+    }
+
+    .pf__summit-note::before { content: ' · '; }
+  }
+
+  // ---------- Camp de base ----------
+  .pf__tent {
+    position: absolute;
+    width: 26px;
+    height: 20px;
+    transform: translate(-50%, -100%);
+    margin-top: -1px;
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    @media (max-width: 768px) {
+      width: 15px;
+      height: 12px;
+    }
+  }
+
+  .pf__base {
+    position: absolute;
+    transform: translate(-50%, 0);
+    margin-top: 28px;
+    text-align: center;
+    white-space: nowrap;
     line-height: 1.3;
 
     strong {
       display: block;
-      color: var(--color-white);
-      font-size: var(--fs-base);
       font-family: var(--font-headline);
-      font-weight: 700;
+      font-size: var(--fs-lg);
+      line-height: 1.05;
+      color: var(--color-accent);
+      margin-bottom: 6px;
+    }
+
+    span {
+      font-size: var(--fs-base);
+      color: rgba(242, 240, 235, 0.72);
+    }
+
+    @media (max-width: 768px) {
+      margin-top: 18px;
+
+      strong { font-size: 16px; margin-bottom: 2px; }
+      span { font-size: 13px; }
+      .pf__base-long { display: none; }
     }
   }
 
-  .profile__stop--right .profile__label { left: 4px; }
-  .profile__stop--left .profile__label { right: 10px; text-align: right; }
-  .profile__stop--end .profile__label { right: 0; bottom: auto; top: 14px; text-align: right; }
-
-  // Sur mobile, les étapes intermédiaires gardent leur point ; leurs noms sont dans la liste des phases.
-  @media (max-width: 768px) {
-    .profile__stop--left .profile__label { display: none; }
-    .profile__stop--right .profile__label { bottom: auto; top: 12px; }
-    .profile__label strong { font-size: var(--fs-xs); }
-    .profile__ticks span:nth-child(2n) { display: none; }
-  }
-
-  .profile__base {
+  // ---------- Étapes ----------
+  .pf__stop {
     position: absolute;
+    width: 0;
     height: 0;
 
-    .profile__base-label {
+    &::before {
+      content: '';
       position: absolute;
-      left: 50%;
-      top: 24px;
-      transform: translateX(-50%);
-      white-space: nowrap;
-      text-align: center;
-      line-height: 1.35;
+      left: -8px;
+      top: -8px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: $night;
+      box-shadow: 0 0 0 3px var(--color-accent);
+    }
 
-      strong {
-        display: block;
-        font-family: var(--font-headline);
-        font-size: var(--fs-md);
-        color: var(--color-accent);
-      }
-
-      span {
-        font-size: var(--fs-xs);
-        color: rgba(255, 255, 255, 0.65);
-        letter-spacing: 0.02em;
+    @media (max-width: 768px) {
+      &::before {
+        left: -6px;
+        top: -6px;
+        width: 12px;
+        height: 12px;
+        box-shadow: 0 0 0 2.5px var(--color-accent);
       }
     }
   }
 
-  .profile__ticks {
+  .pf__label {
+    position: absolute;
+    white-space: nowrap;
+    line-height: 1.2;
+    text-shadow: 0 1px 12px rgba(17, 17, 17, 0.8);
+
+    strong {
+      font-family: var(--font-headline);
+      font-size: var(--fs-md);
+      color: $snow;
+    }
+
+    span {
+      font-size: 15px;
+      color: rgba(242, 240, 235, 0.75);
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .pf__stop--left .pf__label {
+    right: 18px;
+    top: 0;
+    transform: translateY(-50%);
+
+    strong { margin-right: 6px; }
+  }
+
+  .pf__stop--below-left .pf__label,
+  .pf__stop--below-right .pf__label {
+    top: 18px;
+
+    strong { display: block; }
+  }
+
+  .pf__stop--below-left .pf__label { left: -8px; }
+  .pf__stop--below-right .pf__label { right: -8px; text-align: right; }
+
+  @media (max-width: 1199px) {
+    .pf__stop--minor .pf__label { display: none; }
+  }
+
+  @media (max-width: 768px) {
+    .pf__stop--mid .pf__label { display: none; }
+
+    .pf__label {
+      strong { font-size: 15px; }
+      span { font-size: 13px; }
+    }
+
+    .pf__stop--below-left .pf__label,
+    .pf__stop--below-right .pf__label { top: 12px; }
+
+    .pf__summit::after { width: 10px; }
+
+    .pf__summit-label {
+      left: 20px;
+      top: -10px;
+
+      strong { font-size: 15px; }
+      span { display: block; font-size: 13px; }
+      .pf__summit-note::before { content: none; }
+    }
+  }
+
+  // ---------- Marcheur ----------
+  .pf__walker {
     position: absolute;
     left: 0;
-    right: 0;
-    bottom: -28px;
+    top: 0;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+    }
+
+    &::before {
+      left: -18px;
+      top: -18px;
+      width: 36px;
+      height: 36px;
+      background: radial-gradient(circle, rgba(255, 223, 92, 0.55) 0%, rgba(255, 223, 92, 0) 70%);
+    }
+
+    &::after {
+      left: -7px;
+      top: -7px;
+      width: 14px;
+      height: 14px;
+      background: var(--color-accent);
+      box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.9), 0 0 18px 4px rgba(255, 223, 92, 0.7);
+    }
+  }
+
+  // ---------- Altimètre ----------
+  .pf__ruler {
+    position: relative;
+    margin-left: 16px;
+    border-left: 1px solid rgba(242, 240, 235, 0.22);
+
+    @media (max-width: 768px) { margin-left: 8px; }
+  }
+
+  .pf__tick {
+    position: absolute;
+    left: 0;
+    width: 6px;
+    border-top: 1px solid rgba(242, 240, 235, 0.3);
+
+    &--label {
+      width: 10px;
+      border-top-color: rgba(242, 240, 235, 0.55);
+    }
+
+    span {
+      position: absolute;
+      left: 16px;
+      top: -10px;
+      font-size: 14px;
+      white-space: nowrap;
+      color: rgba(242, 240, 235, 0.55);
+      font-variant-numeric: tabular-nums;
+
+      @media (max-width: 768px) {
+        left: 10px;
+      }
+    }
+
+    // Sur mobile, le libellé du Kanchenjunga occupe le haut de la gouttière.
+    &--top span {
+      @media (max-width: 768px) { display: none; }
+    }
+  }
+
+  .pf__marker {
+    position: absolute;
+    left: -1px;
+    top: 0;
+    width: 0;
+    height: 0;
+    opacity: 0;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: -7px;
+      border-style: solid;
+      border-width: 7px 12px 7px 0;
+      border-color: transparent var(--color-accent) transparent transparent;
+    }
+  }
+
+  // ---------- Axe ----------
+  .pf__axis {
+    grid-column: 1;
+    padding-top: 22px;
+  }
+
+  .pf__phasebar {
+    position: relative;
+    height: 26px;
+  }
+
+  .pf__seg {
+    position: absolute;
+    top: 0;
+    height: 4px;
+    border-radius: 4px;
+    background: rgba(242, 240, 235, 0.14);
+    overflow: visible;
+    box-shadow: inset 0 0 0 0 transparent;
+    margin: 0 1px;
+  }
+
+  .pf__seg-fill {
+    position: absolute;
+    inset: 0;
+    border-radius: 4px;
+    background: var(--color-accent);
+    transform-origin: left center;
+  }
+
+  .pf__seg-n {
+    position: absolute;
+    left: 50%;
+    top: 12px;
+    transform: translateX(-50%);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-accent);
+
+    @media (max-width: 768px) { display: none; }
+  }
+
+  .pf__days {
+    position: relative;
+    height: 22px;
 
     span {
       position: absolute;
       transform: translateX(-50%);
-      font-size: var(--fs-xs);
-      color: rgba(255, 255, 255, 0.45);
+      font-size: 14px;
+      color: rgba(242, 240, 235, 0.55);
       font-variant-numeric: tabular-nums;
 
-      &:first-child { transform: none; }
-      &:last-child { transform: translateX(-100%); }
+      &:first-child { transform: translateX(-30%); }
+      &:last-child { transform: translateX(-70%); }
+    }
+
+    @media (max-width: 768px) {
+      .pf__day--minor { display: none; }
     }
   }
 
-  .profile__phases {
+  // ---------- Rejouer ----------
+  .pf__replay-row {
+    display: flex;
+    justify-content: flex-end;
+    min-height: 48px;
+    margin-top: 16px;
+  }
+
+  .pf__replay {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 10px 20px;
+    border-radius: 100px;
+    border: 1px solid rgba(242, 240, 235, 0.3);
+    background: transparent;
+    color: $snow;
+    font: inherit;
+    font-size: var(--fs-base);
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.3s ease, color 0.3s ease;
+
+    &:hover:not([aria-disabled='true']) {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+
+    &[aria-disabled='true'] {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    &[hidden] { display: none; }
+  }
+
+  // ---------- Phases ----------
+  .pf__phases {
     list-style: none;
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 32px;
+    margin-top: 40px;
     padding-top: 40px;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid rgba(242, 240, 235, 0.12);
 
-    @media (max-width: 1024px) {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    @media (max-width: 560px) {
-      grid-template-columns: 1fr;
-      gap: 24px;
-    }
+    @media (max-width: 1024px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    @media (max-width: 560px) { grid-template-columns: 1fr; gap: 24px; }
   }
 
-  .profile__phase {
+  .pf__phase {
     display: flex;
     gap: 16px;
 
     h4 {
       font-family: var(--font-headline);
       font-size: var(--fs-md);
-      color: var(--color-white);
-      margin-bottom: 8px;
       line-height: 1.15;
+      color: $snow;
+      margin-bottom: 8px;
     }
 
     p {
-      color: rgba(255, 255, 255, 0.7);
       font-size: var(--fs-base);
       line-height: 1.55;
+      color: rgba(242, 240, 235, 0.7);
     }
   }
 
-  .profile__phase-badge {
+  .pf__phase-n {
     flex: 0 0 auto;
-    width: 32px;
-    height: 32px;
     display: grid;
     place-items: center;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     background: var(--color-accent);
-    color: var(--color-primary);
+    color: $night;
     font-weight: 700;
-    font-size: var(--fs-xs);
+    font-size: 13px;
   }
 
-  .profile__phase-days {
-    font-size: var(--fs-xs) !important;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+  .pf__phase-days {
+    font-size: 12px !important;
     font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     color: var(--color-accent) !important;
     margin-bottom: 6px !important;
   }
 
-  .profile__note {
+  .pf__note {
     margin-top: 40px;
-    font-size: var(--fs-xs);
-    color: rgba(255, 255, 255, 0.45);
+    font-size: 13px;
+    color: rgba(242, 240, 235, 0.45);
   }
 </style>
