@@ -402,7 +402,9 @@ const letters = 'ALTITUDE'.split('');
     right: 0;
     bottom: 0;
     height: var(--land-h);
-    overflow: hidden;
+    // Rogné en bas et sur les côtés (les plans montent depuis sous le cadre), libre vers le haut :
+    // le halo du soleil s'estompe dans le ciel au lieu d'être coupé net au bord du paysage.
+    clip-path: inset(-100vh 0 0 0);
     pointer-events: none;
   }
 

@@ -281,6 +281,9 @@ const markers = terraces.map((t) => {
 
   // ---------- Étapes : drapeaux plantés sur le sentier ----------
   .cal__steps {
+    // Au-dessus du paysage : le halo du soleil passe derrière les textes, pas devant.
+    position: relative;
+    z-index: 1;
     list-style: none;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -372,14 +375,19 @@ const markers = terraces.map((t) => {
   .cal__art {
     position: relative;
     aspect-ratio: 1200 / 400;
-    overflow: hidden;
+    // Rogné en bas et sur les côtés (les plans montent depuis le sol), libre vers le haut :
+    // le halo du soleil s'estompe dans la page au lieu d'être coupé net au bord du paysage.
+    clip-path: inset(-100vh 0 0 0);
 
-    // Mobile : le paysage passe au-dessus de la liste, dans une carte un peu plus haute.
+    // Mobile : le paysage passe au-dessus de la liste, dans une carte un peu plus haute,
+    // qui contient tout (halo compris).
     @media (max-width: 900px) {
       order: -1;
       aspect-ratio: 1200 / 560;
       border-radius: 24px;
       background: var(--color-surface);
+      clip-path: none;
+      overflow: hidden;
     }
   }
 
