@@ -16,6 +16,12 @@ const base = import.meta.env.BASE_URL;
           <path d="M5 12h14M12 5l7 7-7 7"/>
         </svg>
       </a>
+      <a href={`${base}altitude`} class="btn btn--cta btn--cta-outline">
+        <span>Nouveau : le Programme Altitude</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </a>
     </div>
   </div>
 </section>
@@ -38,7 +44,9 @@ const base = import.meta.env.BASE_URL;
 
   .video-cta {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
+    gap: 16px;
     margin-top: 32px;
 
     @media (max-width: 768px) {
@@ -75,6 +83,19 @@ const base = import.meta.env.BASE_URL;
     @media (max-width: 480px) {
       padding: 16px 28px;
       font-size: var(--fs-base);
+    }
+  }
+
+  .btn--cta-outline {
+    background: transparent;
+    color: var(--color-white);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: none;
+
+    &:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+      box-shadow: none;
     }
   }
 </style>

@@ -14,6 +14,7 @@ const base = import.meta.env.BASE_URL;
       <a href={`${base}galerie`} class="header__link">Galerie</a>
       <a href={`${base}temoignages`} class="header__link">Témoignages</a>
       <a href={`${base}impulsion`} class="header__link header__link--impulsion">Impulsion</a>
+      <a href={`${base}altitude`} class="header__link header__link--impulsion">Altitude</a>
     </nav>
 
     <div class="header__actions">
@@ -72,7 +73,8 @@ const base = import.meta.env.BASE_URL;
       left: 50%;
       transform: translateX(-50%);
 
-      @media (max-width: 1024px) {
+      // 7 liens : en dessous de 1200px, la nav centrée chevauche le bouton Contact
+      @media (max-width: 1200px) {
         display: none;
       }
     }
@@ -80,6 +82,7 @@ const base = import.meta.env.BASE_URL;
     &__link {
       font-size: var(--fs-base);
       font-weight: 500;
+      white-space: nowrap;
       color: rgba(255, 255, 255, 0.8);
       transition: all 0.3s var(--ease-out);
       text-decoration: none;
@@ -137,7 +140,7 @@ const base = import.meta.env.BASE_URL;
         transition: all 0.3s ease;
       }
 
-      @media (max-width: 1024px) {
+      @media (max-width: 1200px) {
         display: flex;
       }
     }

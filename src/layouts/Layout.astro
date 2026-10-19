@@ -17,16 +17,17 @@ interface Props {
 	title: string;
 	description?: string;
 	preloadHeroImage?: boolean;
+	ogImage?: ImageMetadata;
 }
 
-const { title, description = "Jeunesse & Co - L'accompagnement éducatif sur mesure", preloadHeroImage = false } = Astro.props;
+const { title, description = "Jeunesse & Co - L'accompagnement éducatif sur mesure", preloadHeroImage = false, ogImage: ogSource = ogPhoto } = Astro.props;
 
 // Précharge exactement la variante LCP générée dans Hero.astro.
 const heroImage = preloadHeroImage ? await getImage({ src: heroMain, width: 620, height: 780, format: 'webp' }) : null;
 const base = import.meta.env.BASE_URL;
 
 // OpenGraph absolu par environnement (prod / preview) via Astro.site
-const ogImage = await getImage({ src: ogPhoto, width: 1200, format: 'webp' });
+const ogImage = await getImage({ src: ogSource, width: 1200, format: 'webp' });
 const ogImageUrl = new URL(ogImage.src, Astro.site);
 const ogUrl = new URL(Astro.url.pathname, Astro.site);
 ---
