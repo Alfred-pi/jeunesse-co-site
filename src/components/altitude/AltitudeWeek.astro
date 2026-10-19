@@ -1,5 +1,7 @@
 ---
 // Temps 1 · Avant : semaine type de 40 heures et conditions du départ (dossier ALTITUDE).
+// À gauche, chaque heure est un petit sommet : la semaine se remplit heure par heure.
+// À droite, une carte d'embarquement Genève → Katmandou : l'avion n'avance que si une condition est vérifiée.
 const week = [
   { h: 12, label: 'Préparation physique' },
   { h: 12, label: 'Projet post-séjour' },
@@ -7,6 +9,7 @@ const week = [
   { h: 4, label: 'Culture, santé, sécurité' },
   { h: 4, label: 'Bilans et entretiens' },
 ];
+const total = week.reduce((sum, w) => sum + w.h, 0);
 
 const departure = [
   'Assiduité régulière sur toute la préparation',
@@ -14,125 +17,548 @@ const departure = [
   'Projet post-séjour défini et engagé',
   'Aptitude médicale confirmée, vaccinations à jour',
   'Respect du cadre et des règles de vie du groupe',
-  'Documents en ordre : passeport, visa, autorisations',
+  'Documents en ordre : passeport, visa, autorisations',
 ];
-
-const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>`;
 ---
 
-      <div class="alt-avant__bottom">
-        <figure class="alt-week reveal">
-          <figcaption>Une semaine type, 40 heures</figcaption>
-          <div class="alt-week__bar" data-grow role="img" aria-label="Environ 12 heures de préparation physique, 12 heures de projet post-séjour, 8 heures de construction du séjour, 4 heures de culture, santé et sécurité, 4 heures de bilans et d’entretiens.">
-            {week.map((w, i) => (
-              <span class={`alt-week__seg alt-week__seg--${i + 1}`} style={`flex-grow:${w.h}`}><b>{w.h}</b> h</span>
-            ))}
-          </div>
-          <ul class="alt-week__legend" aria-hidden="true">
-            {week.map((w, i) => <li><span class={`alt-week__dot alt-week__seg--${i + 1}`}></span>{w.label}</li>)}
-          </ul>
-        </figure>
+<div class="wk" data-wk>
+  <!-- Semaine type : 40 heures = 40 sommets -->
+  <figure class="wk-week" data-wk-week>
+    <figcaption class="wk-week__head">
+      <span class="wk-week__kicker">Une semaine type</span>
+      <span class="wk-week__total"><b data-wk-total>{total}</b> heures</span>
+    </figcaption>
 
-        <div class="alt-departure reveal">
-          <h3>Le départ <span class="alt-mark">se gagne</span></h3>
-          <p>L’admission ouvre la préparation, elle ne garantit pas le départ. Un bilan vérifie six conditions, avec le jeune et ses représentants légaux.</p>
-          <ul class="alt-checks" data-stagger>
-            {departure.map((d) => <li><span class="alt-checks__icon" set:html={check} />{d}</li>)}
-          </ul>
-        </div>
+    <ol class="wk-week__rows">
+      {week.map((w, i) => (
+        <li class={`wk-row wk-row--${i + 1}`} data-wk-row>
+          <span class="wk-row__h" data-wk-head>
+            <b aria-hidden="true" data-wk-h>{w.h}</b><span aria-hidden="true">h</span>
+            <span class="wk-sr">{w.h} heures&nbsp;:</span>
+          </span>
+          <span class="wk-row__label" data-wk-head>{w.label}</span>
+          <span class="wk-row__pips" aria-hidden="true">
+            {Array.from({ length: w.h }, () => <i class="wk-pip" data-wk-pip></i>)}
+          </span>
+        </li>
+      ))}
+    </ol>
+
+    <p class="wk-week__key" aria-hidden="true"><i class="wk-pip wk-pip--key"></i>= 1&nbsp;heure</p>
+  </figure>
+
+  <!-- Le départ se gagne : carte d'embarquement -->
+  <article class="wk-pass" data-wk-pass>
+    <div class="wk-pass__top" aria-hidden="true">
+      <span class="wk-pass__tag">Carte d’embarquement</span>
+      <span class="wk-pass__date">Printemps 2027</span>
+    </div>
+
+    <div class="wk-pass__route" aria-hidden="true">
+      <span class="wk-pass__city"><b>GVA</b><small>Genève</small></span>
+      <span class="wk-pass__track">
+        <i class="wk-pass__line"></i>
+        <i class="wk-pass__line wk-pass__line--done" data-wk-done></i>
+        <span class="wk-pass__fly" data-wk-fly>
+          <svg class="wk-pass__plane" viewBox="0 0 32 20">
+            <path d="M2 10c0-1 1-1.5 2-1.5h22c2.5 0 4.5.8 5 1.5-.5.7-2.5 1.5-5 1.5H4c-1 0-2-.5-2-1.5Z" />
+            <path d="M13.5 8.6 9 1.5h3l8 7.1zM13.5 11.4 9 18.5h3l8-7.1zM4.2 8.6 2.4 4.6h2.2l3 4zM4.2 11.4l-1.8 4h2.2l3-4z" />
+          </svg>
+        </span>
+      </span>
+      <span class="wk-pass__city wk-pass__city--to"><b>KTM</b><small>Katmandou</small></span>
+    </div>
+
+    <div class="wk-pass__perf" aria-hidden="true"></div>
+
+    <div class="wk-pass__body">
+      <h3>Le départ <span class="alt-mark">se gagne</span></h3>
+      <p class="wk-pass__lead">L’admission ouvre la préparation, elle ne garantit pas le départ. Un bilan vérifie six conditions, avec le jeune et ses représentants légaux.</p>
+
+      <ol class="wk-checks">
+        {departure.map((d) => (
+          <li data-wk-check>
+            <span class="wk-checks__box" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+            </span>
+            <span class="wk-checks__text">{d}</span>
+          </li>
+        ))}
+      </ol>
+
+      <div class="wk-pass__foot" aria-hidden="true">
+        <span class="wk-pass__count">Conditions vérifiées <b><span data-wk-count>{departure.length}</span>&nbsp;/&nbsp;{departure.length}</b></span>
+        <span class="wk-pass__stamp" data-wk-stamp>
+          Bilan de départ
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+        </span>
       </div>
+    </div>
+  </article>
+</div>
+
+<script>
+  import { prepareIcon, popDrawIcon, reducedMotion } from '../../scripts/altitude-motion';
+
+  // États cachés posés ici seulement : sans JS ou avec reduced-motion, tout reste dans son état final.
+  // Seuls transform et opacité sont animés (plus une découpe sur le petit trait de la route).
+  const initWeek = async () => {
+    const root = document.querySelector<HTMLElement>('[data-wk]');
+    if (!root || reducedMotion()) return;
+    const [{ gsap }, { ScrollTrigger }] = await Promise.all([import('gsap'), import('gsap/ScrollTrigger')]);
+    gsap.registerPlugin(ScrollTrigger);
+
+    // ---------- Semaine : les heures surgissent une à une, rangée par rangée ----------
+    const week = root.querySelector<HTMLElement>('[data-wk-week]');
+    if (week) {
+      const totalEl = week.querySelector<HTMLElement>('[data-wk-total]')!;
+      const rows = Array.from(week.querySelectorAll<HTMLElement>('[data-wk-row]'));
+      const STEP = 0.034;
+
+      gsap.set(week, { opacity: 0, y: 48 });
+      gsap.set(week.querySelectorAll('[data-wk-head]'), { opacity: 0, x: -14 });
+      gsap.set(week.querySelectorAll('[data-wk-pip]'), { scale: 0, y: 10, transformOrigin: '50% 100%' });
+      totalEl.textContent = '0';
+      rows.forEach((row) => { row.querySelector('[data-wk-h]')!.textContent = '0'; });
+
+      const tl = gsap.timeline({ paused: true });
+      tl.to(week, { opacity: 1, y: 0, duration: 0.8, ease: 'back.out(1.4)' }, 0);
+
+      let at = 0.45;
+      let count = 0;
+      rows.forEach((row) => {
+        const hEl = row.querySelector<HTMLElement>('[data-wk-h]')!;
+        const pips = Array.from(row.querySelectorAll('[data-wk-pip]'));
+        tl.to(row.querySelectorAll('[data-wk-head]'), { opacity: 1, x: 0, duration: 0.45, ease: 'power3.out', stagger: 0.06 }, at);
+        pips.forEach((pip, j) => {
+          const t = at + 0.12 + j * STEP;
+          const n = j + 1;
+          const sum = ++count;
+          tl.to(pip, { scale: 1, y: 0, duration: 0.5, ease: 'back.out(3.2)' }, t);
+          // Chaque sommet ajoute une heure à la rangée et au total.
+          tl.call(() => { hEl.textContent = String(n); totalEl.textContent = String(sum); }, undefined, t);
+        });
+        at += 0.12 + pips.length * STEP + 0.1;
+      });
+      // Le total rebondit une fois la semaine pleine.
+      tl.to(totalEl, { scale: 1.14, duration: 0.16, ease: 'power2.out', yoyo: true, repeat: 1, transformOrigin: '0% 85%' }, at);
+
+      ScrollTrigger.create({ trigger: week, start: 'top 75%', once: true, onEnter: () => tl.play() });
+    }
+
+    // ---------- Départ : chaque condition cochée fait avancer l'avion vers Katmandou ----------
+    const pass = root.querySelector<HTMLElement>('[data-wk-pass]');
+    if (pass) {
+      const checks = Array.from(pass.querySelectorAll<HTMLElement>('[data-wk-check]'));
+      const fly = pass.querySelector<HTMLElement>('[data-wk-fly]')!;
+      const done = pass.querySelector<HTMLElement>('[data-wk-done]')!;
+      const countEl = pass.querySelector<HTMLElement>('[data-wk-count]')!;
+      const stamp = pass.querySelector<HTMLElement>('[data-wk-stamp]')!;
+      const N = checks.length;
+      const GAP = 0.34;
+
+      gsap.set(pass, { opacity: 0, y: 48 });
+      gsap.set(fly, { x: 0, xPercent: 0 });
+      gsap.set(done, { clipPath: 'inset(-4px 100% -4px 0%)' });
+      gsap.set(stamp, { opacity: 0, scale: 2.4, rotate: -30 });
+      countEl.textContent = '0';
+
+      const marks = checks.map((li) => {
+        li.classList.add('is-off');
+        const svg = li.querySelector('svg')!;
+        return { li, box: li.querySelector('.wk-checks__box')!, svg, strokes: prepareIcon(gsap, svg) };
+      });
+
+      const tl = gsap.timeline({ paused: true });
+      tl.to(pass, { opacity: 1, y: 0, duration: 0.8, ease: 'back.out(1.4)' }, 0);
+
+      marks.forEach((m, k) => {
+        const t = 0.75 + k * GAP;
+        const p = ((k + 1) / N) * 100;
+        tl.call(() => { m.li.classList.remove('is-off'); countEl.textContent = String(k + 1); }, undefined, t);
+        tl.to(m.box, { keyframes: [{ scale: 0.72, duration: 0.09, ease: 'power2.in' }, { scale: 1, duration: 0.55, ease: 'back.out(3.2)' }] }, t);
+        tl.add(popDrawIcon(gsap, m.svg, m.strokes), t + 0.06);
+        tl.to(fly, { xPercent: p, duration: 0.5, ease: 'power2.inOut' }, t);
+        tl.to(done, { clipPath: `inset(-4px ${(100 - p).toFixed(2)}% -4px 0%)`, duration: 0.5, ease: 'power2.inOut' }, t);
+      });
+
+      // Six sur six : le tampon tombe sur la carte, qui encaisse le choc.
+      const end = 0.75 + N * GAP + 0.12;
+      tl.to(stamp, { opacity: 1, scale: 1, rotate: -8, duration: 0.42, ease: 'back.out(1.8)' }, end);
+      tl.to(pass, { y: 5, duration: 0.07, ease: 'power1.out', yoyo: true, repeat: 1 }, end + 0.16);
+
+      ScrollTrigger.create({ trigger: pass, start: 'top 75%', once: true, onEnter: () => tl.play() });
+    }
+  };
+
+  if (document.readyState === 'complete') initWeek();
+  else window.addEventListener('load', initWeek, { once: true });
+</script>
 
 <style lang="scss">
-  .alt-avant__bottom {
+  $snow: #F2F0EB;
+
+  .wk {
     margin-top: 96px;
     display: grid;
-    grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
-    gap: 80px;
-    align-items: start;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 32px;
+    align-items: stretch;
 
-    @media (max-width: 1024px) { grid-template-columns: 1fr; gap: 64px; margin-top: 72px; }
+    @media (max-width: 1024px) { grid-template-columns: 1fr; gap: 24px; margin-top: 72px; }
   }
 
-  .alt-week {
-    margin: 0;
+  .wk-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
 
-    figcaption {
-      font-family: var(--font-headline);
-      font-weight: 700;
-      font-size: var(--fs-md);
-      margin-bottom: 20px;
+  // ---------- Semaine type ----------
+  .wk-week {
+    --pip-gap: 6px;
+    margin: 0;
+    padding: 44px 44px 36px;
+    border-radius: 28px;
+    background: var(--color-surface);
+    display: flex;
+    flex-direction: column;
+
+    @media (max-width: 560px) {
+      --pip-gap: 4px;
+      padding: 28px 20px 24px;
+    }
+
+    // Tablette (une seule colonne, carte large) : le total à gauche, les rangées à droite.
+    @media (min-width: 900px) and (max-width: 1024px) {
+      display: grid;
+      grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
+      column-gap: 48px;
+
+      .wk-week__head {
+        grid-column: 1;
+        grid-row: 1;
+        padding-bottom: 0;
+        margin-bottom: 0;
+        border-bottom: 0;
+      }
+
+      .wk-week__rows { grid-column: 2; grid-row: 1 / span 2; }
+
+      .wk-week__key {
+        grid-column: 1;
+        grid-row: 2;
+        align-self: end;
+      }
     }
   }
 
-  .alt-week__bar {
+  .wk-week__head {
     display: flex;
-    height: 96px;
-    gap: 4px;
-
-    @media (max-width: 560px) { height: 72px; }
+    flex-direction: column;
+    gap: 6px;
+    padding-bottom: 20px;
+    margin-bottom: 4px;
+    border-bottom: 2px solid var(--color-primary);
   }
 
-  .alt-week__seg {
-    flex-basis: 0;
-    min-width: 0;
+  .wk-week__kicker {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-text-muted);
+  }
+
+  .wk-week__total {
+    font-family: var(--font-headline);
+    font-weight: 700;
+    font-size: clamp(22px, 2.2vw, 30px);
+    line-height: 1;
+    color: var(--color-primary);
+
+    b {
+      display: inline-block;
+      // Largeur de « 40 » réservée : le mot « heures » ne glisse pas pendant le comptage.
+      min-width: 1.15em;
+      font-size: clamp(64px, 7vw, 96px);
+      line-height: 0.82;
+      letter-spacing: -0.03em;
+      vertical-align: -0.04em;
+    }
+  }
+
+  .wk-week__rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex: 1 1 auto;
     display: flex;
-    align-items: flex-end;
-    padding: 12px 14px;
-    border-radius: 14px;
-    font-size: var(--fs-base);
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .wk-row {
+    display: grid;
+    grid-template-columns: 4.6rem minmax(0, 1fr);
+    grid-template-areas:
+      'h label'
+      'h pips';
+    column-gap: 16px;
+    row-gap: 10px;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(17, 17, 17, 0.08);
+
+    &:last-child { border-bottom: 0; }
+
+    @media (max-width: 560px) {
+      grid-template-columns: 3.6rem minmax(0, 1fr);
+      grid-template-areas:
+        'h label'
+        'pips pips';
+      row-gap: 12px;
+      padding: 14px 0;
+    }
+  }
+
+  .wk-row__h {
+    grid-area: h;
+    display: flex;
+    align-items: baseline;
+    gap: 3px;
+    font-family: var(--font-headline);
+    font-weight: 700;
+    color: var(--color-primary);
+
+    b {
+      // Chiffres alignés à droite dans une largeur fixe : « 4 h » et « 12 h » partagent la même colonne.
+      display: inline-block;
+      min-width: 1.15em;
+      text-align: right;
+      font-size: clamp(32px, 3.2vw, 44px);
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    > span { font-size: var(--fs-base); }
+  }
+
+  .wk-row__label {
+    grid-area: label;
     font-weight: 600;
-    white-space: nowrap;
+    font-size: var(--fs-base);
+    line-height: 1.3;
+    color: var(--color-text);
+  }
+
+  // Conteneur de requête : douze sommets tiennent toujours sur une ligne, quelle que soit la largeur.
+  .wk-row__pips {
+    grid-area: pips;
+    container-type: inline-size;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--pip-gap);
+
+    .wk-pip { --size: min(38px, calc((100cqi - 11 * var(--pip-gap)) / 12)); }
+  }
+
+  // Une heure = un petit sommet à facettes, calotte de neige crénelée (style du logo).
+  .wk-pip {
+    --tone: #3B3934;
+    --shade: #2F2D27;
+    --size: 24px;
+    position: relative;
+    display: block;
+    flex: 0 0 auto;
+    width: var(--size);
+    height: calc(var(--size) * 0.88);
+    background: linear-gradient(100deg, var(--tone) 0 50%, var(--shade) 50% 100%);
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: $snow;
+      clip-path: polygon(0 0, 100% 0, 100% 42%, 64% 32%, 50% 47%, 36% 32%, 0 42%);
+    }
+  }
+
+  .wk-row--1 .wk-pip { --tone: #FFDF5C; --shade: #F0C93B; }
+  .wk-row--2 .wk-pip { --tone: #2A2925; --shade: #151514; }
+  .wk-row--3 .wk-pip { --tone: #5E5C57; --shade: #46443F; }
+  .wk-row--4 .wk-pip { --tone: #95907F; --shade: #7B7768; }
+  .wk-row--5 .wk-pip { --tone: #C9C3B6; --shade: #B3AC9D; }
+
+  .wk-week__key {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 18px 0 0;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+  }
+
+  .wk-pip--key {
+    --size: 16px;
+    --tone: #2A2925;
+    --shade: #151514;
+  }
+
+  // ---------- Carte d'embarquement ----------
+  // overflow: hidden contient le tampon agrandi avant sa chute et la boîte de l'avion :
+  // aucun débordement horizontal, et les encoches deviennent de vraies demi-lunes.
+  .wk-pass {
+    --pad: 44px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 28px;
+    background: var(--color-primary);
+    color: $snow;
+
+    @media (max-width: 560px) { --pad: 22px; }
+  }
+
+  .wk-pass__top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 6px 16px;
+    padding: 28px var(--pad) 0;
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
+
+  .wk-pass__tag { color: var(--color-accent); }
+  .wk-pass__date { color: rgba(242, 240, 235, 0.5); }
+
+  .wk-pass__route {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px;
+    padding: 18px var(--pad) 26px;
+
+    @media (max-width: 560px) { gap: 10px; }
+  }
+
+  .wk-pass__city {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 
     b {
       font-family: var(--font-headline);
-      font-size: clamp(22px, 2.6vw, 36px);
+      font-weight: 700;
+      font-size: clamp(34px, 3.6vw, 50px);
       line-height: 0.9;
-      margin-right: 2px;
+      letter-spacing: 0.01em;
+      color: $snow;
     }
 
-    @media (max-width: 560px) {
-      padding: 8px;
-      justify-content: center;
-      font-size: 12px;
-
-      b { font-size: 18px; }
+    small {
+      font-size: var(--fs-xs);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: rgba(242, 240, 235, 0.6);
     }
 
-    &--1 { background: var(--color-accent); color: var(--color-primary); }
-    &--2 { background: var(--color-primary); color: #F2F0EB; }
-    &--3 { background: #4A4740; color: #F2F0EB; }
-    &--4 { background: #B8B0A3; color: var(--color-primary); }
-    &--5 { background: #DDD6CA; color: var(--color-primary); }
+    &--to { text-align: right; }
   }
 
-  .alt-week__legend {
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px 24px;
-    margin-top: 24px;
-    font-size: var(--fs-base);
+  // Route : pointillés, la partie parcourue passe au jaune derrière l'avion.
+  .wk-pass__track {
+    --plane: 34px;
+    position: relative;
+    height: 24px;
+    margin-bottom: 18px;
 
-    li { display: inline-flex; align-items: center; gap: 12px; }
+    @media (max-width: 560px) { --plane: 26px; }
   }
 
-  .alt-week__dot {
-    flex: 0 0 auto;
-    width: 14px;
-    height: 14px;
-    padding: 0;
-    border-radius: 4px;
+  .wk-pass__line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 4px;
+    margin-top: -2px;
+    background: radial-gradient(circle, rgba(242, 240, 235, 0.32) 0 1.5px, transparent 2px) 0 50% / 9px 4px repeat-x;
+
+    &--done {
+      background-image: radial-gradient(circle, var(--color-accent) 0 1.8px, transparent 2.3px);
+    }
   }
 
-  .alt-departure {
-    padding: 48px;
-    border-radius: 28px;
-    background: var(--color-primary);
+  // Boîte large de (route − avion) : xPercent 0 → 100 mène l'avion d'un bout à l'autre, en transform.
+  // Sans JS, l'avion est déjà arrivé à Katmandou.
+  .wk-pass__fly {
+    position: absolute;
+    left: 0;
+    right: var(--plane);
+    top: 0;
+    bottom: 0;
+    transform: translateX(100%);
+  }
 
-    @media (max-width: 560px) { padding: 32px 24px; }
+  .wk-pass__plane {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: var(--plane);
+    height: auto;
+    aspect-ratio: 32 / 20;
+    translate: 0 -50%;
+    fill: var(--color-accent);
+    filter: drop-shadow(0 0 10px rgba(255, 223, 92, 0.45));
+  }
 
-    h3 { font-size: var(--fs-lg); color: #F2F0EB; }
-    > p { color: rgba(242, 240, 235, 0.72); margin-bottom: 24px; }
+  // Perforation : pointillés et encoches de part et d'autre, comme un vrai talon de carte.
+  .wk-pass__perf {
+    position: relative;
+    height: 0;
+    margin: 0 18px;
+    border-top: 2px dashed rgba(242, 240, 235, 0.2);
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      top: -15px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--color-bg);
+    }
+
+    &::before { left: -32px; }
+    &::after { right: -32px; }
+  }
+
+  .wk-pass__body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    padding: 32px var(--pad) 36px;
+
+    h3 {
+      font-size: var(--fs-lg);
+      line-height: 1.05;
+      margin: 0 0 16px;
+      color: $snow;
+    }
 
     .alt-mark {
       color: var(--color-accent) !important;
@@ -141,28 +567,109 @@ const check = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
     }
   }
 
-  .alt-checks {
+  .wk-pass__lead {
+    margin: 0 0 18px;
+    color: rgba(242, 240, 235, 0.72);
+  }
+
+  .wk-checks {
     list-style: none;
+    margin: 0;
+    padding: 0;
 
     li {
       display: flex;
-      gap: 16px;
       align-items: center;
-      padding: 14px 0;
+      gap: 16px;
+      padding: 13px 0;
       border-top: 1px solid rgba(242, 240, 235, 0.12);
       font-size: var(--fs-base);
-      color: #F2F0EB;
+      line-height: 1.4;
     }
   }
 
-  .alt-checks__icon {
+  .wk-checks__box {
     flex: 0 0 auto;
     display: grid;
     place-items: center;
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     background: var(--color-accent);
+    border: 2px solid var(--color-accent);
     color: var(--color-primary);
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+
+    svg { width: 16px; height: 16px; }
+  }
+
+  .wk-checks__text {
+    color: $snow;
+    transition: color 0.3s ease;
+  }
+
+  // Condition pas encore vérifiée (posé par le JS pendant l'animation).
+  .is-off {
+    .wk-checks__box {
+      background: transparent;
+      border-color: rgba(242, 240, 235, 0.28);
+    }
+
+    .wk-checks__text { color: rgba(242, 240, 235, 0.45); }
+  }
+
+  .wk-pass__foot {
+    margin-top: auto;
+    padding-top: 22px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-top: 1px solid rgba(242, 240, 235, 0.12);
+  }
+
+  .wk-pass__count {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(242, 240, 235, 0.6);
+
+    b {
+      margin-left: 8px;
+      font-family: var(--font-headline);
+      font-size: 22px;
+      letter-spacing: 0.02em;
+      color: var(--color-accent);
+    }
+  }
+
+  // Tampon : double cadre jaune, légèrement de travers.
+  .wk-pass__stamp {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 16px 7px;
+    border: 3px solid var(--color-accent);
+    border-radius: 10px;
+    outline: 1.5px solid rgba(255, 223, 92, 0.45);
+    outline-offset: 3px;
+    font-family: var(--font-headline);
+    font-weight: 700;
+    font-size: 12px;
+    line-height: 1.1;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-accent);
+    transform: rotate(-8deg);
+    // Passé à la ligne (mobile), le tampon reste calé à droite.
+    margin-left: auto;
+
+    svg {
+      width: 26px;
+      height: 26px;
+    }
   }
 </style>

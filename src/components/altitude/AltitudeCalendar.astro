@@ -1,67 +1,530 @@
 ---
-// Calendrier du programme (dossier ALTITUDE).
+// Calendrier du programme (dossier ALTITUDE) : quatre étapes posées sur un sentier de montagne.
+// Le sentier monte jusqu'au camp de base (printemps 2027), puis garde son altitude après le retour.
+// Sur grand écran, chaque étape est un drapeau planté sur le sentier ; sur mobile, une liste numérotée.
 const calendar = [
   { when: 'Automne – hiver 2026', text: 'Présentations, orientations, entretiens d’admission' },
   { when: 'Jusqu’au départ', text: 'Préparation à 40 h par semaine, sortie test, bilan de départ' },
   { when: 'Printemps 2027', text: '60 jours au Népal, région du Kanchenjunga' },
   { when: 'Retour + 6 mois', text: 'Entrée dans le projet, suivi, restitution publique' },
 ];
+const KEY = 2; // le séjour au Népal, point haut du sentier
+
+// Repère du dessin : 1200 × 400 (y de -20 à 380), sol à y = 380.
+// Les SVG sont étirés au cadre (preserveAspectRatio="none") : points, repères et mâts HTML
+// sont placés en % du même cadre, ils restent donc collés au dessin à toutes les largeurs.
+const W = 1200;
+const Y0 = -20;
+const VH = 400;
+const GROUND = 380;
+const viewBox = `0 ${Y0} ${W} ${VH}`;
+
+type P = [number, number];
+type Peak = { x: number; y: number; lw: number; rw: number; snow?: number };
+
+const pt = (x: number, y: number) => `${x.toFixed(1)},${y.toFixed(1)}`;
+const pctX = (x: number) => `${((x / W) * 100).toFixed(3)}%`;
+const pctY = (y: number) => `${(((y - Y0) / VH) * 100).toFixed(3)}%`;
+
+// Montagnes à facettes du logo : corps, versant à l'ombre, calotte de neige crénelée.
+const onFace = (p: Peak, u: number, t: number) => {
+  const footX = p.x - p.lw + u * (p.lw + p.rw);
+  return pt(p.x + t * (footX - p.x), p.y + t * (GROUND - p.y));
+};
+const shapes = (p: Peak) => {
+  const ridgeU = (p.lw + p.rw * 0.16) / (p.lw + p.rw);
+  const body = `M${pt(p.x, p.y)} L${pt(p.x - p.lw, GROUND)} L${pt(p.x + p.rw, GROUND)} Z`;
+  const shade = `M${pt(p.x, p.y)} L${pt(p.x + p.rw * 0.16, GROUND)} L${pt(p.x + p.rw, GROUND)} Z`;
+  if (!p.snow) return { body, shade };
+  const t = p.snow;
+  const snow = `M${pt(p.x, p.y)} L${onFace(p, 0, t)} L${onFace(p, 0.18, t * 0.66)} L${onFace(p, 0.34, t * 1.04)} L${onFace(p, ridgeU - 0.06, t * 0.62)} L${onFace(p, 0.72, t * 0.98)} L${onFace(p, 0.88, t * 0.68)} L${onFace(p, 1, t * 0.92)} Z`;
+  const snowShade = `M${pt(p.x, p.y)} L${onFace(p, ridgeU, t * 0.7)} L${onFace(p, 0.72, t * 0.98)} L${onFace(p, 0.88, t * 0.68)} L${onFace(p, 1, t * 0.92)} Z`;
+  return { body, shade, snow, snowShade };
+};
+
+// Plans, du plus lointain au plus proche (teintes plus sombres à mesure qu'on approche).
+const far = [
+  { x: 60, y: 232, lw: 150, rw: 150 },
+  { x: 240, y: 176, lw: 170, rw: 170 },
+  { x: 420, y: 150, lw: 170, rw: 160 },
+  { x: 600, y: 140, lw: 150, rw: 150 },
+  { x: 990, y: 150, lw: 170, rw: 150 },
+  { x: 1150, y: 182, lw: 150, rw: 160 },
+].map(shapes);
+const SUMMIT = { x: 780, y: 34 };
+const main = shapes({ ...SUMMIT, lw: 450, rw: 420, snow: 0.3 });
+const mid = [
+  { x: 110, y: 270, lw: 160, rw: 170 },
+  { x: 330, y: 214, lw: 230, rw: 210 },
+  { x: 470, y: 200, lw: 170, rw: 200 },
+  { x: 1120, y: 120, lw: 360, rw: 260, snow: 0.2 },
+].map(shapes);
+const near = 'M0,318 L70,326 L160,340 L260,350 L400,356 L600,360 L800,358 L1000,354 L1200,350 L1200,380 L0,380 Z';
+const SUN = { x: 780, y: 80, r: 66, ring: 96 };
+const sunStyle = `--sx:${pctX(SUN.x)};--sy:${pctY(SUN.y)};--sd:${pctX(SUN.r * 2)};--rd:${pctX(SUN.ring * 2)}`;
+
+// Sentier : replats aux quatre étapes, lacets entre elles, puis traversée à flanc de montagne.
+const trail: P[] = [
+  [6, 338], [64, 338],
+  [130, 322], [176, 318], [236, 296], [270, 290], [304, 276], [360, 276],
+  [420, 262], [452, 248], [500, 240], [530, 236], [576, 212], [604, 196], [660, 196],
+  [720, 204], [790, 206], [850, 214], [904, 212], [960, 212],
+  [1040, 210], [1120, 212], [1200, 210],
+];
+const terraces = [
+  { from: 8, to: 64, y: 338 },
+  { from: 304, to: 360, y: 276 },
+  { from: 604, to: 660, y: 196 },
+  { from: 904, to: 960, y: 212 },
+];
+
+// Points espacés de 14 unités ; après la dernière étape, ils s'estompent : le suivi continue.
+const GAP = 14;
+const TAIL = 960;
+const dots: { x: number; y: number; o: number }[] = [];
+{
+  let walked = 0;
+  let next = 0;
+  for (let i = 1; i < trail.length; i++) {
+    const [x0, y0] = trail[i - 1];
+    const [x1, y1] = trail[i];
+    const len = Math.hypot(x1 - x0, y1 - y0);
+    while (next <= walked + len) {
+      const f = (next - walked) / len;
+      const x = x0 + (x1 - x0) * f;
+      const y = y0 + (y1 - y0) * f;
+      const o = x <= TAIL ? 1 : Math.max(0.12, 1 - ((x - TAIL) / (W - TAIL)) * 0.92);
+      dots.push({ x, y, o });
+      next += GAP;
+    }
+    walked += len;
+  }
+}
+// Chaque repère apparaît quand le sentier atteint le point le plus proche de son replat.
+const markers = terraces.map((t) => {
+  const cx = (t.from + t.to) / 2;
+  let dot = 0;
+  dots.forEach((d, i) => {
+    if (Math.hypot(d.x - cx, d.y - t.y) < Math.hypot(dots[dot].x - cx, dots[dot].y - t.y)) dot = i;
+  });
+  return { y: pctY(t.y), dot };
+});
 ---
 
-<section class="alt-section alt-calendar-section alt-dark">
+<section class="alt-section cal" aria-labelledby="cal-title" data-cal>
   <div class="container">
-      <div class="alt-calendar">
-        <h3 class="reveal">Calendrier</h3>
-        <ol data-stagger>
-          {calendar.map((c, i) => (
-            <li class:list={{ 'is-now': i === 2 }}><span class="alt-calendar__when">{c.when}</span><p>{c.text}</p></li>
-          ))}
-        </ol>
-        <p class="alt-calendar__note reveal">Les dates précises seront communiquées dès la constitution du groupe.</p>
+    <div class="alt-head alt-head--split">
+      <div data-cal-head>
+        <span class="alt-kicker">Calendrier</span>
+        <h2 id="cal-title">Du premier entretien <span class="alt-mark">au retour</span></h2>
       </div>
+      <p class="alt-lead" data-cal-head>Les dates précises seront communiquées dès la constitution du groupe.</p>
+    </div>
+
+    <div class="cal__stage" data-cal-stage>
+      <ol class="cal__steps">
+        {calendar.map((c, i) => (
+          <li class:list={['cal__step', { 'is-key': i === KEY }]} style={`--k:${i + 1}`} data-cal-step>
+            <span class="cal__mast" aria-hidden="true" data-cal-mast></span>
+            <svg class="cal__pennant" viewBox="0 0 32 22" aria-hidden="true" focusable="false" data-cal-pennant>
+              <path d="M1.5 1.5 30 11 1.5 20.5z" fill="#FFDF5C" stroke="#111" stroke-width="2" stroke-linejoin="round" />
+            </svg>
+            <span class="cal__badge" aria-hidden="true" data-cal-badge>{i + 1}</span>
+            <h3 class="cal__when" data-cal-text>{i === KEY ? <span class="alt-mark">{c.when}</span> : c.when}</h3>
+            <p class="cal__text" data-cal-text>{c.text}</p>
+          </li>
+        ))}
+      </ol>
+
+      <div class="cal__art" style={sunStyle} aria-hidden="true">
+        <!-- Soleil et anneau en HTML : ils restent ronds quand le dessin s'étire sur mobile. -->
+        <span class="cal__sun" data-cal-sun><i class="cal__glow"></i><i class="cal__disc"></i></span>
+        <span class="cal__ring" data-cal-ring></span>
+
+        <svg class="cal__layer" viewBox={viewBox} preserveAspectRatio="none" focusable="false" data-cal-layer data-rise="60">
+          {far.map((s) => (<><path d={s.body} fill="#D9D2C6" /><path d={s.shade} fill="#C9C1B4" /></>))}
+        </svg>
+        <svg class="cal__layer" viewBox={viewBox} preserveAspectRatio="none" focusable="false" data-cal-layer data-rise="100">
+          <path d={main.body} fill="#4A4842" />
+          <path d={main.shade} fill="#2A2925" />
+        </svg>
+        <svg class="cal__layer" viewBox={viewBox} preserveAspectRatio="none" focusable="false" data-cal-snow>
+          <path d={main.snow} fill="#F2F0EB" />
+          <path d={main.snowShade} fill="#C9C5BC" />
+        </svg>
+        <svg class="cal__layer" viewBox={viewBox} preserveAspectRatio="none" focusable="false" data-cal-layer data-rise="70">
+          {mid.map((s) => (
+            <>
+              <path d={s.body} fill="#2F2D27" />
+              <path d={s.shade} fill="#242320" />
+              {s.snow && (<><path d={s.snow} fill="#F2F0EB" /><path d={s.snowShade} fill="#C9C5BC" /></>)}
+            </>
+          ))}
+        </svg>
+        <svg class="cal__layer" viewBox={viewBox} preserveAspectRatio="none" focusable="false" data-cal-layer data-rise="45">
+          <path d={near} fill="#1B1B1A" />
+        </svg>
+
+        <span class="cal__fade cal__fade--l"></span>
+        <span class="cal__fade cal__fade--r"></span>
+
+        <div class="cal__trail">
+          {dots.map((d) => (
+            <i class="cal__dot" style={`left:${pctX(d.x)};top:${pctY(d.y)}${d.o < 1 ? `;opacity:${d.o.toFixed(2)}` : ''}`} data-cal-dot></i>
+          ))}
+        </div>
+
+        {markers.map((m, i) => (
+          <i class="cal__pole" style={`--k:${i + 1};--y:${m.y}`} data-cal-pole></i>
+        ))}
+        {markers.map((m, i) => (
+          <span class:list={['cal__marker', { 'is-key': i === KEY }]} style={`--k:${i + 1};--y:${m.y}`} data-cal-marker data-dot={m.dot}>{i + 1}</span>
+        ))}
+      </div>
+    </div>
   </div>
 </section>
 
+<script>
+  import { reducedMotion } from '../../scripts/altitude-motion';
+
+  const initCalendar = async () => {
+    const root = document.querySelector<HTMLElement>('[data-cal]');
+    if (!root || reducedMotion()) return;
+    const [{ gsap }, { ScrollTrigger }] = await Promise.all([import('gsap'), import('gsap/ScrollTrigger')]);
+    gsap.registerPlugin(ScrollTrigger);
+
+    const q = (sel: string, scope: ParentNode = root) => Array.from(scope.querySelectorAll<HTMLElement>(sel));
+    const stage = root.querySelector<HTMLElement>('[data-cal-stage]')!;
+    const head = q('[data-cal-head]');
+    const sun = q('[data-cal-sun]');
+    const ring = q('[data-cal-ring]');
+    const layers = q('[data-cal-layer]');
+    const snow = q('[data-cal-snow]');
+    const dots = q('[data-cal-dot]');
+    const markers = q('[data-cal-marker]');
+    const poles = q('[data-cal-pole]');
+    const steps = q('[data-cal-step]');
+
+    const DOT = 0.022; // délai entre deux points du sentier
+    const T0 = 1.05; // le sentier part quand les montagnes sont en place
+
+    // États de départ posés par le JS seulement : sans JS ou en mouvement réduit, tout reste visible.
+    // Tout bouge en transform/opacité (plans SVG séparés, points HTML) : rien n'est redessiné à chaque image.
+    gsap.set(head, { opacity: 0, y: 28 });
+    gsap.set(sun, { yPercent: 130, opacity: 0 });
+    gsap.set(ring, { scale: 0.5, opacity: 0 });
+    gsap.set(layers, { yPercent: (i: number, el: HTMLElement) => Number(el.dataset.rise ?? 80) });
+    gsap.set(snow, { scale: 0, transformOrigin: '65% 13.5%' });
+    gsap.set(dots, { scale: 0 });
+    gsap.set(markers, { scale: 0 });
+    gsap.set(poles, { scaleY: 0, transformOrigin: '50% 100%' });
+    gsap.set(q('[data-cal-mast]'), { scaleY: 0, transformOrigin: '50% 100%' });
+    gsap.set(q('[data-cal-pennant]'), { scaleX: 0, rotate: -18, transformOrigin: '0% 50%' });
+    gsap.set(q('[data-cal-badge]'), { scale: 0 });
+    gsap.set(q('[data-cal-text]'), { opacity: 0, x: -18 });
+
+    ScrollTrigger.create({
+      trigger: head[0] ?? root,
+      start: 'top 85%',
+      once: true,
+      onEnter: () => gsap.to(head, { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out', stagger: 0.12 }),
+    });
+
+    const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } })
+      .to(sun, { yPercent: 0, opacity: 1, duration: 1.4, ease: 'expo.out' }, 0)
+      .to(ring, { scale: 1, opacity: 1, duration: 1.3, ease: 'elastic.out(1, 0.55)' }, 0.3)
+      .to(layers, { yPercent: 0, duration: 1.3, ease: 'power4.out', stagger: 0.12 }, 0.05)
+      .to(snow, { scale: 1, duration: 0.8, ease: 'back.out(2.6)' }, 0.85)
+      // Le sentier : les points rebondissent l'un après l'autre.
+      .to(dots, { scale: 1, duration: 0.5, ease: 'back.out(4)', stagger: DOT }, T0);
+
+    // À chaque étape : le repère surgit, le mât se plante jusqu'au texte, le fanion se déroule.
+    markers.forEach((marker, i) => {
+      const at = T0 + Number(marker.dataset.dot ?? 0) * DOT;
+      const step = steps[i];
+      if (!step) return;
+      tl.to(marker, { scale: 1, duration: 0.6, ease: 'back.out(3.2)' }, at)
+        .to(poles[i], { scaleY: 1, duration: 0.45, ease: 'back.out(1.4)' }, at + 0.12)
+        .to(q('[data-cal-mast]', step), { scaleY: 1, duration: 0.3, ease: 'power2.out' }, at + 0.5)
+        .to(q('[data-cal-badge]', step), { scale: 1, duration: 0.55, ease: 'back.out(3)' }, at + 0.15)
+        .to(q('[data-cal-pennant]', step), { scaleX: 1, rotate: 0, duration: 1, ease: 'elastic.out(1.1, 0.4)' }, at + 0.72)
+        .to(q('[data-cal-text]', step), { opacity: 1, x: 0, duration: 0.7, ease: 'back.out(1.8)', stagger: 0.08 }, at + 0.6);
+    });
+
+    ScrollTrigger.create({ trigger: stage, start: 'top 72%', once: true, onEnter: () => tl.play() });
+  };
+
+  if (document.readyState === 'complete') initCalendar();
+  else window.addEventListener('load', initCalendar, { once: true });
+</script>
+
 <style lang="scss">
-  .alt-calendar {
-    margin-top: 120px;
-    padding-top: 56px;
-    border-top: 1px solid rgba(242, 240, 235, 0.14);
+  // Section claire entre l'admission (sombre) et le CTA (jaune) ; le paysage se pose sur le CTA.
+  .cal {
+    position: relative;
+    background: var(--color-bg);
+    padding-bottom: 0;
 
-    @media (max-width: 768px) { margin-top: 80px; }
+    @media (max-width: 900px) { padding-bottom: 88px; }
+  }
 
-    h3 { font-size: var(--fs-lg); margin-bottom: 40px; }
+  .cal__stage {
+    // Décalage du mât dans sa colonne (grand écran) ; sur mobile, centre du replat (3 % du dessin).
+    --pin: 20px;
+    display: flex;
+    flex-direction: column;
 
-    ol {
-      list-style: none;
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 32px;
+    @media (max-width: 900px) { --pin: 3%; }
+  }
 
-      @media (max-width: 1024px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      @media (max-width: 560px) { grid-template-columns: 1fr; }
+  // ---------- Étapes : drapeaux plantés sur le sentier ----------
+  .cal__steps {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+
+    @media (max-width: 900px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 32px;
+      margin-top: 32px;
     }
 
-    li {
-      padding-top: 20px;
-      border-top: 4px solid rgba(242, 240, 235, 0.2);
+    @media (max-width: 560px) { grid-template-columns: 1fr; }
+  }
 
-      &.is-now { border-top-color: var(--color-accent); }
+  .cal__step {
+    position: relative;
+    padding: 46px 24px 44px calc(var(--pin) + 24px);
+
+    @media (max-width: 900px) {
+      padding: 20px 0 20px 54px;
+      border-top: 1px solid var(--color-border);
     }
   }
 
-  .alt-calendar__when {
+  // Le mât prolonge, dans la carte, la hampe qui monte du repère.
+  .cal__mast {
+    position: absolute;
+    left: var(--pin);
+    top: 8px;
+    bottom: 0;
+    width: 2px;
+    background: #111;
+
+    @media (max-width: 900px) { display: none; }
+  }
+
+  .cal__pennant {
+    position: absolute;
+    left: calc(var(--pin) + 1px);
+    top: 8px;
+    width: 32px;
+    height: 22px;
+    overflow: visible;
+
+    .is-key & { width: 40px; height: 28px; }
+
+    @media (max-width: 900px) { display: none; }
+  }
+
+  .cal__badge {
+    display: none;
+
+    @media (max-width: 900px) {
+      position: absolute;
+      left: 0;
+      top: 18px;
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      border: 2px solid #111;
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 15px;
+      line-height: 1;
+      padding-top: 2px;
+      color: #111;
+    }
+  }
+
+  .cal__when {
+    font-size: var(--fs-md);
+    line-height: 1.15;
+    margin: 0 0 10px;
+    color: var(--color-text);
+  }
+
+  .cal__text {
+    margin: 0;
+    font-size: var(--fs-base);
+    line-height: 1.5;
+    color: var(--color-text-muted);
+  }
+
+  // ---------- Paysage ----------
+  .cal__art {
+    position: relative;
+    aspect-ratio: 1200 / 400;
+    overflow: hidden;
+
+    // Mobile : le paysage passe au-dessus de la liste, dans une carte un peu plus haute.
+    @media (max-width: 900px) {
+      order: -1;
+      aspect-ratio: 1200 / 560;
+      border-radius: 24px;
+      background: var(--color-surface);
+    }
+  }
+
+  .cal__layer {
+    position: absolute;
+    inset: 0;
     display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  // Soleil du logo, derrière le sommet, et son anneau (centres en % du dessin).
+  .cal__sun,
+  .cal__ring {
+    position: absolute;
+    left: var(--sx);
+    top: var(--sy);
+    aspect-ratio: 1;
+    border-radius: 50%;
+  }
+
+  .cal__sun {
+    width: var(--sd);
+    // marges en % de la largeur : le disque reste centré sur son point
+    margin: calc(var(--sd) / -2) 0 0 calc(var(--sd) / -2);
+  }
+
+  .cal__glow {
+    position: absolute;
+    inset: -70%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 223, 92, 0.5) 0%, rgba(255, 223, 92, 0) 68%);
+  }
+
+  .cal__disc {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--color-accent);
+  }
+
+  .cal__ring {
+    width: var(--rd);
+    margin: calc(var(--rd) / -2) 0 0 calc(var(--rd) / -2);
+    border: 3px solid #111;
+
+    @media (max-width: 900px) { border-width: 2px; }
+  }
+
+  // Fondu latéral : le paysage se perd dans la page au lieu d'être coupé net.
+  .cal__fade {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 6%;
+    pointer-events: none;
+
+    &--l { left: 0; background: linear-gradient(90deg, var(--color-bg), rgba(253, 251, 247, 0)); }
+    &--r { right: 0; background: linear-gradient(270deg, var(--color-bg), rgba(253, 251, 247, 0)); }
+
+    @media (max-width: 900px) { display: none; }
+  }
+
+  .cal__trail {
+    position: absolute;
+    inset: 0;
+  }
+
+  // Point du sentier : cerné de nuit, il reste lisible sur la roche comme sur le fondu clair.
+  .cal__dot {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    margin: -3.5px 0 0 -3.5px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    box-shadow: 0 0 0 1.5px #1B1B1A;
+
+    @media (max-width: 900px) {
+      width: 5px;
+      height: 5px;
+      margin: -2.5px 0 0 -2.5px;
+      box-shadow: 0 0 0 1px #1B1B1A;
+    }
+
+    @media (max-width: 560px) {
+      &:nth-child(2n) { display: none; }
+    }
+  }
+
+  // Hampe : du repère jusqu'au haut du paysage, où le mât de la carte prend le relais.
+  .cal__pole {
+    position: absolute;
+    top: 0;
+    left: calc((var(--k) - 1) * 25% + var(--pin));
+    width: 2px;
+    height: var(--y);
+    background: #111;
+    box-shadow: 0 0 0 1.5px rgba(242, 240, 235, 0.85);
+
+    @media (max-width: 900px) { display: none; }
+  }
+
+  .cal__marker {
+    position: absolute;
+    left: calc((var(--k) - 1) * 25% + var(--pin) + 1px);
+    top: var(--y);
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    margin: -17px 0 0 -17px;
+    padding-top: 2px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    border: 3px solid #111;
+    box-shadow: 0 0 0 4px rgba(255, 223, 92, 0.35);
     font-family: var(--font-headline);
     font-weight: 700;
-    font-size: var(--fs-md);
-    color: #F2F0EB;
-    margin-bottom: 8px;
-  }
+    font-size: 16px;
+    line-height: 1;
+    font-style: normal;
+    color: #111;
 
-  .alt-calendar__note {
-    margin-top: 40px;
-    font-size: var(--fs-xs);
-    color: rgba(242, 240, 235, 0.5) !important;
+    &.is-key {
+      width: 44px;
+      height: 44px;
+      margin: -22px 0 0 -22px;
+      font-size: 20px;
+      box-shadow: 0 0 0 6px rgba(255, 223, 92, 0.35), 0 0 26px 8px rgba(255, 223, 92, 0.5);
+    }
+
+    @media (max-width: 900px) {
+      left: calc((var(--k) - 1) * 25% + var(--pin));
+      width: 26px;
+      height: 26px;
+      margin: -13px 0 0 -13px;
+      border-width: 2px;
+      font-size: 13px;
+
+      &.is-key {
+        width: 32px;
+        height: 32px;
+        margin: -16px 0 0 -16px;
+        font-size: 15px;
+      }
+    }
   }
 </style>

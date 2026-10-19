@@ -1,98 +1,605 @@
 ---
 // Admission : six étapes, de l'orientation au contrat (dossier ALTITUDE).
-const admission = [
-  { title: 'Orientation', text: 'Par l’autorité judiciaire, un service (SPMi, Hospice général, DIP…), la famille ou le réseau.' },
-  { title: 'Rencontre', text: 'Le programme est présenté au jeune et à ses proches, sans rien cacher de ses exigences.' },
-  { title: 'Réflexion', text: 'C’est au jeune de reprendre contact s’il souhaite poursuivre.' },
-  { title: 'Entretien', text: 'Le jeune explique avec ses mots pourquoi il veut s’engager.' },
-  { title: 'Bilan médical', text: 'Aptitude à l’effort prolongé et à l’altitude.' },
-  { title: 'Contrat', text: 'Signé par le jeune, ses représentants légaux et Jeunesse&Co.' },
+// Grand écran : un sentier pointillé gravit une montagne à facettes, un jalon par étape ;
+// l'étape 3 (« c'est au jeune de reprendre contact ») est marquée comme le choix du jeune.
+// Mobile et tablette : liste verticale reliée par le même sentier.
+
+const icon = (body: string) =>
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+
+const steps = [
+  {
+    title: 'Orientation',
+    text: 'Par l’autorité judiciaire, un service (SPMi, Hospice général, DIP…), la famille ou le réseau.',
+    // panneau indicateur
+    icon: icon('<path d="M12 21V3"/><path d="M12 5h6.5l2.5 2.5L18.5 10H12"/><path d="M12 12.5H5.5L3 15l2.5 2.5H12"/>'),
+  },
+  {
+    title: 'Rencontre',
+    text: 'Le programme est présenté au jeune et à ses proches, sans rien cacher de ses exigences.',
+    // deux personnes
+    icon: icon('<circle cx="8.5" cy="8" r="3"/><path d="M3 20a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.8A4.5 4.5 0 0 1 21.5 19"/>'),
+  },
+  {
+    title: 'Réflexion',
+    text: 'C’est au jeune de reprendre contact s’il souhaite poursuivre.',
+    // téléphone : c'est le jeune qui rappelle
+    icon: icon('<path d="M5 3.5h3.5l1.8 4.6-2.3 1.4a11.5 11.5 0 0 0 5.5 5.5l1.4-2.3 4.6 1.8V18a2 2 0 0 1-2 2A15.5 15.5 0 0 1 3 5.5a2 2 0 0 1 2-2"/>'),
+    choice: true,
+  },
+  {
+    title: 'Entretien',
+    text: 'Le jeune explique avec ses mots pourquoi il veut s’engager.',
+    // bulle de parole
+    icon: icon('<path d="M20.5 11.5a8 8 0 0 1-11.7 7.1L4 19.8l1.2-4.4A8 8 0 1 1 20.5 11.5z"/><path d="M8.5 10h7"/><path d="M8.5 13.5h4.5"/>'),
+  },
+  {
+    title: 'Bilan médical',
+    text: 'Aptitude à l’effort prolongé et à l’altitude.',
+    // cœur et pouls
+    icon: icon('<path d="M19.8 6.2a4.8 4.8 0 0 0-6.8 0L12 7.2l-1-1a4.8 4.8 0 0 0-6.8 6.8L12 20.8l7.8-7.8a4.8 4.8 0 0 0 0-6.8z"/><path d="M3.5 12.5h4l1.5-2.5 2.5 5 1.5-2.5h7.5"/>'),
+  },
+  {
+    title: 'Contrat',
+    text: 'Signé par le jeune, ses représentants légaux et Jeunesse&Co.',
+    // document signé
+    icon: icon('<path d="M14 3H6.5A2 2 0 0 0 4.5 5v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V8.5z"/><path d="M14 3v5.5h5.5"/><path d="M8 17c1.2-1.8 2.2-1.8 2.8 0s1.6 1.8 2.8 0"/>'),
+  },
 ];
+
+// ---------- Paysage (repère 1200 × 300, ratio figé 4:1 : aucune déformation) ----------
+const W = 1200;
+const H = 300;
+type P = [number, number];
+
+// Ligne de crête : monte de gauche à droite jusqu'au sommet, à droite.
+const skyline: P[] = [
+  [0, 236], [90, 214], [170, 224], [300, 176], [380, 190], [520, 128],
+  [600, 140], [720, 98], [790, 108], [930, 56], [990, 70], [1150, 14], [1200, 52],
+];
+const ridge = [...skyline, [W, H], [0, H]].map(([x, y]) => `${x},${y}`).join(' ');
+
+// Chaîne lointaine, à peine plus claire que le fond.
+// Elle redescend à droite pour ne pas masquer le soleil.
+const far = '0,196 150,150 260,170 420,104 560,126 690,66 820,88 960,60 1060,92 1200,120 1200,300 0,300';
+
+// Facettes à l'ombre : de chaque sommet vers le creux suivant, puis jusqu'au pied.
+const shades = [
+  '90,214 170,224 200,300 104,300',
+  '300,176 380,190 412,300 318,300',
+  '520,128 600,140 636,300 542,300',
+  '720,98 790,108 830,300 746,300',
+  '930,56 990,70 1036,300 960,300',
+  '1150,14 1200,52 1200,300 1176,300',
+];
+
+// Calottes de neige crénelées (sommet principal, puis voisin), sous la crête.
+const snow = '1064.3,44 1150,14 1189.5,44 1178,38 1166,50 1152,40 1138,49 1122,40 1106,48 1090,41 1076,47';
+const snowShade = '1150,14 1189.5,44 1178,38 1166,50 1156,44';
+const snowSmall = '903,66 930,56 972.9,66 960,66 948,70 936,62 922,69 912,65';
+
+// Jalons : un par colonne de texte (centre de chaque sixième), de plus en plus haut.
+const waypoints: P[] = [[100, 238], [300, 206], [500, 170], [700, 138], [900, 106], [1100, 80]];
+
+// Sentier : du pied de la pente au dernier jalon, avec un léger creux entre deux jalons.
+// Échantillonné au build en points espacés de 15 unités : chaque point est un élément HTML
+// qui rebondit à l'intro, sans redessiner le paysage.
+const trailStart: P = [12, 270];
+const quad = (a: number, c: number, b: number, t: number) => (1 - t) ** 2 * a + 2 * (1 - t) * t * c + t ** 2 * b;
+const line: P[] = [trailStart];
+const marks: number[] = []; // index dans `line` de chaque jalon
+{
+  let from = trailStart;
+  for (const to of waypoints) {
+    const ctrl: P = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2 + 18];
+    for (let i = 1; i <= 40; i++) {
+      const t = i / 40;
+      line.push([quad(from[0], ctrl[0], to[0], t), quad(from[1], ctrl[1], to[1], t)]);
+    }
+    marks.push(line.length - 1);
+    from = to;
+  }
+}
+const GAP = 15;
+const dots: P[] = [];
+const atDot: number[] = []; // premier point posé à hauteur de chaque jalon
+{
+  let walked = 0;
+  let next = 0;
+  let m = 0;
+  for (let i = 1; i < line.length; i++) {
+    const [x0, y0] = line[i - 1];
+    const [x1, y1] = line[i];
+    const len = Math.hypot(x1 - x0, y1 - y0);
+    while (next <= walked + len) {
+      const f = (next - walked) / len;
+      dots.push([x0 + (x1 - x0) * f, y0 + (y1 - y0) * f]);
+      next += GAP;
+    }
+    walked += len;
+    if (m < marks.length && i === marks[m]) {
+      atDot.push(dots.length);
+      m++;
+    }
+  }
+}
+const pct = (v: number, max: number) => `${((v / max) * 100).toFixed(3)}%`;
 ---
 
-  <section class="alt-section alt-admission alt-dark">
-    <div class="container">
-      <div class="alt-head alt-head--split reveal">
-        <div>
-          <span class="alt-kicker">Admission</span>
-          <h2>Un engagement <span class="alt-mark">choisi</span></h2>
-        </div>
-        <p class="alt-lead">Une décision judiciaire peut ouvrir la porte du programme. Elle ne peut pas remplacer l’adhésion du jeune.</p>
+<section class="alt-section alt-admission alt-dark adm" data-adm>
+  <div class="container">
+    <div class="alt-head alt-head--split reveal">
+      <div>
+        <span class="alt-kicker">Admission</span>
+        <h2>Un engagement <span class="alt-mark">choisi</span></h2>
+      </div>
+      <p class="alt-lead">Une décision judiciaire peut ouvrir la porte du programme. Elle ne peut pas remplacer l’adhésion du jeune.</p>
+    </div>
+
+    <!-- Grand écran : la montée vers le départ, un jalon par étape (illustration, le texte suit dessous). -->
+    <div class="adm__climb" aria-hidden="true" data-adm-climb>
+      <span class="adm__sun" data-adm-sun></span>
+      <div class="adm__land">
+        <svg class="adm__ridge" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" focusable="false" data-adm-ridge>
+          <polygon points={far} fill="#1C1C1A" />
+          <polygon points={ridge} fill="#3B3934" />
+          {shades.map((s) => <polygon points={s} fill="#2A2925" />)}
+          <polygon points={snow} fill="#F2F0EB" />
+          <polygon points={snowShade} fill="#C9C5BC" />
+          <polygon points={snowSmall} fill="#F2F0EB" fill-opacity="0.85" />
+        </svg>
       </div>
 
-      <div class="alt-steps">
-        <span class="alt-steps__line" aria-hidden="true" data-grow-line></span>
-        <ol>
-          {admission.map((a, i) => (
-            <li data-stagger>
-              <span class="alt-steps__n">{i + 1}</span>
-              <h3>{a.title}</h3>
-              <p>{a.text}</p>
-            </li>
-          ))}
-        </ol>
+      <div class="adm__trail">
+        {dots.map(([x, y]) => <i class="adm__dot" style={`left:${pct(x, W)};top:${pct(y, H)}`} data-adm-dot></i>)}
       </div>
+
+      {steps.map((s, i) => (
+        <span
+          class:list={['adm__pin', { 'is-choice': s.choice }]}
+          style={`left:${pct(waypoints[i][0], W)};top:${pct(waypoints[i][1], H)}`}
+          data-adm-pin
+          data-at={atDot[i]}
+        >
+          {s.choice && <span class="adm__ring" data-adm-ring></span>}
+          <span class="adm__badge" data-adm-badge set:html={s.icon} />
+          {s.choice && (
+            <span class="adm__tagpos">
+              <span class="adm__tag" data-adm-tag>Le choix du jeune</span>
+            </span>
+          )}
+        </span>
+      ))}
     </div>
-  </section>
+
+    <ol class="adm__steps" data-adm-steps>
+      {steps.map((s, i) => (
+        <li class:list={['adm__step', { 'is-choice': s.choice }]} data-adm-step>
+          {s.choice && <span class="adm__bar" aria-hidden="true" data-adm-bar></span>}
+          <span class="adm__mbadge" aria-hidden="true" data-adm-mbadge set:html={s.icon} />
+          <span class="adm__link" aria-hidden="true" data-adm-link></span>
+          <div class="adm__body" data-adm-body>
+            <span class="adm__num" aria-hidden="true">{`0${i + 1}`}</span>
+            <h3>{s.title}</h3>
+            {s.choice && <span class="adm__choice">Le choix du jeune</span>}
+            <p>{s.text}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<script>
+  const init = async () => {
+    const root = document.querySelector<HTMLElement>('[data-adm]');
+    if (!root || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const [{ gsap }, { ScrollTrigger }, { prepareIcon, popDrawIcon }] = await Promise.all([
+      import('gsap'),
+      import('gsap/ScrollTrigger'),
+      import('../../scripts/altitude-motion'),
+    ]);
+    gsap.registerPlugin(ScrollTrigger);
+
+    const q = <T extends Element = HTMLElement>(sel: string, scope: Element = root) => Array.from(scope.querySelectorAll<T>(sel));
+    const climb = root.querySelector<HTMLElement>('[data-adm-climb]');
+    const list = root.querySelector<HTMLElement>('[data-adm-steps]')!;
+    const items = q('[data-adm-step]');
+    // On anime le contenu de chaque étape (pas l'élément de liste) : la ligne de sol ne bouge pas.
+    const bodies = items.map((li) => li.querySelector('[data-adm-body]')!);
+
+    // N'anime que la version affichée. Les textes sont communs aux deux versions : ils finissent
+    // toujours visibles, même si la fenêtre change de taille avant le déclenchement.
+    const wide = !!climb && climb.offsetParent !== null;
+
+    if (wide && climb) {
+      const DOT = 0.028; // secondes entre deux points du sentier
+      const T0 = 0.75; // départ du sentier, une fois la montagne en place
+      const dots = q('[data-adm-dot]', climb);
+      const pins = q('[data-adm-pin]', climb);
+      const ridge = climb.querySelector('[data-adm-ridge]');
+      const sun = climb.querySelector('[data-adm-sun]');
+      const ring = climb.querySelector('[data-adm-ring]');
+      const bar = root.querySelector('[data-adm-bar]');
+      const tag = climb.querySelector('[data-adm-tag]');
+      const badges = pins.map((pin) => {
+        const badge = pin.querySelector('[data-adm-badge]')!;
+        return { badge, strokes: prepareIcon(gsap, badge), at: Number(pin.dataset.at ?? 0) };
+      });
+
+      // La montagne monte opaque depuis sous le cadre (rogné par .adm__land) : le soleil ne transparaît pas.
+      gsap.set(ridge, { yPercent: 100 });
+      gsap.set(sun, { y: 50, opacity: 0, scale: 0.7 });
+      gsap.set(dots, { scale: 0 });
+      gsap.set(bodies, { opacity: 0, y: 28 });
+      gsap.set(bar, { scaleX: 0 });
+      gsap.set(tag, { opacity: 0, scale: 0.3, y: 12 });
+
+      const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } })
+        .to(ridge, { yPercent: 0, duration: 1, ease: 'power4.out' }, 0)
+        .to(sun, { y: 0, opacity: 1, scale: 1, duration: 1.5, ease: 'expo.out' }, 0.25)
+        // Le sentier : les points rebondissent un à un vers le sommet.
+        .to(dots, { scale: 1, duration: 0.5, ease: 'back.out(4)', stagger: DOT }, T0);
+
+      // Chaque jalon surgit quand le sentier l'atteint ; son étape monte juste après.
+      badges.forEach(({ badge, strokes, at }, i) => {
+        const t = T0 + at * DOT;
+        tl.add(popDrawIcon(gsap, badge, strokes), t - 0.05)
+          .to(bodies[i], { opacity: 1, y: 0, duration: 0.8, ease: 'back.out(1.7)' }, t + 0.08);
+      });
+
+      // Étape 3 : deux ondes autour du jalon, puis l'étiquette « Le choix du jeune ».
+      const choice = items.findIndex((li) => li.classList.contains('is-choice'));
+      if (choice >= 0) {
+        const t = T0 + badges[choice].at * DOT;
+        // immediateRender: false, sinon l'anneau s'affiche dès la création de la timeline.
+        tl.fromTo(ring, { scale: 1, opacity: 0.9 }, { scale: 2.1, opacity: 0, duration: 1.1, ease: 'power2.out', repeat: 1, immediateRender: false }, t + 0.35)
+          .to(tag, { opacity: 1, scale: 1, y: 0, duration: 1, ease: 'elastic.out(1, 0.45)' }, t + 0.3)
+          .to(bar, { scaleX: 1, duration: 0.7, ease: 'expo.out' }, t + 0.1);
+      }
+
+      // Déclenché par la liste (toujours affichée) : si la fenêtre passe en version mobile avant,
+      // les textes apparaissent quand même. Liste à 92 % de l'écran = paysage entièrement visible.
+      ScrollTrigger.create({ trigger: list, start: 'top 92%', once: true, onEnter: () => tl.play() });
+      return;
+    }
+
+    // Liste verticale : chaque étape arrive à son tour, au fil du défilement.
+    items.forEach((li) => {
+      const badge = li.querySelector('[data-adm-mbadge]')!;
+      const link = li.querySelector<HTMLElement>('[data-adm-link]');
+      const body = li.querySelector('[data-adm-body]');
+      const strokes = prepareIcon(gsap, badge);
+      gsap.set(body, { opacity: 0, x: 24 });
+      if (link) link.style.clipPath = 'inset(0 0 100% 0)';
+
+      const tl = gsap.timeline({ paused: true })
+        .add(popDrawIcon(gsap, badge, strokes), 0)
+        .to(body, { opacity: 1, x: 0, duration: 0.7, ease: 'back.out(1.6)' }, 0.1);
+      if (link) {
+        const reveal = { p: 0 };
+        tl.to(reveal, {
+          p: 1,
+          duration: 0.8,
+          ease: 'power1.inOut',
+          onUpdate: () => { link.style.clipPath = `inset(0 0 ${((1 - reveal.p) * 100).toFixed(2)}% 0)`; },
+          onComplete: () => { link.style.clipPath = ''; },
+        }, 0.35);
+      }
+      ScrollTrigger.create({ trigger: li, start: 'top 85%', once: true, onEnter: () => tl.play() });
+    });
+  };
+
+  if (document.readyState === 'complete') init();
+  else window.addEventListener('load', init, { once: true });
+</script>
 
 <style lang="scss">
-  // ---------- Admission ----------
-  .alt-steps {
+  $accent: #FFDF5C;
+  $snow: #F2F0EB;
+
+  // ---------- Montée (grand écran) ----------
+  .adm__climb {
     position: relative;
+    aspect-ratio: 4 / 1;
+    margin-top: 16px;
 
-    ol {
-      list-style: none;
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 24px;
-
-      @media (max-width: 1100px) { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 48px; }
-      @media (max-width: 640px) { grid-template-columns: 1fr; row-gap: 32px; }
-    }
-
-    h3 { font-size: var(--fs-md); margin-bottom: 8px; line-height: 1.2; }
-    p { font-size: var(--fs-base); }
+    @media (max-width: 1180px) { display: none; }
   }
 
-  .alt-steps__line {
+  // Le paysage monte depuis le sol : boîte qui le rogne, le reste (drapeau, étiquette) déborde librement.
+  .adm__land {
     position: absolute;
-    top: 27px;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: rgba(255, 223, 92, 0.5);
-
-    @media (max-width: 1100px) { display: none; }
+    inset: 0;
+    overflow: hidden;
   }
 
-  .alt-steps__n {
-    position: relative;
+  .adm__ridge {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  // Soleil derrière le sommet, comme sur le logo : centre (1150, 22), rayon 44 dans le repère.
+  // Centré par marges (les % de marge se rapportent à la largeur, comme sa taille) ;
+  // hors de la boîte rognée pour pouvoir dépasser en haut.
+  .adm__sun {
+    position: absolute;
+    left: 95.833%;
+    top: 7.333%;
+    width: 7.333%;
+    aspect-ratio: 1;
+    margin: -3.667% 0 0 -3.667%;
+    border-radius: 50%;
+    background: #F8D541;
+    box-shadow: 0 0 70px 16px rgba(248, 213, 65, 0.16);
+  }
+
+  .adm__trail {
+    position: absolute;
+    inset: 0;
+  }
+
+  .adm__dot {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    margin: -3px 0 0 -3px;
+    border-radius: 50%;
+    background: $accent;
+  }
+
+  // Jalon : point d'ancrage sans taille, contenu centré par marges (les transforms restent libres pour GSAP).
+  .adm__pin {
+    position: absolute;
+    width: 0;
+    height: 0;
+    --r: 30px;
+
+    &.is-choice { --r: 38px; }
+  }
+
+  .adm__badge,
+  .adm__ring {
+    position: absolute;
+    left: calc(var(--r) * -1);
+    top: calc(var(--r) * -1);
+    width: calc(var(--r) * 2);
+    height: calc(var(--r) * 2);
+    border-radius: 50%;
+  }
+
+  .adm__badge {
     display: grid;
     place-items: center;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: var(--color-primary);
-    border: 2px solid var(--color-accent);
-    color: var(--color-accent);
-    font-family: var(--font-headline);
-    font-weight: 700;
-    font-size: var(--fs-md);
-    margin-bottom: 24px;
-  }
+    background: #111;
+    border: 2px solid $accent;
+    color: $accent;
+    // anneau sombre : le jalon se détache de la roche et des pointillés
+    box-shadow: 0 0 0 5px #111, 0 10px 30px rgba(0, 0, 0, 0.55);
 
-  // Mobile : numéro à gauche du texte pour raccourcir la liste.
-  @media (max-width: 640px) {
-    .alt-steps li {
-      display: grid;
-      grid-template-columns: 56px minmax(0, 1fr);
-      column-gap: 16px;
-      align-items: start;
-
-      > :first-child { grid-row: span 2; }
+    :global(svg) {
+      width: 46%;
+      height: 46%;
     }
 
-    .alt-steps__n { width: 48px; height: 48px; margin: 0; }
-    .alt-steps h3 { margin: 4px 0 6px; }
+    .is-choice & {
+      background: $accent;
+      color: #111;
+      box-shadow: 0 0 0 5px #111, 0 0 0 8px rgba(255, 223, 92, 0.35), 0 0 46px 6px rgba(255, 223, 92, 0.42);
+    }
+  }
+
+  .adm__ring {
+    border: 2px solid $accent;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  // Étiquette centrée au-dessus du jalon (boîte de largeur nulle centrée par flex).
+  .adm__tagpos {
+    position: absolute;
+    left: 0;
+    bottom: calc(var(--r) + 14px);
+    width: 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .adm__tag {
+    position: relative;
+    white-space: nowrap;
+    padding: 8px 16px;
+    border-radius: 100px;
+    background: $snow;
+    color: #111;
+    font-family: var(--font-headline);
+    font-weight: 700;
+    font-size: clamp(14px, 1.2vw, 17px);
+    line-height: 1;
+    transform-origin: 50% 100%;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      margin-left: -7px;
+      border: 7px solid transparent;
+      border-top-color: $snow;
+      border-bottom-width: 0;
+    }
+  }
+
+  // ---------- Étapes ----------
+  .adm__steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    // ligne de sol : le pied de la montagne
+    border-top: 1px solid rgba(242, 240, 235, 0.16);
+  }
+
+  .adm__step {
+    position: relative;
+    padding: 32px 14px 0;
+    text-align: center;
+
+    // colonnes plus étroites : on rend la marge au texte
+    @media (max-width: 1320px) { padding-inline: 8px; }
+  }
+
+  .adm__body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .adm__num {
+    font-family: var(--font-headline);
+    font-weight: 700;
+    font-size: clamp(36px, 3.6vw, 54px);
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    color: rgba(242, 240, 235, 0.22);
+    margin-bottom: 14px;
+
+    .is-choice & { color: $accent; }
+  }
+
+  .adm__step h3 {
+    font-size: var(--fs-md);
+    line-height: 1.15;
+    margin: 0 0 10px;
+  }
+
+  .adm__step.is-choice h3 { color: $accent; }
+
+  .adm__step p {
+    font-size: var(--fs-base);
+    line-height: 1.5;
+    margin: 0;
+    color: rgba(242, 240, 235, 0.72);
+  }
+
+  .adm__step.is-choice p { color: rgba(242, 240, 235, 0.92); }
+
+  // Repères propres à la liste verticale : masqués sur grand écran.
+  .adm__mbadge,
+  .adm__link,
+  .adm__choice {
+    display: none;
+  }
+
+  // Étape 3 sur grand écran : trait doré posé sur la ligne de sol, au-dessus de la colonne.
+  .adm__bar {
+    position: absolute;
+    inset: -1px 4px auto;
+    height: 3px;
+    background: $accent;
+    border-radius: 0 0 3px 3px;
+  }
+
+  // ---------- Liste verticale (tablette et mobile) ----------
+  @media (max-width: 1180px) {
+    .adm__steps {
+      grid-template-columns: 1fr;
+      max-width: 760px;
+      border-top: 0;
+    }
+
+    .adm__step {
+      display: grid;
+      grid-template-columns: 64px minmax(0, 1fr);
+      column-gap: 24px;
+      align-items: start;
+      padding: 0 0 40px;
+      text-align: left;
+
+      &:last-child { padding-bottom: 0; }
+    }
+
+    .adm__body { align-items: flex-start; padding-top: 6px; }
+
+    .adm__bar { display: none; }
+
+    .adm__mbadge {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #111;
+      border: 2px solid $accent;
+      color: $accent;
+
+      :global(svg) { width: 28px; height: 28px; }
+    }
+
+    .adm__step.is-choice .adm__mbadge {
+      background: $accent;
+      color: #111;
+      box-shadow: 0 0 0 6px rgba(255, 223, 92, 0.18), 0 0 32px rgba(255, 223, 92, 0.4);
+    }
+
+    // Sentier pointillé d'un jalon au suivant.
+    .adm__link {
+      display: block;
+      position: absolute;
+      left: 30px;
+      top: 72px;
+      bottom: 8px;
+      width: 4px;
+      background: radial-gradient(circle, $accent 0 1.6px, transparent 2px) 50% 0 / 4px 11px repeat-y;
+    }
+
+    .adm__step:last-child .adm__link { display: none; }
+
+    .adm__num {
+      font-size: 15px;
+      line-height: 1;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+      color: rgba(242, 240, 235, 0.5);
+    }
+
+    .adm__step h3 { margin-bottom: 8px; }
+
+    .adm__choice {
+      display: inline-block;
+      margin: 0 0 10px;
+      padding: 6px 12px;
+      border-radius: 100px;
+      background: $accent;
+      color: #111;
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 1;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .adm__step {
+      grid-template-columns: 52px minmax(0, 1fr);
+      column-gap: 18px;
+      padding-bottom: 32px;
+    }
+
+    .adm__mbadge {
+      width: 52px;
+      height: 52px;
+
+      :global(svg) { width: 24px; height: 24px; }
+    }
+
+    .adm__link { left: 24px; top: 60px; }
   }
 </style>
