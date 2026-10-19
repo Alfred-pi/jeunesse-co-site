@@ -9,6 +9,7 @@ import AltitudeWeek from '../components/altitude/AltitudeWeek.astro';
 import AltitudeAdmission from '../components/altitude/AltitudeAdmission.astro';
 import AltitudeCalendar from '../components/altitude/AltitudeCalendar.astro';
 import AltitudeCta from '../components/altitude/AltitudeCta.astro';
+import AltitudeFooter from '../components/altitude/AltitudeFooter.astro';
 import '../styles/altitude.scss';
 import { Image } from 'astro:assets';
 import altitudeLogo from '../assets/altitude/altitude-logo.png';
@@ -430,6 +431,7 @@ const svgIcon = (body: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="
   <AltitudeAdmission />
   <AltitudeCalendar />
   <AltitudeCta />
+  <AltitudeFooter slot="footer" />
 </Layout>
 
 <script>

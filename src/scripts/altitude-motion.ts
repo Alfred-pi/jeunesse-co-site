@@ -5,6 +5,17 @@ type Gsap = typeof GsapType;
 
 export const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/**
+ * Départ ScrollTrigger « quand on le voit » : l'animation démarre quand l'élément est entièrement
+ * à l'écran s'il y tient (bas à 92 % de la hauteur), sinon quand il remplit déjà l'essentiel de
+ * l'écran (haut à 25 %). Fonction : recalculée à chaque rafraîchissement (rotation, redimension).
+ * clamp() : un élément en fin de page, dont le bas ne peut pas monter jusqu'à 92 %, se déclenche quand même.
+ */
+export const seenStart = (el: Element) => () => {
+  const h = el.getBoundingClientRect().height;
+  return h <= window.innerHeight * 0.8 ? 'clamp(bottom 92%)' : 'clamp(top 25%)';
+};
+
 const STROKES = 'path, circle, rect, line, polyline, polygon, ellipse';
 
 /**

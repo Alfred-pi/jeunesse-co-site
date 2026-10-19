@@ -57,7 +57,8 @@ const ogUrl = new URL(Astro.url.pathname, Astro.site);
 		<main>
 			<slot />
 		</main>
-		<Footer />
+		<!-- Une page peut fournir son propre pied de page (slot="footer") ; sinon, celui du site. -->
+		<slot name="footer"><Footer /></slot>
 		
 		<script>
 			// Defer scroll-triggered animations until after page load
