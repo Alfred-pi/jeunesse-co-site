@@ -20,7 +20,7 @@ const conditions = [
       <div class="evi__ring">
         <svg viewBox="0 0 200 200" aria-hidden="true">
           <circle cx="100" cy="100" r="86" class="evi__ring-track" />
-          <circle cx="100" cy="100" r="86" class="evi__ring-fill" pathLength="100" data-ring />
+          <circle cx="100" cy="100" r="86" class="evi__ring-fill" data-ring />
         </svg>
         <p class="evi__ring-value" aria-hidden="true"><span class="evi__ring-num"><span data-count="76">76</span><span class="evi__ring-unit">%</span></span></p>
       </div>
@@ -123,11 +123,12 @@ const conditions = [
           const count = ring.querySelector<HTMLElement>('[data-count]');
           const text = ring.querySelectorAll('.evi__lead-text > *');
           const state = { v: 0 };
-          gsap.set(fill, { strokeDashoffset: 100 });
+          // Départ à 545 (> longueur du trait) : aucun point arrondi visible avant le remplissage.
+          gsap.set(fill, { strokeDashoffset: 545 });
           gsap.set(text, { opacity: 0, y: 16 });
           if (count) count.textContent = '0';
           const tl = gsap.timeline({ paused: true })
-            .to(fill, { strokeDashoffset: 24, duration: 2, ease: 'power2.inOut' })
+            .to(fill, { strokeDashoffset: 129.685, duration: 2, ease: 'power2.inOut' })
             .to(state, { v: 76, duration: 2, ease: 'power2.inOut', onUpdate: () => { if (count) count.textContent = String(Math.round(state.v)); } }, 0)
             .to(text, { opacity: 1, y: 0, duration: 0.8, stagger: 0.12, ease }, 0.6);
           on(ring, tl);
@@ -278,8 +279,10 @@ const conditions = [
     stroke: var(--color-accent);
     stroke-width: 14;
     stroke-linecap: round;
-    stroke-dasharray: 100;
-    stroke-dashoffset: 24;
+    // Longueurs réelles (périmètre 2π × 86 = 540,354) plutôt que pathLength : même rendu sur tous
+    // les navigateurs. 76 % visibles : décalage de 24 % du périmètre ; trou plus long que le trait.
+    stroke-dasharray: 540.354 560;
+    stroke-dashoffset: 129.685;
   }
 
   .evi__ring-value {
