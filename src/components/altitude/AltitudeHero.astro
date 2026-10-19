@@ -33,7 +33,8 @@ const shapes = (p: Peak) => {
 const layers = [
   {
     name: 'far',
-    speed: 110,
+    speed: 50,
+    rise: 300,
     fill: '#3F3D38',
     shade: '#33322E',
     snowOpacity: 0.42,
@@ -50,7 +51,8 @@ const layers = [
   },
   {
     name: 'main',
-    speed: 60,
+    speed: 0,
+    rise: 360,
     fill: '#4A4842',
     shade: '#2A2925',
     snowOpacity: 1,
@@ -62,7 +64,8 @@ const layers = [
   },
   {
     name: 'mid',
-    speed: 35,
+    speed: 0,
+    rise: 160,
     fill: '#2F2D27',
     shade: '#242320',
     snowOpacity: 1,
@@ -77,6 +80,7 @@ const layers = [
   {
     name: 'near',
     speed: 0,
+    rise: 150,
     fill: '#1B1B1A',
     shade: '#151514',
     snowOpacity: 1,
@@ -131,7 +135,7 @@ const letters = 'ALTITUDE'.split('');
 
         {layers.map((layer) => (
           <g data-para={layer.speed}>
-            <g class={`hero__layer hero__layer--${layer.name}`} data-hero-layer>
+            <g class={`hero__layer hero__layer--${layer.name}`} data-hero-layer data-rise={layer.rise}>
               {layer.shapes.map((s) => (
                 <g>
                   <path d={s.body} fill={layer.fill} />
@@ -148,7 +152,7 @@ const letters = 'ALTITUDE'.split('');
           </g>
         ))}
 
-        <g data-para="60">
+        <g>
           <path d={trail} fill="none" stroke="#F8D541" stroke-width="5" stroke-linecap="round" stroke-dasharray="0 13" mask="url(#heroTrailMask)" />
           <g class="hero__camp" data-hero-camp>
             <path d={`M${CAMP.x - 22},${CAMP.y + 1} L${CAMP.x - 11},${CAMP.y - 16} L${CAMP.x},${CAMP.y + 1} Z`} fill="#F2F0EB" />
@@ -237,7 +241,8 @@ const letters = 'ALTITUDE'.split('');
         if (intro) {
           gsap.set(sun, { y: 110, opacity: 0 });
           gsap.set(arc, { strokeDashoffset: 1 });
-          gsap.set(layers, { y: 80, opacity: 0 });
+          // Les couches montent depuis sous le cadre, opaques : le soleil ne transparaît jamais à travers.
+          gsap.set(layers, { y: (i: number, el: Element) => Number(el.getAttribute('data-rise') ?? 200) });
           gsap.set(snows, { opacity: 0 });
           gsap.set(letters, { yPercent: 160 });
           gsap.set(lines, { scaleX: 0 });
@@ -252,28 +257,24 @@ const letters = 'ALTITUDE'.split('');
           tl.to(fades[0], { opacity: 1, y: 0, duration: 0.6 }, 0)
             .to(sun, { y: 0, opacity: 1, duration: 1.6, ease: 'expo.out' }, 0)
             .to(arc, { strokeDashoffset: 0, duration: 1.4, ease: 'power2.inOut' }, 0.25)
-            .to(layers, { y: 0, opacity: 1, duration: 1.2, stagger: 0.12 }, 0.1)
+            .to(layers, { y: 0, duration: 1.5, stagger: 0.14, ease: 'power4.out' }, 0.1)
             .to(letters, { yPercent: 0, duration: 0.9, stagger: 0.045, ease: 'expo.out' }, 0.15)
             .to(lines, { scaleX: 1, duration: 0.8, ease: 'expo.out' }, 0.6)
             .to(ruleText, { opacity: 1, y: 0, duration: 0.6 }, 0.7)
             .to(snows, { opacity: (i: number, el: Element) => Number(el.getAttribute('opacity') ?? 1), duration: 0.7, stagger: 0.04 }, 0.7)
             .to(fades.slice(1), { opacity: 1, y: 0, duration: 0.8, stagger: 0.08 }, 0.8)
-            .to(trailMask, { strokeDashoffset: 0, duration: 0.95, ease: 'power2.inOut' }, 0.95)
-            .to(camp, { opacity: 1, scale: 1, duration: 0.5, ease: 'expo.out' }, 1.8)
-            .to(tags, { opacity: 1, y: 0, duration: 0.5, stagger: 0.12 }, 1.75);
+            .to(trailMask, { strokeDashoffset: 0, duration: 1.1, ease: 'power2.inOut' }, 1.15)
+            .to(camp, { opacity: 1, scale: 1, duration: 0.5, ease: 'expo.out' }, 2.15)
+            .to(tags, { opacity: 1, y: 0, duration: 0.5, stagger: 0.12 }, 2.2);
         }
 
-        // Parallaxe : les couches lointaines descendent plus que les proches, le texte remonte.
-        const art = hero.querySelector<HTMLElement>('[data-hero-art]');
+        // Parallaxe : le soleil se couche derrière le sommet, la chaîne du fond descend un peu, le texte remonte.
+        // Le paysage qui porte le sentier, le camp et les libellés reste d'un seul bloc : aucun décalage entre eux.
         const scrub = { trigger: hero, start: 'top top', end: 'bottom top', scrub: 0.6 };
         q('[data-para]').forEach((g) => {
           const speed = Number(g.getAttribute('data-para'));
           if (speed) gsap.to(g, { y: speed, ease: 'none', scrollTrigger: scrub });
         });
-        const tagGroup = hero.querySelector('[data-hero-tags]');
-        if (tagGroup && art) {
-          gsap.to(tagGroup, { y: () => 60 * (art.clientWidth / 1440), ease: 'none', scrollTrigger: { ...scrub, invalidateOnRefresh: true } });
-        }
         gsap.to(hero.querySelector('[data-hero-content]'), { y: -90, ease: 'none', scrollTrigger: scrub });
       })
       .catch(() => root.classList.remove('hero-intro'));
@@ -300,9 +301,15 @@ const letters = 'ALTITUDE'.split('');
       padding-top: 132px;
     }
 
+    // Sous 960 px, le dessin garde 960 × 320 px : on lui laisse 60 px de ciel pour le libellé du sommet.
+    @media (max-width: 960px) {
+      --land-h: 380px;
+      padding-bottom: calc(var(--land-h) * 0.5);
+    }
+
+    // Le texte s'arrête au-dessus du ciel réservé : rien ne chevauche le libellé du sommet.
     @media (max-width: 640px) {
-      --land-h: 320px;
-      padding: 120px 0 calc(var(--land-h) - 24px);
+      padding: 120px 0 calc(var(--land-h) + 16px);
     }
   }
 
@@ -395,12 +402,15 @@ const letters = 'ALTITUDE'.split('');
     }
   }
 
-  // Sur mobile, le libellé du sommet passe au-dessus de l'épaule droite de l'arc pour rester dans l'écran.
+  // Dès que le paysage est rogné (fenêtre < 960 px), le libellé du sommet se centre au-dessus de l'arc,
+  // dans le ciel réservé : il reste dans l'écran sans masquer l'arc.
+  // `translate` plutôt que `transform`, que GSAP réécrit pendant l'intro.
   .hero__tag--summit {
-    @media (max-width: 640px) {
-      left: auto !important;
-      right: 16%;
-      top: 7% !important;
+    @media (max-width: 960px) {
+      left: 70.14% !important; // SUN.x / W
+      top: -16% !important;
+      translate: -50% 0;
+      align-items: center;
     }
   }
 

@@ -157,11 +157,14 @@ const base = import.meta.env.BASE_URL;
 
 <script>
   const header = document.getElementById('header');
-  window.addEventListener('scroll', () => {
+  const syncHeader = () => {
     if (window.scrollY > 50) {
       header?.classList.add('header--scrolled');
     } else {
       header?.classList.remove('header--scrolled');
     }
-  });
+  };
+  window.addEventListener('scroll', syncHeader);
+  // Rechargement en milieu de page : le fond s'applique sans attendre un premier scroll.
+  syncHeader();
 </script>

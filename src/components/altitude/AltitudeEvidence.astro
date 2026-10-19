@@ -302,6 +302,13 @@ const conditions = [
     display: inline-flex;
     align-items: flex-start;
     gap: 0.06em;
+    font-variant-numeric: tabular-nums;
+
+    // Deux chiffres réservés : le « % » ne glisse pas pendant le comptage.
+    > span:first-child {
+      min-width: 2ch;
+      text-align: right;
+    }
   }
 
   .evi__ring-unit {

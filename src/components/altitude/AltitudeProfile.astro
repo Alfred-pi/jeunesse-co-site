@@ -374,7 +374,8 @@ const walkData = {
           trail.style.clipPath = 'inset(-6% 100% -6% -2%)';
         };
 
-        gsap.set(layers, { yPercent: 22, opacity: 0 });
+        // Couches opaques qui montent depuis sous le cadre : le soleil ne transparaît pas à travers la roche.
+        gsap.set(layers, { yPercent: 100 });
         gsap.set(snow, { opacity: 0 });
         gsap.set(sun, { yPercent: 90, opacity: 0 });
         gsap.set(fades, { opacity: 0 });
@@ -430,7 +431,7 @@ const walkData = {
 
         const intro = gsap.timeline({ paused: true })
           .to(sun, { yPercent: 0, opacity: 1, duration: 1.6, ease: 'expo.out' }, 0)
-          .to(layers, { yPercent: 0, opacity: 1, duration: 1.2, ease: 'expo.out', stagger: 0.16 }, 0.05)
+          .to(layers, { yPercent: 0, duration: 1.4, ease: 'power4.out', stagger: 0.14 }, 0.05)
           .to(snow, { opacity: 1, duration: 0.9, ease: 'power2.out', stagger: 0.12 }, 0.7)
           .to(fades, { opacity: 1, duration: 0.7 }, 1.1)
           .to(hud, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 1.0)
@@ -489,7 +490,8 @@ const walkData = {
     line-height: 1;
     letter-spacing: -0.01em;
     color: $snow;
-    min-width: 2.4ch;
+    // « J60 » : trois signes réservés, la suite du compteur ne glisse pas quand on passe de J9 à J10.
+    min-width: 3ch;
   }
 
   .pf__hud-alt {

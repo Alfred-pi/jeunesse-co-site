@@ -1,49 +1,75 @@
 ---
 // Schéma illustratif « Ni rupture, ni parenthèse » (dossier ALTITUDE, p. 3).
 // Il ne représente pas des données mesurées : intention du programme uniquement.
+// Dessin dans le style du logo : arêtes droites, sommet pointu, facettes et calotte de neige crénelée.
 const W = 300;
 const H = 160;
 
 type Pt = [number, number];
-type Seg = [number, number, number, number, number, number];
 
-const start: Pt = [0, 138];
-// ALTITUDE : monte pendant la préparation, culmine au Népal, fléchit au retour puis se maintient.
-const altitudeSegs: Seg[] = [
-  [30, 134, 66, 112, 100, 88],
-  [122, 72, 134, 30, 158, 26],
-  [182, 22, 190, 58, 210, 60],
-  [232, 62, 248, 42, 270, 38],
-  [282, 36, 292, 36, 300, 36],
+// ALTITUDE : montée par paliers pendant la préparation, sommet au Népal, col au retour, puis l'arête se maintient haut.
+const altitudePts: Pt[] = [
+  [0, 138], [28, 122], [40, 122], [66, 100], [78, 100], [100, 82],
+  [150, 22],
+  [200, 58], [230, 40], [244, 47], [268, 36], [300, 36],
 ];
-const toPath = (s: Pt, segs: Seg[]) => `M${s[0]},${s[1]} ` + segs.map((c) => `C${c.join(',')}`).join(' ');
-const altitudeLine = toPath(start, altitudeSegs);
+// Séjour classique : plat avant, pic pendant le séjour, chute au retour jusqu'au point de départ.
+const classicPts: Pt[] = [[0, 138], [95, 136], [148, 56], [204, 134], [300, 136]];
+
+const toPath = (pts: Pt[]) => 'M' + pts.map(([x, y]) => `${x},${y}`).join(' L');
+const fmt = (pts: Pt[]) => pts.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(' ');
+const altitudeLine = toPath(altitudePts);
 const altitudeArea = `${altitudeLine} L${W},${H} L0,${H} Z`;
+const classicLine = toPath(classicPts);
 
-// Séjour classique : plat avant, pic pendant, chute au retour.
-const classicLine = 'M0,138 L92,137 C112,136 124,40 150,38 C176,36 184,120 208,132 L300,136';
-
-// Échantillonne la courbe pour poser la crête enneigée au plus près du sommet.
-const bez = (p0: number, p1: number, p2: number, p3: number, t: number) =>
-  (1 - t) ** 3 * p0 + 3 * (1 - t) ** 2 * t * p1 + 3 * (1 - t) * t ** 2 * p2 + t ** 3 * p3;
-const samples: Pt[] = [];
-let prev = start;
-for (const c of altitudeSegs) {
-  for (let i = 1; i <= 40; i++) {
-    const t = i / 40;
-    samples.push([bez(prev[0], c[0], c[2], c[4], t), bez(prev[1], c[1], c[3], c[5], t)]);
+// Ordonnée de l'arête ALTITUDE pour une abscisse donnée (interpolation linéaire).
+const yAt = (x: number) => {
+  for (let i = 1; i < altitudePts.length; i++) {
+    const [x0, y0] = altitudePts[i - 1];
+    const [x1, y1] = altitudePts[i];
+    if (x <= x1) return y0 + ((y1 - y0) * (x - x0)) / (x1 - x0);
   }
-  prev = [c[4], c[5]];
-}
-const ridge = samples.filter(([x]) => x >= 141 && x <= 178);
-const teeth = [9, 4, 11, 5, 8, 3, 10];
-const snowBottom = teeth.map((d, i) => {
-  const x = 178 - (i / (teeth.length - 1)) * 37;
-  const near = ridge.reduce((a, b) => (Math.abs(b[0] - x) < Math.abs(a[0] - x) ? b : a));
-  return [x, near[1] + d] as Pt;
-});
-const snow = [...ridge, ...snowBottom].map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(' ');
+  return altitudePts[altitudePts.length - 1][1];
+};
 
+// Calotte de neige : l'arête depuis la ligne de neige jusqu'au sommet, le bas en dents de scie.
+const snowCap = (peakIndex: number, level: number, teeth: number[]) => {
+  const pts = altitudePts;
+  const cross = (a: Pt, b: Pt) => a[0] + ((level - a[1]) * (b[0] - a[0])) / (b[1] - a[1]);
+  let l = peakIndex;
+  while (l > 0 && pts[l - 1][1] < level) l--;
+  let r = peakIndex;
+  while (r < pts.length - 1 && pts[r + 1][1] < level) r++;
+  const xL = cross(pts[l - 1], pts[l]);
+  const xR = cross(pts[r], pts[r + 1]);
+  const ridge: Pt[] = [[xL, level], ...pts.slice(l, r + 1), [xR, level]];
+  const bottom: Pt[] = teeth.map((d, k) => {
+    const x = xR - ((k + 1) / (teeth.length + 1)) * (xR - xL);
+    return [x, Math.max(level + d, yAt(x) + 2.5)];
+  });
+  const [px] = pts[peakIndex];
+  // Versant à l'ombre de la calotte : tout ce qui est à droite du sommet.
+  const shade: Pt[] = [pts[peakIndex], ...ridge.filter(([x]) => x > px), ...bottom.filter(([x]) => x > px + 1)];
+  return { at: px, snow: fmt([...ridge, ...bottom]), shade: fmt(shade) };
+};
+const caps = [
+  { ...snowCap(6, 44, [5, -3, 6, -2, 5, -3, 4]), opacity: 0.94 },
+  { ...snowCap(8, 45, [4, -1, 4]), opacity: 0.8 },
+];
+
+// Facettes (clipées par l'aire) : une arête descend de chaque sommet ; versant éclairé à gauche, à l'ombre à droite.
+const litFaces = [
+  { points: '150,22 58,160 156,160', opacity: 0.08 },
+  { points: '100,82 52,160 104,160', opacity: 0.04 },
+];
+const shadeFaces = [
+  { points: '150,22 156,160 214,160 200,58', opacity: 0.32 },
+  { points: '230,40 236,160 256,160 244,47', opacity: 0.24 },
+  { points: '268,36 276,160 300,160 300,36', opacity: 0.2 },
+];
+
+const endY = altitudePts[altitudePts.length - 1][1];
+const classicEndY = classicPts[classicPts.length - 1][1];
 const pct = (v: number, max: number) => `${((v / max) * 100).toFixed(3)}%`;
 const zones = [
   { name: 'Avant', sub: 'Préparation à Genève' },
@@ -52,13 +78,13 @@ const zones = [
 ];
 ---
 
-<figure class="curve" data-curve>
+<figure class="curve" data-curve data-curve-points={JSON.stringify(altitudePts)} style={`--end-y:${pct(endY, H)}`}>
   <div class="curve__frame">
     <span class="curve__axis-title" aria-hidden="true"><span>Mobilisation du jeune</span></span>
 
-    <div class="curve__plot" data-curve-plot role="img" aria-label="Schéma illustratif : la mobilisation d’un jeune dans un séjour classique monte pendant le séjour puis retombe au retour ; avec ALTITUDE, elle monte dès la préparation, culmine pendant le séjour et se maintient après le retour.">
+    <div class="curve__plot" data-curve-plot role="img" aria-label="Schéma illustratif : la mobilisation d’un jeune dans un séjour classique monte pendant le séjour puis retombe au retour ; avec ALTITUDE, elle monte par paliers dès la préparation, culmine pendant le séjour et se maintient après le retour.">
       <div class="curve__zones" aria-hidden="true">
-        {zones.map((z, i) => <span class:list={['curve__zone', { 'is-peak': i === 1 }]} data-curve-zone></span>)}
+        {zones.map((_, i) => <span class:list={['curve__zone', { 'is-peak': i === 1 }]} data-curve-zone></span>)}
       </div>
 
       <div class="curve__layer" data-curve-classic aria-hidden="true">
@@ -81,27 +107,26 @@ const zones = [
           </defs>
           <g clip-path="url(#curveSlope)">
             <rect x="0" y="0" width={W} height={H} fill="url(#curveFill)" />
-            <!-- facettes : versant éclairé à gauche du sommet, versant à l'ombre à droite -->
-            <polygon points="158,26 104,160 158,160" fill="#FFDF5C" fill-opacity="0.07" />
-            <polygon points="158,26 158,160 214,160" fill="#000" fill-opacity="0.28" />
-            <polygon points="100,88 62,160 100,160" fill="#FFDF5C" fill-opacity="0.04" />
-            <polygon points="270,38 238,160 270,160" fill="#FFDF5C" fill-opacity="0.06" />
-            <polygon points="270,38 270,160 300,160 300,36" fill="#000" fill-opacity="0.2" />
+            {litFaces.map((f) => <polygon points={f.points} fill="#FFDF5C" fill-opacity={f.opacity} />)}
+            {shadeFaces.map((f) => <polygon points={f.points} fill="#000" fill-opacity={f.opacity} />)}
           </g>
-          <g data-curve-snow>
-            <polygon points={snow} fill="#F2F0EB" fill-opacity="0.92" />
-          </g>
-          <path d={altitudeLine} class="curve__altitude" vector-effect="non-scaling-stroke" data-curve-path />
+          {caps.map((c) => (
+            <g data-curve-snow data-at={c.at} opacity={c.opacity}>
+              <polygon points={c.snow} fill="#F2F0EB" />
+              <polygon points={c.shade} fill="#C9C5BC" />
+            </g>
+          ))}
+          <path d={altitudeLine} class="curve__altitude" vector-effect="non-scaling-stroke" />
         </svg>
       </div>
 
       <span class="curve__dot" data-curve-dot aria-hidden="true"></span>
 
-      <span class="curve__end curve__end--altitude" style={`top:${pct(36, H)}`} aria-hidden="true">
+      <span class="curve__end curve__end--altitude" style={`top:${pct(endY, H)}`} aria-hidden="true">
         <span data-curve-label>ALTITUDE : l’élan se garde</span>
       </span>
-      <span class="curve__end curve__end--classic" style={`top:${pct(136, H)}`} aria-hidden="true">
-        <span data-curve-label-classic>Séjour classique : retour au point de départ</span>
+      <span class="curve__end curve__end--classic" style={`top:${pct(classicEndY, H)}`} aria-hidden="true">
+        <span data-curve-label-classic>Séjour classique : <span class="curve__nowrap">retour au point de départ</span></span>
       </span>
     </div>
 
@@ -136,46 +161,40 @@ const zones = [
         const plot = fig.querySelector<HTMLElement>('[data-curve-plot]')!;
         const classic = fig.querySelector<HTMLElement>('[data-curve-classic]')!;
         const altitude = fig.querySelector<HTMLElement>('[data-curve-altitude]')!;
-        const path = fig.querySelector<SVGPathElement>('[data-curve-path]')!;
         const dot = fig.querySelector<HTMLElement>('[data-curve-dot]')!;
-        const snow = fig.querySelector('[data-curve-snow]');
+        const snows = Array.from(fig.querySelectorAll<SVGGElement>('[data-curve-snow]'));
         const zones = fig.querySelectorAll('[data-curve-zone]');
         const names = fig.querySelectorAll('[data-curve-name]');
         const label = fig.querySelector('[data-curve-label]');
         const labelClassic = fig.querySelector('[data-curve-label-classic]');
         const caption = fig.querySelector('[data-curve-caption]');
 
-        // Table x -> y de la courbe ALTITUDE (unités du viewBox 300 x 160).
-        const len = path.getTotalLength();
-        const table: [number, number][] = [];
-        for (let i = 0; i <= 240; i++) {
-          const p = path.getPointAtLength((i / 240) * len);
-          table.push([p.x, p.y]);
-        }
+        // Arête ALTITUDE en unités du viewBox 300 x 160 : la polyligne permet un calcul exact.
+        const pts: [number, number][] = JSON.parse(fig.dataset.curvePoints || '[]');
+        const endY = pts[pts.length - 1][1];
         const yAt = (x: number) => {
-          for (let i = 1; i < table.length; i++) {
-            if (table[i][0] >= x) {
-              const [x0, y0] = table[i - 1];
-              const [x1, y1] = table[i];
-              return y0 + ((y1 - y0) * (x - x0)) / Math.max(x1 - x0, 0.0001);
-            }
+          for (let i = 1; i < pts.length; i++) {
+            const [x0, y0] = pts[i - 1];
+            const [x1, y1] = pts[i];
+            if (x <= x1) return y0 + ((y1 - y0) * (x - x0)) / (x1 - x0);
           }
-          return table[table.length - 1][1];
+          return endY;
         };
 
         const reveal = (el: HTMLElement, p: number) => {
-          el.style.clipPath = `inset(-20% ${(100 - p * 100).toFixed(2)}% -20% -2%)`;
+          el.style.clipPath = `inset(-20% ${(100 - p * 100).toFixed(3)}% -20% -2%)`;
         };
+        // Le point est posé en CSS au bout de l'arête ; pendant la montée on le décale depuis cette position.
+        // Les dimensions sont relues à chaque image : un redimensionnement en cours d'animation ne crée aucun décalage.
         const placeDot = (x: number) => {
           const w = plot.clientWidth;
           const h = plot.clientHeight;
-          // Position finale CSS : bout de courbe (x = 300, y = 36).
-          gsap.set(dot, { x: (x / 300) * w - w, y: (yAt(x) / 160) * h - (36 / 160) * h });
+          gsap.set(dot, { x: (x / 300) * w - w, y: ((yAt(x) - endY) / 160) * h });
         };
 
         const cls = { p: 0 };
         const alt = { p: 0 };
-        let snowShown = false;
+        const snowShown = new Set<Element>();
 
         reveal(classic, 0);
         reveal(altitude, 0);
@@ -183,7 +202,8 @@ const zones = [
         gsap.set(names, { opacity: 0, y: 16 });
         gsap.set([label, labelClassic], { opacity: 0, y: 10 });
         gsap.set(dot, { opacity: 0, scale: 0.4 });
-        gsap.set(snow, { opacity: 0 });
+        placeDot(0);
+        gsap.set(snows, { opacity: 0, y: 4 });
         gsap.set(caption, { opacity: 0 });
 
         gsap.timeline({
@@ -201,21 +221,22 @@ const zones = [
           .to(dot, { opacity: 1, scale: 1, duration: 0.3, ease: 'power2.out' }, 1.5)
           .to(alt, {
             p: 1,
-            duration: 2.4,
+            duration: 2.6,
             ease: 'power1.inOut',
-            onStart: () => placeDot(0),
             onUpdate: () => {
               const x = alt.p * 300;
               reveal(altitude, alt.p);
               placeDot(x);
-              if (!snowShown && x > 150) {
-                snowShown = true;
-                gsap.to(snow, { opacity: 1, duration: 0.8, ease: 'power2.out' });
-              }
+              snows.forEach((s) => {
+                if (!snowShown.has(s) && x >= Number(s.dataset.at)) {
+                  snowShown.add(s);
+                  gsap.to(s, { opacity: Number(s.getAttribute('opacity') ?? 1), y: 0, duration: 0.7, ease: 'power3.out' });
+                }
+              });
             },
           }, 1.55)
-          .to(label, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, 3.8)
-          .to(caption, { opacity: 1, duration: 0.8, ease: 'power2.out' }, 3.9);
+          .to(label, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, 4)
+          .to(caption, { opacity: 1, duration: 0.8, ease: 'power2.out' }, 4.1);
       });
     });
   };
@@ -332,6 +353,7 @@ const zones = [
     stroke-width: 2.5;
     stroke-dasharray: 7 7;
     stroke-linecap: round;
+    stroke-linejoin: miter;
   }
 
   .curve__altitude {
@@ -339,13 +361,16 @@ const zones = [
     stroke: var(--color-accent);
     stroke-width: 4;
     stroke-linecap: round;
-    stroke-linejoin: round;
+    // arêtes vives : le sommet reste pointu
+    stroke-linejoin: miter;
+    stroke-miterlimit: 10;
   }
 
   .curve__dot {
     position: absolute;
     left: 100%;
-    top: 22.5%;
+    // bout de l'arête ALTITUDE (posé par le composant)
+    top: var(--end-y, 22.5%);
     width: 18px;
     height: 18px;
     margin: -9px 0 0 -9px;
@@ -377,9 +402,11 @@ const zones = [
       transform: translateY(calc(-100% - 20px));
     }
 
+    // Sous sa ligne : le libellé ne croise jamais la chute en pointillés.
     &--classic {
       color: rgba(255, 255, 255, 0.72);
       font-weight: 500;
+      transform: translateY(12px);
     }
 
     // Mobile : l'étiquette ALTITUDE passe au-dessus du graphique pour ne pas toucher le sommet.
@@ -392,9 +419,15 @@ const zones = [
         transform: translateY(calc(-100% - 8px));
       }
 
-      &--classic { font-size: 14px; }
+      &--classic {
+        font-size: 13px;
+        line-height: 1.25;
+        transform: translateY(7px);
+      }
     }
   }
+
+  .curve__nowrap { white-space: nowrap; }
 
   .curve__names {
     list-style: none;
