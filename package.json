@@ -14,7 +14,7 @@
     "@fontsource/fraunces": "^5.2.9",
     "@fontsource/league-spartan": "^5.2.8",
     "@fontsource/montserrat": "^5.2.8",
-    "astro": "^5.17.1",
+    "astro": "^7.4.1",
     "gsap": "^3.14.2",
     "sass": "^1.97.3"
   },
