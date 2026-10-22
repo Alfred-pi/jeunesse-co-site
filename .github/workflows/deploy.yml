@@ -14,10 +14,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: npm ci
       - run: npm run build
@@ -25,7 +25,7 @@ jobs:
           # PROD uniquement sur le repo du domaine custom ; ailleurs (repo TEST
           # Alfred-pi/jeunesse-co-site), build preview avec base /jeunesse-co-site/
           DEPLOY_ENV: ${{ github.repository == 'JonnyBuild/jeunesse-co' && 'production' || 'preview' }}
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: ./dist
 
@@ -37,4 +37,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

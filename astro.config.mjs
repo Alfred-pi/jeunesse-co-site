@@ -12,5 +12,7 @@ export default defineConfig({
   compressHTML: true,
   image: { service: { config: { quality: 90 } } },
   build: { inlineStylesheets: 'auto' },
-  vite: { build: { minify: 'esbuild', cssMinify: true, rollupOptions: { output: { manualChunks: { gsap: ['gsap', 'gsap/ScrollTrigger'] } } } } }
+  // Vite 8 (Astro 7) : rolldown n'accepte plus manualChunks sous forme d'objet,
+  // et esbuild n'est plus fourni : minification par défaut (oxc).
+  vite: { build: { minify: true, cssMinify: true, rollupOptions: { output: { manualChunks: (id) => (/[\\/]node_modules[\\/]gsap[\\/]/.test(id) ? 'gsap' : undefined) } } } }
 });
